@@ -1,5 +1,5 @@
 {
-  "name": "FitCoach Phase 2",
+  "name": "FitCoach Phase 3",
   "short_name": "FitCoach",
   "start_url": "./",
   "display": "standalone",
@@ -17,5 +17,5 @@
       "type": "image/png"
     }
   ],
-  "description": "FitCoach Phase 2: motor de entrenamiento, plantillas, analítica, récords y 1RM."
+  "description": "Nutrition Intelligence, planificador inteligente, recetas y lista de compra."
 }
