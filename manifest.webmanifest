@@ -1,5 +1,5 @@
 {
-  "name": "FitCoach Phase 1",
+  "name": "FitCoach Phase 2",
   "short_name": "FitCoach",
   "start_url": "./",
   "display": "standalone",
@@ -17,5 +17,5 @@
       "type": "image/png"
     }
   ],
-  "description": "Entrenamiento editable con biblioteca, progresión, nutrición y progreso."
+  "description": "FitCoach Phase 2: motor de entrenamiento, plantillas, analítica, récords y 1RM."
 }

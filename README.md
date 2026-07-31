@@ -1,15 +1,14 @@
-# FitCoach Phase 1
+# FitCoach Phase 2
 
-Rediseño visual completo compatible con GitHub Pages.
-
-## Novedades
-- Interfaz estilo Apple más limpia.
-- Dashboard renovado.
-- Tarjetas, fondos, animaciones y navegación mejoradas.
-- Se mantienen entrenamiento, recetas, macros, progreso y copias de seguridad.
-- Compatible con los datos locales de la Beta 0.7.
+## Novedades reales
+- Motor de entrenamiento mejorado.
+- Cuatro plantillas rápidas: recomposición, Upper/Lower, Full Body y Express.
+- Historial y recomendaciones por ejercicio.
+- Cálculo de volumen semanal.
+- Recuento de series por grupo muscular.
+- Récords personales y estimación de 1RM.
+- Adherencia semanal.
+- Mantiene entrenamiento, recetas, macros, menús, progreso y copias de seguridad.
 
 ## Actualización en GitHub
-Sustituye en la raíz del repositorio todos estos archivos y haz un commit con el mensaje:
-
-`FitCoach Phase 1 - rediseño completo`
+Sube y reemplaza los seis archivos de este ZIP en la raíz del repositorio. Usa el commit: `FitCoach Phase 2 - Training Intelligence`.
