@@ -1,11 +1,11 @@
 {
-  "name": "FitCoach Phase 5",
+  "name": "FitCoach Phase 6",
   "short_name": "FitCoach",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#090E1B",
   "theme_color": "#090E1B",
-  "description": "Metodologías de entrenamiento, menús completos por macros y fotos desde la galería.",
+  "description": "Protocolos basados en evidencia, planificación nutricional avanzada y readiness.",
   "icons": [
     {
       "src": "icon-192.png",
