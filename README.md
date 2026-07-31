@@ -28,3 +28,27 @@ Sustituye todos los archivos de la raíz por los de este ZIP.
 Commit recomendado:
 
 `FitCoach Stable 1.0 - Full rebuild and stability release`
+
+
+## Comparación con IA real
+
+La versión 1.1 añade:
+- Selección de dos fotos ya guardadas.
+- Consentimiento explícito antes del envío.
+- Envío al backend únicamente al pulsar analizar.
+- Resumen, cambios observables, limitaciones y recomendaciones.
+- Sin estimación clínica de grasa corporal.
+
+### Backend
+
+La carpeta `backend` está preparada para Vercel.
+
+1. Sube la carpeta `backend` a un proyecto de Vercel.
+2. Añade la variable secreta `OPENAI_API_KEY`.
+3. Opcionalmente añade `OPENAI_MODEL`.
+4. Despliega.
+5. Copia la URL:
+   `https://TU-PROYECTO.vercel.app/api/analyze-photos`
+6. Pégala en FitCoach → Ajustes → URL del backend de IA.
+
+La clave API nunca debe guardarse en `app.js`, GitHub Pages ni en el navegador.

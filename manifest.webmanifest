@@ -1,11 +1,11 @@
 {
-  "name": "FitCoach Stable 1.0",
+  "name": "FitCoach Stable 1.1 AI",
   "short_name": "FitCoach",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#080E1A",
   "theme_color": "#080E1A",
-  "description": "Entrenamiento, nutrición, progreso y análisis en una app funcional.",
+  "description": "FitCoach con comparación opcional de fotos mediante backend de IA.",
   "icons": [
     {
       "src": "icon-192.png",

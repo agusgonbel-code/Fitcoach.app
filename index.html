@@ -10,13 +10,13 @@
   <link rel="apple-touch-icon" href="icon-192.png">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="stylesheet" href="styles.css">
-  <title>FitCoach Stable 1.0</title>
+  <title>FitCoach Stable 1.1 AI</title>
 </head>
 <body>
 <header>
   <div class="topbar">
     <div class="brand"><div class="logo">F</div><div>FitCoach</div></div>
-    <span class="version">Stable 1.0</span>
+    <span class="version">Stable 1.1 AI</span>
   </div>
 </header>
 
@@ -166,6 +166,19 @@
     </div>
     <div id="photoGrid" class="photoGrid" style="margin-top:10px"></div>
 
+
+    <h2>Comparación con IA</h2>
+    <div class="card">
+      <div class="notice">
+        Para usar esta función debes desplegar el backend incluido y configurar su dirección en Ajustes.
+        Las imágenes se enviarán al servicio de IA únicamente cuando pulses analizar.
+      </div>
+      <label><input id="aiConsent" type="checkbox" style="width:auto;margin-right:8px"> Autorizo el envío temporal de estas dos fotos para generar el análisis.</label>
+      <button id="runAiCompare" style="width:100%;margin-top:10px">Analizar fotos con IA</button>
+      <div id="aiCompareStatus" class="small" style="margin-top:8px"></div>
+    </div>
+    <div id="aiCompareResult" class="card" style="margin-top:10px"><div class="empty">Selecciona dos fotos y conecta el backend.</div></div>
+
     <h2>Historial corporal</h2><div class="card" id="metricHistory"></div>
   </section>
 
@@ -174,6 +187,7 @@
     <div class="card">
       <label>Nombre</label><input id="profileName" value="Agustín">
       <div class="row"><div><label>Descanso</label><select id="restSeconds"><option value="60">60 s</option><option value="90" selected>90 s</option><option value="120">120 s</option><option value="180">180 s</option></select></div><div><label>Tema</label><select id="theme"><option value="dark">Oscuro</option><option value="light">Claro</option></select></div></div>
+      <label>URL del backend de IA</label><input id="aiBackendUrl" placeholder="https://tu-backend.vercel.app/api/analyze-photos">
       <button id="saveSettings" style="width:100%;margin-top:10px">Guardar ajustes</button>
     </div>
     <h2>Copia de seguridad</h2>

@@ -22,7 +22,7 @@
 
   const defaults = {
     profile: {name:'Agustín'},
-    settings: {rest:90,theme:'dark'},
+    settings: {rest:90,theme:'dark',aiBackendUrl:''},
     targets: {kcal:3014,protein:156,carbs:422,fat:78},
     routines: createEvidenceRoutine(),
     workouts: [],
@@ -164,6 +164,7 @@
   function applyTheme() {
     document.body.classList.toggle('light', state.settings.theme === 'light');
     $('theme').value = state.settings.theme;
+    $('aiBackendUrl').value = state.settings.aiBackendUrl || '';
   }
 
   function totalsToday() {
@@ -583,6 +584,73 @@
     $('photoCompare').innerHTML = `<div><div class="small">ANTES</div><img src="${before.data}"><div class="small">${before.note}</div></div><div><div class="small">DESPUÉS</div><img src="${after.data}"><div class="small">${after.note}</div></div>`;
   }
 
+
+  async function runAiCompare() {
+    if (!state.settings.aiBackendUrl) return alert('Configura la URL del backend en Ajustes.');
+    if (!$('aiConsent').checked) return alert('Debes autorizar el envío temporal de las fotos.');
+    if (state.photos.length < 2) return alert('Añade al menos dos fotos.');
+
+    const before = state.photos[Number($('photoBefore').value)||0];
+    const after = state.photos[Number($('photoAfter').value)||state.photos.length-1];
+    const firstMetric = state.metrics[0] || null;
+    const lastMetric = state.metrics[state.metrics.length-1] || null;
+
+    $('aiCompareStatus').textContent = 'Analizando...';
+    $('runAiCompare').disabled = true;
+
+    try {
+      const response = await fetch(state.settings.aiBackendUrl, {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({
+          beforeImage:before.data,
+          afterImage:after.data,
+          beforeDate:before.date,
+          afterDate:after.date,
+          beforeNote:before.note,
+          afterNote:after.note,
+          metrics:{before:firstMetric,after:lastMetric}
+        })
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText || `Error ${response.status}`);
+      }
+
+      const result = await response.json();
+      renderAiResult(result);
+      $('aiCompareStatus').textContent = 'Análisis completado.';
+    } catch (error) {
+      $('aiCompareStatus').textContent = 'No se pudo completar el análisis.';
+      $('aiCompareResult').innerHTML = `<div class="notice">${String(error.message || error)}</div>`;
+    } finally {
+      $('runAiCompare').disabled = false;
+    }
+  }
+
+  function renderAiResult(result) {
+    const positives = Array.isArray(result.positive_changes) ? result.positive_changes : [];
+    const limitations = Array.isArray(result.limitations) ? result.limitations : [];
+    const recommendations = Array.isArray(result.recommendations) ? result.recommendations : [];
+
+    $('aiCompareResult').innerHTML = `<div class="aiResult">
+      <h3>Resumen</h3>
+      <div class="good">${result.summary || 'Sin resumen disponible.'}</div>
+      <div class="aiScore">
+        <div><div class="stat">${result.confidence ?? '-'}</div><div class="label">confianza orientativa</div></div>
+        <div><div class="stat">${result.photo_quality ?? '-'}</div><div class="label">calidad comparativa</div></div>
+      </div>
+      <h3>Cambios observables</h3>
+      ${positives.length ? `<ul>${positives.map(x=>`<li>${x}</li>`).join('')}</ul>` : `<div class="small">No se identificaron cambios claros.</div>`}
+      <h3>Limitaciones</h3>
+      ${limitations.length ? `<ul>${limitations.map(x=>`<li>${x}</li>`).join('')}</ul>` : `<div class="small">Sin observaciones.</div>`}
+      <h3>Recomendaciones</h3>
+      ${recommendations.length ? `<ul>${recommendations.map(x=>`<li>${x}</li>`).join('')}</ul>` : `<div class="small">Sin recomendaciones.</div>`}
+      <div class="notice">Este análisis es orientativo y no sustituye una valoración profesional ni estima de forma clínica el porcentaje de grasa.</div>
+    </div>`;
+  }
+
   function renderMetricHistory() {
     $('metricHistory').innerHTML = state.metrics.length ? state.metrics.slice().reverse().map(m => `<div class="history"><strong>${new Date(m.date).toLocaleDateString('es-ES')}</strong><div class="small">${m.weight ?? '-'} kg · grasa ${m.fat ?? '-'}% · cintura ${m.waist ?? '-'} cm · pecho ${m.chest ?? '-'} cm</div></div>`).join('') : `<div class="empty">Sin métricas.</div>`;
   }
@@ -597,12 +665,14 @@
     $('profileName').value = state.profile.name || '';
     $('restSeconds').value = state.settings.rest;
     $('theme').value = state.settings.theme;
+    $('aiBackendUrl').value = state.settings.aiBackendUrl || '';
   }
 
   function saveSettings() {
     state.profile.name = $('profileName').value.trim() || 'Agustín';
     state.settings.rest = Number($('restSeconds').value);
     state.settings.theme = $('theme').value;
+    state.settings.aiBackendUrl = $('aiBackendUrl').value.trim();
     saveState();
     applyTheme();
     renderHome();
@@ -669,6 +739,7 @@
     $('savePhotos').addEventListener('click', savePhotos);
     $('photoBefore').addEventListener('change', renderPhotoCompare);
     $('photoAfter').addEventListener('change', renderPhotoCompare);
+    $('runAiCompare').addEventListener('click', runAiCompare);
 
     $('saveSettings').addEventListener('click', saveSettings);
     $('exportData').addEventListener('click', exportData);
