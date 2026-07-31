@@ -1,14 +1,38 @@
-# FitCoach Phase 8
+# FitCoach Phase 9 Pro
 
-- Rediseño visual y onboarding.
-- Planes por objetivo, experiencia, días, tiempo y prioridad muscular.
-- Calculadora Mifflin-St Jeor y Katch-McArdle.
-- Ajuste por pasos, entrenamientos, objetivo y ritmo.
-- Menús según calorías y macros.
-- Recetas reales con ingredientes y pasos.
-- Importación múltiple desde Fotos, Archivos o cámara.
-- Comparador, línea temporal e informe local vinculado con métricas.
+## Calidad visual
+- Tema oscuro y claro.
+- Panel Pro con adherencia, recuperación, fuerza y nutrición.
+- Interfaz más limpia y consistente.
+- Control de densidad visual.
+- Diagnóstico de salud de datos.
 
-El análisis visual con IA real requiere un backend seguro y no se simula en esta PWA.
+## Entrenamiento
+- Biblioteca Pro con más ejercicios estructurados.
+- Filtros por músculo, material y nivel.
+- Técnica, errores, alternativas y favoritos.
+- Añadir ejercicios directamente a la rutina.
+- Mantiene planes por objetivos, métodos avanzados, periodización, calendario y récords.
 
-Commit: FitCoach Phase 8 - Goal Plans, Scientific Macros, Recipes & Photo Intelligence
+## Nutrición
+- Generador completo de 7 días.
+- 4, 5 o 6 comidas.
+- Distribución de macros equilibrada o centrada en pre/post entrenamiento.
+- Diferenciación entre día de entrenamiento y descanso.
+- Recetas paso a paso y registro directo.
+- Lista de compra automática.
+
+## Fotos
+- Fotos, Archivos y cámara.
+- Selección múltiple.
+- Comparador superpuesto con control deslizante.
+- Comparación lado a lado, línea temporal e informe local.
+- No simula un análisis visual clínico o de grasa corporal mediante IA.
+
+## Técnica
+- Nueva caché Phase 9.
+- Sintaxis JavaScript validada.
+- Mantiene importación y exportación de datos.
+
+Commit:
+`FitCoach Phase 9 Pro - UI, Exercise Library, Daily Menus & Visual Compare`
