@@ -1,38 +1,30 @@
-# FitCoach Phase 9 Pro
+# FitCoach Stable 1.0
 
-## Calidad visual
-- Tema oscuro y claro.
-- Panel Pro con adherencia, recuperación, fuerza y nutrición.
-- Interfaz más limpia y consistente.
-- Control de densidad visual.
-- Diagnóstico de salud de datos.
+Reconstrucción completa orientada a estabilidad.
 
-## Entrenamiento
-- Biblioteca Pro con más ejercicios estructurados.
-- Filtros por músculo, material y nivel.
-- Técnica, errores, alternativas y favoritos.
-- Añadir ejercicios directamente a la rutina.
-- Mantiene planes por objetivos, métodos avanzados, periodización, calendario y récords.
+## Funciones comprobables
+- Navegación estable entre cinco módulos.
+- Planes de recomposición, hipertrofia, fuerza y pérdida de grasa.
+- Programa basado en evidencia, Heavy Duty inspirado en Mentzer, powerbuilding y dosis mínima.
+- Registro de peso, repeticiones, RIR, volumen e historial.
+- Temporizador de descanso.
+- Biblioteca de ejercicios con técnica, errores y alternativas.
+- Calculadora Mifflin-St Jeor y Katch-McArdle.
+- Menús de 1, 3 o 7 días según calorías y proteína.
+- Recetas reales con ingredientes y pasos.
+- Diario nutricional.
+- Métricas corporales y gráfica.
+- Fotos desde Fotos/Archivos y cámara.
+- Comparación lado a lado.
+- Tema claro y oscuro.
+- Exportación e importación.
 
-## Nutrición
-- Generador completo de 7 días.
-- 4, 5 o 6 comidas.
-- Distribución de macros equilibrada o centrada en pre/post entrenamiento.
-- Diferenciación entre día de entrenamiento y descanso.
-- Recetas paso a paso y registro directo.
-- Lista de compra automática.
+## Sobre la comparación con IA
+La versión local no simula una IA visual. Una comparación real mediante modelo de visión requiere backend seguro, consentimiento, política de privacidad y almacenamiento protegido.
 
-## Fotos
-- Fotos, Archivos y cámara.
-- Selección múltiple.
-- Comparador superpuesto con control deslizante.
-- Comparación lado a lado, línea temporal e informe local.
-- No simula un análisis visual clínico o de grasa corporal mediante IA.
+## Subida a GitHub
+Sustituye todos los archivos de la raíz por los de este ZIP.
 
-## Técnica
-- Nueva caché Phase 9.
-- Sintaxis JavaScript validada.
-- Mantiene importación y exportación de datos.
+Commit recomendado:
 
-Commit:
-`FitCoach Phase 9 Pro - UI, Exercise Library, Daily Menus & Visual Compare`
+`FitCoach Stable 1.0 - Full rebuild and stability release`

@@ -1,11 +1,11 @@
 {
-  "name": "FitCoach Phase 9 Pro",
+  "name": "FitCoach Stable 1.0",
   "short_name": "FitCoach",
   "start_url": "./",
   "display": "standalone",
-  "background_color": "#090E1B",
-  "theme_color": "#090E1B",
-  "description": "Interfaz Pro, biblioteca avanzada, menús diarios y comparador visual.",
+  "background_color": "#080E1A",
+  "theme_color": "#080E1A",
+  "description": "Entrenamiento, nutrición, progreso y análisis en una app funcional.",
   "icons": [
     {
       "src": "icon-192.png",

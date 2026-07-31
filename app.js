@@ -1,0 +1,695 @@
+(() => {
+  'use strict';
+
+  const DATA = window.FITCOACH_DATA;
+  const DAYS = ['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+  const $ = id => document.getElementById(id);
+  const $$ = sel => [...document.querySelectorAll(sel)];
+
+  const Store = {
+    get(key, fallback) {
+      try {
+        const value = JSON.parse(localStorage.getItem(key));
+        return value ?? fallback;
+      } catch {
+        return fallback;
+      }
+    },
+    set(key, value) {
+      localStorage.setItem(key, JSON.stringify(value));
+    }
+  };
+
+  const defaults = {
+    profile: {name:'Agustín'},
+    settings: {rest:90,theme:'dark'},
+    targets: {kcal:3014,protein:156,carbs:422,fat:78},
+    routines: createEvidenceRoutine(),
+    workouts: [],
+    meals: [],
+    metrics: [],
+    photos: []
+  };
+
+  let state = {
+    profile: Store.get('profile', defaults.profile),
+    settings: Store.get('settings', defaults.settings),
+    targets: Store.get('targets', defaults.targets),
+    routines: Store.get('routines', defaults.routines),
+    workouts: Store.get('workouts', defaults.workouts),
+    meals: Store.get('meals', defaults.meals),
+    metrics: Store.get('metrics', defaults.metrics),
+    photos: Store.get('photos', defaults.photos)
+  };
+
+  let timerId = null;
+  let timerLeft = 0;
+  let pendingPhotos = [];
+
+  function createEvidenceRoutine() {
+    return {
+      Lunes: [
+        ['Press banca con mancuernas',3,'6-10','Press en máquina'],
+        ['Remo con apoyo de pecho',3,'8-12','Remo en polea'],
+        ['Press militar sentado',3,'8-12','Press de hombros en máquina'],
+        ['Jalón al pecho',3,'8-12','Dominada asistida'],
+        ['Elevaciones laterales',3,'12-20','Elevación lateral en polea'],
+        ['Curl con barra EZ',2,'10-15','Curl con mancuernas'],
+        ['Extensión de tríceps en polea',2,'10-15','Fondos asistidos']
+      ],
+      Martes: [
+        ['Peso muerto rumano',3,'6-10','Curl femoral'],
+        ['Prensa de piernas',3,'8-12','Hack squat'],
+        ['Curl femoral sentado',3,'10-15','Curl femoral tumbado'],
+        ['Extensión de cuádriceps',2,'12-15','Step-up bajo'],
+        ['Gemelo de pie',3,'10-20','Gemelo en prensa'],
+        ['Dead bug',3,'8-12','Plancha']
+      ],
+      Miércoles: [
+        ['Press inclinado con mancuernas',3,'8-12','Press inclinado en máquina'],
+        ['Remo en polea',3,'8-12','Remo unilateral'],
+        ['Aperturas en polea',2,'12-15','Pec deck'],
+        ['Jalón al pecho',3,'8-12','Pullover'],
+        ['Pájaros en máquina',3,'12-20','Face pull'],
+        ['Curl martillo',2,'10-15','Curl con cuerda'],
+        ['Tríceps por encima de la cabeza',2,'10-15','Press francés']
+      ],
+      Jueves: [
+        ['Hip thrust',3,'6-10','Puente de glúteo'],
+        ['Prensa de piernas',3,'8-12','Hack squat'],
+        ['Curl femoral sentado',3,'10-15','Curl femoral tumbado'],
+        ['Zancada atrás',2,'8-12','Step-up'],
+        ['Gemelo de pie',3,'12-20','Gemelo sentado'],
+        ['Crunch en polea',3,'10-15','Reverse crunch']
+      ]
+    };
+  }
+
+  function createMentzerRoutine() {
+    return {
+      Lunes: [
+        ['Press inclinado con mancuernas',1,'6-10','Press inclinado en máquina'],
+        ['Jalón al pecho',1,'6-10','Dominada asistida'],
+        ['Remo con apoyo de pecho',1,'6-10','Remo en máquina'],
+        ['Elevaciones laterales',1,'8-12','Elevación lateral en polea'],
+        ['Curl con barra EZ',1,'6-10','Curl con mancuernas'],
+        ['Extensión de tríceps en polea',1,'6-10','Fondos asistidos']
+      ],
+      Miércoles: [
+        ['Prensa de piernas',1,'8-12','Hack squat'],
+        ['Peso muerto rumano',1,'6-10','Curl femoral'],
+        ['Curl femoral sentado',1,'6-10','Curl femoral tumbado'],
+        ['Gemelo de pie',1,'8-12','Gemelo en prensa'],
+        ['Crunch en polea',1,'8-12','Reverse crunch']
+      ],
+      Viernes: [
+        ['Press banca con mancuernas',1,'6-10','Press en máquina'],
+        ['Remo en polea',1,'6-10','Remo unilateral'],
+        ['Press militar sentado',1,'6-10','Press de hombros en máquina'],
+        ['Jalón al pecho',1,'6-10','Pullover'],
+        ['Extensión de cuádriceps',1,'8-12','Step-up'],
+        ['Hip thrust',1,'6-10','Puente de glúteo']
+      ]
+    };
+  }
+
+  function createStrengthRoutine() {
+    return {
+      Lunes: [
+        ['Press banca con mancuernas',4,'4-6','Press en máquina'],
+        ['Remo con apoyo de pecho',4,'5-8','Remo en máquina'],
+        ['Press militar sentado',3,'5-8','Press de hombros en máquina'],
+        ['Curl con barra EZ',2,'8-10','Curl con mancuernas']
+      ],
+      Martes: [
+        ['Prensa de piernas',4,'4-6','Hack squat'],
+        ['Peso muerto rumano',4,'5-8','Curl femoral'],
+        ['Gemelo de pie',3,'8-12','Gemelo en prensa'],
+        ['Dead bug',3,'8-12','Plancha']
+      ],
+      Miércoles: [
+        ['Press inclinado con mancuernas',4,'5-8','Press inclinado en máquina'],
+        ['Jalón al pecho',4,'5-8','Dominada asistida'],
+        ['Remo en polea',3,'6-10','Remo unilateral'],
+        ['Extensión de tríceps en polea',2,'8-10','Fondos asistidos']
+      ],
+      Jueves: [
+        ['Hip thrust',4,'5-8','Puente de glúteo'],
+        ['Prensa de piernas',4,'6-10','Hack squat'],
+        ['Curl femoral sentado',3,'8-12','Curl femoral tumbado'],
+        ['Crunch en polea',3,'8-12','Reverse crunch']
+      ]
+    };
+  }
+
+  function saveState() {
+    Object.entries(state).forEach(([key,value]) => Store.set(key,value));
+  }
+
+  function todayKey() {
+    return new Date().toISOString().slice(0,10);
+  }
+
+  function showPage(id) {
+    $$('.page').forEach(page => page.classList.toggle('active', page.id === id));
+    $$('nav button').forEach(btn => btn.classList.toggle('active', btn.dataset.page === id));
+    if (id === 'home') renderHome();
+    if (id === 'training') renderTraining();
+    if (id === 'nutrition') renderNutrition();
+    if (id === 'progress') renderProgress();
+    if (id === 'settings') renderSettings();
+    window.scrollTo({top:0,behavior:'smooth'});
+  }
+
+  function applyTheme() {
+    document.body.classList.toggle('light', state.settings.theme === 'light');
+    $('theme').value = state.settings.theme;
+  }
+
+  function totalsToday() {
+    return state.meals.filter(m => m.date === todayKey()).reduce(
+      (a,m) => ({kcal:a.kcal+m.kcal,p:a.p+m.p,c:a.c+m.c,f:a.f+m.f}),
+      {kcal:0,p:0,c:0,f:0}
+    );
+  }
+
+  function macroLine(label,value,target) {
+    const pct = Math.min(100, target ? value/target*100 : 0);
+    return `<div class="macro"><div class="macroHead"><span>${label}</span><span>${Math.round(value)} / ${target}</span></div><div class="progress"><div style="width:${pct}%"></div></div></div>`;
+  }
+
+  function weekStart() {
+    const now = new Date();
+    const start = new Date(now);
+    start.setDate(now.getDate()-((now.getDay()+6)%7));
+    start.setHours(0,0,0,0);
+    return start;
+  }
+
+  function renderHome() {
+    const today = totalsToday();
+    const week = state.workouts.filter(w => new Date(w.date) >= weekStart());
+    $('homeGreeting').textContent = `Hola, ${state.profile.name || 'Agustín'}`;
+    $('homeSessions').textContent = state.workouts.length;
+    $('homeWeek').textContent = `${week.length}/4`;
+    $('homeKcal').textContent = Math.round(today.kcal);
+    $('homeProtein').textContent = `${Math.round(today.p)} g`;
+    $('homeMacros').innerHTML =
+      macroLine('Calorías',today.kcal,state.targets.kcal)+
+      macroLine('Proteína',today.p,state.targets.protein)+
+      macroLine('Carbohidratos',today.c,state.targets.carbs)+
+      macroLine('Grasas',today.f,state.targets.fat);
+
+    const tips = [];
+    if (!state.workouts.length) tips.push('Registra tu primer entrenamiento para activar recomendaciones.');
+    if (today.p < state.targets.protein*0.7) tips.push('La proteína de hoy está por debajo del 70% del objetivo.');
+    if (week.length < 2 && new Date().getDay() >= 4) tips.push('La frecuencia semanal está baja para un plan de 4 días.');
+    if (!tips.length) tips.push('Los registros actuales están dentro de un rango razonable. Mantén el plan.');
+    $('homeCoach').innerHTML = `<div class="good">${tips.join('<br><br>')}</div>`;
+
+    const last = state.workouts[state.workouts.length-1];
+    $('homeLast').innerHTML = last
+      ? `<strong>${last.day}</strong><div class="small">${new Date(last.date).toLocaleString('es-ES')} · ${Math.round(last.volume).toLocaleString('es-ES')} kg</div>`
+      : `<div class="empty">Sin actividad todavía.</div>`;
+  }
+
+  function generatePlan() {
+    const method = $('planMethod').value;
+    const goal = $('planGoal').value;
+    let routine = method === 'mentzer' ? createMentzerRoutine() : goal === 'strength' || method === 'powerbuilding' ? createStrengthRoutine() : createEvidenceRoutine();
+    const days = Number($('planDays').value);
+    const keys = Object.keys(routine).slice(0,days);
+    state.routines = Object.fromEntries(keys.map(k => [k,routine[k]]));
+    saveState();
+    renderTraining();
+    alert('Plan generado correctamente.');
+  }
+
+  function populateDays() {
+    const days = Object.keys(state.routines);
+    $('trainingDay').innerHTML = days.map(d => `<option value="${d}">${d}</option>`).join('');
+    const weekday = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'][new Date().getDay()];
+    if (days.includes(weekday)) $('trainingDay').value = weekday;
+  }
+
+  function lastExercise(name) {
+    for (let i=state.workouts.length-1;i>=0;i--) {
+      const found = state.workouts[i].exercises.find(e => e.name === name);
+      if (found) return found;
+    }
+    return null;
+  }
+
+  function renderWorkoutList() {
+    const day = $('trainingDay').value;
+    const exercises = state.routines[day] || [];
+    $('workoutList').innerHTML = exercises.map((e,ei) => {
+      const [name,sets,reps,alt] = e;
+      const last = lastExercise(name);
+      let rows = '';
+      for (let si=0;si<sets;si++) {
+        const prev = last?.sets?.[si] || {};
+        rows += `<div class="setRow">
+          <div class="setNo">${si+1}</div>
+          <input class="setKg" data-e="${ei}" data-s="${si}" type="number" step="0.5" placeholder="kg" value="${prev.kg ?? ''}">
+          <input class="setReps" data-e="${ei}" data-s="${si}" type="number" placeholder="reps" value="${prev.reps ?? ''}">
+          <input class="setRir" data-e="${ei}" data-s="${si}" type="number" placeholder="RIR" value="${prev.rir ?? ''}">
+        </div>`;
+      }
+      const lastText = last ? `<div class="small" style="margin-top:5px">Última vez: ${last.sets.map(s => `${s.kg} kg × ${s.reps} · RIR ${s.rir}`).join(' | ')}</div>` : '';
+      return `<div class="card workoutCard">
+        <div class="exerciseHead"><div><h3>${name}</h3><span class="pill">${sets} series</span><span class="pill">${reps}</span></div><button class="secondary restButton">Descanso</button></div>
+        <div class="small">Alternativa: ${alt}</div>${lastText}${rows}
+      </div>`;
+    }).join('') || `<div class="empty">No hay ejercicios para este día.</div>`;
+    $$('.restButton').forEach(btn => btn.addEventListener('click', startTimer));
+  }
+
+  function renderTraining() {
+    populateDays();
+    renderWorkoutList();
+    renderWorkoutHistory();
+  }
+
+  function saveWorkout() {
+    const day = $('trainingDay').value;
+    const routine = state.routines[day] || [];
+    const exercises = routine.map((e,ei) => {
+      const sets = [];
+      $$('.setKg').filter(el => Number(el.dataset.e) === ei).forEach((kgEl,si) => {
+        const repsEl = document.querySelector(`.setReps[data-e="${ei}"][data-s="${si}"]`);
+        const rirEl = document.querySelector(`.setRir[data-e="${ei}"][data-s="${si}"]`);
+        sets.push({kg:Number(kgEl.value)||0,reps:Number(repsEl.value)||0,rir:Number(rirEl.value)||0});
+      });
+      return {name:e[0],sets};
+    });
+    const volume = exercises.reduce((a,e) => a + e.sets.reduce((b,s) => b+s.kg*s.reps,0),0);
+    state.workouts.push({id:Date.now(),date:new Date().toISOString(),day,notes:$('workoutNotes').value.trim(),volume,exercises});
+    $('workoutNotes').value = '';
+    saveState();
+    renderTraining();
+    renderHome();
+    alert('Entrenamiento guardado.');
+  }
+
+  function renderWorkoutHistory() {
+    $('workoutHistory').innerHTML = state.workouts.length
+      ? state.workouts.slice().reverse().map(w => `<div class="history"><strong>${w.day}</strong><div class="small">${new Date(w.date).toLocaleDateString('es-ES')} · ${Math.round(w.volume).toLocaleString('es-ES')} kg · ${w.exercises.length} ejercicios</div></div>`).join('')
+      : `<div class="empty">Sin entrenamientos.</div>`;
+  }
+
+  function startTimer() {
+    timerLeft = Number(state.settings.rest)||90;
+    $('timer').classList.add('active');
+    clearInterval(timerId);
+    updateTimer();
+    timerId = setInterval(() => {
+      timerLeft -= 1;
+      updateTimer();
+      if (timerLeft <= 0) {
+        clearInterval(timerId);
+        navigator.vibrate?.([120,80,120]);
+        alert('Descanso terminado.');
+      }
+    },1000);
+  }
+  function updateTimer() {
+    $('timerText').textContent = `${String(Math.floor(timerLeft/60)).padStart(2,'0')}:${String(timerLeft%60).padStart(2,'0')}`;
+  }
+  function stopTimer() {
+    clearInterval(timerId);
+    $('timer').classList.remove('active');
+  }
+
+  function openLibrary() {
+    $('libraryModal').classList.add('open');
+    populateMuscleFilter();
+    renderExerciseLibrary();
+  }
+  function populateMuscleFilter() {
+    const muscles = [...new Set(DATA.exercises.map(e => e.muscle))].sort();
+    $('muscleFilter').innerHTML = `<option value="">Todos</option>${muscles.map(m => `<option>${m}</option>`).join('')}`;
+  }
+  function renderExerciseLibrary() {
+    const q = $('exerciseSearch').value.toLowerCase();
+    const muscle = $('muscleFilter').value;
+    const list = DATA.exercises.filter(e => (!q || JSON.stringify(e).toLowerCase().includes(q)) && (!muscle || e.muscle === muscle));
+    $('exerciseLibrary').innerHTML = list.map(e => `<div class="exerciseCard">
+      <h3>${e.name}</h3><span class="pill">${e.muscle}</span><span class="pill">${e.equipment}</span><span class="pill">${e.level}</span>
+      <div class="small">${e.pattern} · Alternativa: ${e.alt}</div>
+      <details style="margin-top:8px"><summary>Técnica</summary><ol>${e.steps.map(s => `<li>${s}</li>`).join('')}</ol><strong class="small">Errores</strong><ol>${e.errors.map(s => `<li>${s}</li>`).join('')}</ol></details>
+      <button class="addExercise" data-name="${e.name}" style="width:100%;margin-top:8px">Añadir al día actual</button>
+    </div>`).join('');
+    $$('.addExercise').forEach(btn => btn.addEventListener('click', () => {
+      const day = $('trainingDay').value;
+      const ex = DATA.exercises.find(e => e.name === btn.dataset.name);
+      state.routines[day] ||= [];
+      state.routines[day].push([ex.name,3,'8-12',ex.alt]);
+      saveState();
+      renderWorkoutList();
+      $('libraryModal').classList.remove('open');
+    }));
+  }
+
+  function showNutritionPanel(name) {
+    $$('.nutritionPanel').forEach(p => p.hidden = p.id !== `nutrition-${name}`);
+    $$('[data-nutrition-tab]').forEach(b => b.classList.toggle('active', b.dataset.nutritionTab === name));
+    if (name === 'diary') renderTodayMeals();
+    if (name === 'recipes') renderRecipes();
+  }
+
+  function calculateMacros() {
+    const equation = $('calcEquation').value;
+    const sex = $('calcSex').value;
+    const age = Number($('calcAge').value);
+    const height = Number($('calcHeight').value);
+    const weight = Number($('calcWeight').value);
+    const fat = Number($('calcFat').value);
+    const activity = Number($('calcActivity').value);
+    const goal = $('calcGoal').value;
+    if (!age || !height || !weight) return alert('Completa edad, altura y peso.');
+
+    let bmr;
+    if (equation === 'katch' && fat > 0) {
+      const lbm = weight*(1-fat/100);
+      bmr = 370+21.6*lbm;
+    } else {
+      bmr = 10*weight+6.25*height-5*age+(sex==='m'?5:-161);
+    }
+    const maintenance = Math.round(bmr*activity);
+    const factor = goal === 'loss' ? 0.85 : goal === 'gain' ? 1.07 : goal === 'recomp' ? (fat >= 20 ? 0.93 : 1) : 1;
+    const kcal = Math.round(maintenance*factor);
+    const proteinFactor = goal === 'loss' ? 2.0 : goal === 'gain' ? 1.8 : 1.9;
+    const protein = Math.round(weight*proteinFactor);
+    const fatGrams = Math.round(weight*(goal === 'loss' ? 0.8 : 0.9));
+    const carbs = Math.max(0,Math.round((kcal-protein*4-fatGrams*9)/4));
+    state.targets = {kcal,protein,carbs,fat:fatGrams,maintenance,bmr:Math.round(bmr)};
+    saveState();
+    renderMacroResult();
+    renderHome();
+  }
+
+  function renderMacroResult() {
+    const t = state.targets;
+    $('macroResult').innerHTML = `<div class="card"><div class="grid">
+      <div><div class="stat">${t.bmr || '-'}</div><div class="label">metabolismo basal</div></div>
+      <div><div class="stat">${t.maintenance || '-'}</div><div class="label">mantenimiento</div></div>
+      <div><div class="stat">${t.kcal}</div><div class="label">kcal objetivo</div></div>
+      <div><div class="stat">${t.protein} g</div><div class="label">proteína</div></div>
+      <div><div class="stat">${t.carbs} g</div><div class="label">carbohidratos</div></div>
+      <div><div class="stat">${t.fat} g</div><div class="label">grasas</div></div>
+    </div><div class="notice">Es una estimación inicial. Ajusta según la tendencia real de peso durante 2-3 semanas.</div></div>`;
+  }
+
+  function chooseRecipe(meal,targetK,targetP,used) {
+    const pool = DATA.recipes.filter(r => r.meal === meal && !used.has(r.id));
+    const fallback = DATA.recipes.filter(r => r.meal === meal);
+    const candidates = pool.length ? pool : fallback;
+    candidates.sort((a,b) => (Math.abs(a.kcal-targetK)+Math.abs(a.p-targetP)*7) - (Math.abs(b.kcal-targetK)+Math.abs(b.p-targetP)*7));
+    return candidates[0];
+  }
+
+  function generateMenu() {
+    const count = Number($('menuMeals').value);
+    const days = Number($('menuDays').value);
+    const dayNames = ['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'];
+    const meals = count === 4 ? ['Desayuno','Comida','Merienda','Cena'] : ['Desayuno','Merienda','Comida','Merienda','Cena'];
+    const weights = count === 4 ? [.24,.34,.14,.28] : [.20,.12,.30,.13,.25];
+    const all = [];
+    $('menuOutput').innerHTML = Array.from({length:days},(_,di) => {
+      const used = new Set();
+      const selected = meals.map((meal,i) => {
+        const recipe = chooseRecipe(meal,state.targets.kcal*weights[i],state.targets.protein*weights[i],used);
+        if (recipe) used.add(recipe.id);
+        return recipe;
+      }).filter(Boolean);
+      all.push(...selected);
+      const sum = selected.reduce((a,r) => ({kcal:a.kcal+r.kcal,p:a.p+r.p,c:a.c+r.c,f:a.f+r.f}),{kcal:0,p:0,c:0,f:0});
+      return `<div class="card" style="margin-bottom:10px"><h3>${dayNames[di]}</h3>${selected.map(r => `<div class="history"><strong>${r.meal}: ${r.name}</strong><div class="small">${r.kcal} kcal · P ${r.p} · C ${r.c} · G ${r.f}</div><button class="secondary menuRecipe" data-id="${r.id}" style="margin-top:6px;padding:8px 10px">Ver receta</button></div>`).join('')}<div class="kcal">Total ${sum.kcal} kcal · P ${sum.p} g</div><div class="small">Objetivo: ${state.targets.kcal} kcal · ${state.targets.protein} g proteína</div></div>`;
+    }).join('');
+    $$('.menuRecipe').forEach(btn => btn.addEventListener('click', () => {
+      showNutritionPanel('recipes');
+      $('recipeSearch').value = DATA.recipes.find(r => r.id === btn.dataset.id).name;
+      renderRecipes();
+    }));
+    renderShoppingList(all);
+  }
+
+  function renderShoppingList(recipes) {
+    const items = [...new Set(recipes.flatMap(r => r.ingredients))];
+    $('shoppingList').innerHTML = items.length ? items.map(i => `<label class="history"><input type="checkbox" style="width:auto;margin-right:8px"> ${i}</label>`).join('') : `<div class="empty">Sin elementos.</div>`;
+  }
+
+  function addMeal() {
+    const meal = {
+      id:Date.now(),date:todayKey(),type:$('mealType').value,name:$('mealName').value.trim() || 'Comida',
+      kcal:Number($('mealKcal').value)||0,p:Number($('mealProtein').value)||0,c:Number($('mealCarbs').value)||0,f:Number($('mealFat').value)||0
+    };
+    state.meals.push(meal);
+    ['mealName','mealKcal','mealProtein','mealCarbs','mealFat'].forEach(id => $(id).value='');
+    saveState();
+    renderTodayMeals();
+    renderHome();
+  }
+
+  function renderTodayMeals() {
+    const list = state.meals.filter(m => m.date === todayKey());
+    $('todayMeals').innerHTML = list.length ? list.map(m => `<div class="history"><strong>${m.type}: ${m.name}</strong><div class="small">${m.kcal} kcal · P ${m.p} · C ${m.c} · G ${m.f}</div><button class="danger deleteMeal" data-id="${m.id}" style="margin-top:6px;padding:7px 9px">Eliminar</button></div>`).join('') : `<div class="empty">Sin comidas registradas hoy.</div>`;
+    $$('.deleteMeal').forEach(btn => btn.addEventListener('click', () => {
+      state.meals = state.meals.filter(m => m.id !== Number(btn.dataset.id));
+      saveState();
+      renderTodayMeals();
+      renderHome();
+    }));
+  }
+
+  function renderRecipes() {
+    const q = $('recipeSearch').value.toLowerCase();
+    const list = DATA.recipes.filter(r => !q || JSON.stringify(r).toLowerCase().includes(q));
+    $('recipeList').innerHTML = list.map(r => `<div class="recipeCard">
+      <h3>${r.name}</h3><span class="pill">${r.meal}</span>
+      <div class="kcal">${r.kcal} kcal</div><div class="small">P ${r.p} g · C ${r.c} g · G ${r.f} g</div>
+      <div class="recipeSteps"><strong>Ingredientes</strong><div class="small">${r.ingredients.join('<br>')}</div><strong style="display:block;margin-top:9px">Preparación</strong><ol>${r.steps.map(s => `<li>${s}</li>`).join('')}</ol></div>
+      <button class="addRecipeMeal" data-id="${r.id}" style="width:100%">Añadir al diario</button>
+    </div>`).join('');
+    $$('.addRecipeMeal').forEach(btn => btn.addEventListener('click', () => {
+      const r = DATA.recipes.find(x => x.id === btn.dataset.id);
+      state.meals.push({id:Date.now(),date:todayKey(),type:r.meal,name:r.name,kcal:r.kcal,p:r.p,c:r.c,f:r.f});
+      saveState();
+      renderHome();
+      alert('Receta añadida al diario.');
+    }));
+  }
+
+  function renderNutrition() {
+    renderMacroResult();
+    renderTodayMeals();
+    renderRecipes();
+  }
+
+  function saveMetric() {
+    state.metrics.push({
+      id:Date.now(),date:new Date().toISOString(),
+      weight:Number($('metricWeight').value)||null,
+      fat:Number($('metricFat').value)||null,
+      waist:Number($('metricWaist').value)||null,
+      chest:Number($('metricChest').value)||null
+    });
+    ['metricWeight','metricFat','metricWaist','metricChest'].forEach(id => $(id).value='');
+    saveState();
+    renderProgress();
+  }
+
+  function drawWeightChart() {
+    const canvas = $('weightChart');
+    const ctx = canvas.getContext('2d');
+    const points = state.metrics.filter(m => m.weight);
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    if (points.length < 2) {
+      ctx.fillStyle = getComputedStyle(document.body).getPropertyValue('--muted');
+      ctx.font = '22px sans-serif';
+      ctx.fillText('Añade al menos 2 registros',190,120);
+      return;
+    }
+    const values = points.map(p => p.weight);
+    let min = Math.min(...values), max = Math.max(...values);
+    if (min === max) {min -= 1;max += 1}
+    const pad = 42;
+    ctx.strokeStyle = '#2fd374';
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    points.forEach((p,i) => {
+      const x = pad+i*(canvas.width-pad-20)/(points.length-1);
+      const y = 20+(max-p.weight)*(canvas.height-pad-20)/(max-min);
+      if (i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+    });
+    ctx.stroke();
+  }
+
+  function preparePhotos(input) {
+    pendingPhotos = [...(input.files || [])];
+    $('selectedPhotos').textContent = pendingPhotos.length ? `${pendingPhotos.length} foto(s) seleccionada(s)` : 'Ninguna foto seleccionada.';
+  }
+
+  async function savePhotos() {
+    if (!pendingPhotos.length) return alert('Selecciona una o varias fotos.');
+    for (const file of pendingPhotos) {
+      if (file.size > 5*1024*1024) continue;
+      const data = await new Promise((resolve,reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+      state.photos.push({id:Date.now()+Math.random(),date:new Date().toISOString(),note:$('photoNote').value.trim() || file.name,data});
+    }
+    pendingPhotos = [];
+    $('photoFiles').value = '';
+    $('photoCamera').value = '';
+    $('photoNote').value = '';
+    $('selectedPhotos').textContent = 'Ninguna foto seleccionada.';
+    try {
+      saveState();
+      renderPhotos();
+    } catch {
+      alert('No hay espacio suficiente. Usa fotos más pequeñas.');
+    }
+  }
+
+  function renderPhotos() {
+    const opts = state.photos.map((p,i) => `<option value="${i}">${new Date(p.date).toLocaleDateString('es-ES')} · ${p.note}</option>`).join('');
+    $('photoBefore').innerHTML = opts;
+    $('photoAfter').innerHTML = opts;
+    if (state.photos.length > 1) $('photoAfter').value = state.photos.length-1;
+    renderPhotoCompare();
+    $('photoGrid').innerHTML = state.photos.length ? state.photos.slice().reverse().map((p,rev) => {
+      const index = state.photos.length-1-rev;
+      return `<div class="card"><strong>${new Date(p.date).toLocaleDateString('es-ES')}</strong><div class="small">${p.note}</div><img src="${p.data}"><button class="danger deletePhoto" data-index="${index}" style="width:100%;margin-top:6px">Eliminar</button></div>`;
+    }).join('') : `<div class="empty">Sin fotos.</div>`;
+    $$('.deletePhoto').forEach(btn => btn.addEventListener('click', () => {
+      state.photos.splice(Number(btn.dataset.index),1);
+      saveState();
+      renderPhotos();
+    }));
+  }
+
+  function renderPhotoCompare() {
+    if (state.photos.length < 2) {
+      $('photoCompare').innerHTML = `<div class="empty">Añade dos fotos.</div>`;
+      return;
+    }
+    const before = state.photos[Number($('photoBefore').value)||0];
+    const after = state.photos[Number($('photoAfter').value)||state.photos.length-1];
+    $('photoCompare').innerHTML = `<div><div class="small">ANTES</div><img src="${before.data}"><div class="small">${before.note}</div></div><div><div class="small">DESPUÉS</div><img src="${after.data}"><div class="small">${after.note}</div></div>`;
+  }
+
+  function renderMetricHistory() {
+    $('metricHistory').innerHTML = state.metrics.length ? state.metrics.slice().reverse().map(m => `<div class="history"><strong>${new Date(m.date).toLocaleDateString('es-ES')}</strong><div class="small">${m.weight ?? '-'} kg · grasa ${m.fat ?? '-'}% · cintura ${m.waist ?? '-'} cm · pecho ${m.chest ?? '-'} cm</div></div>`).join('') : `<div class="empty">Sin métricas.</div>`;
+  }
+
+  function renderProgress() {
+    drawWeightChart();
+    renderPhotos();
+    renderMetricHistory();
+  }
+
+  function renderSettings() {
+    $('profileName').value = state.profile.name || '';
+    $('restSeconds').value = state.settings.rest;
+    $('theme').value = state.settings.theme;
+  }
+
+  function saveSettings() {
+    state.profile.name = $('profileName').value.trim() || 'Agustín';
+    state.settings.rest = Number($('restSeconds').value);
+    state.settings.theme = $('theme').value;
+    saveState();
+    applyTheme();
+    renderHome();
+    alert('Ajustes guardados.');
+  }
+
+  function exportData() {
+    const blob = new Blob([JSON.stringify(state,null,2)],{type:'application/json'});
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `fitcoach-backup-${todayKey()}.json`;
+    link.click();
+  }
+
+  function importData(file) {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const data = JSON.parse(reader.result);
+        state = {...state,...data};
+        saveState();
+        applyTheme();
+        renderAll();
+        alert('Datos importados.');
+      } catch {
+        alert('Archivo no válido.');
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  function resetData() {
+    if (!confirm('¿Borrar todos los datos locales?')) return;
+    Object.keys(defaults).forEach(k => localStorage.removeItem(k));
+    state = JSON.parse(JSON.stringify(defaults));
+    saveState();
+    renderAll();
+  }
+
+  function bindEvents() {
+    $$('nav button').forEach(btn => btn.addEventListener('click', () => showPage(btn.dataset.page)));
+    $$('[data-go]').forEach(btn => btn.addEventListener('click', () => showPage(btn.dataset.go)));
+    $$('[data-nutrition-tab]').forEach(btn => btn.addEventListener('click', () => showNutritionPanel(btn.dataset.nutritionTab)));
+
+    $('generatePlan').addEventListener('click', generatePlan);
+    $('trainingDay').addEventListener('change', renderWorkoutList);
+    $('saveWorkout').addEventListener('click', saveWorkout);
+    $('openLibrary').addEventListener('click', openLibrary);
+    $('closeLibrary').addEventListener('click', () => $('libraryModal').classList.remove('open'));
+    $('exerciseSearch').addEventListener('input', renderExerciseLibrary);
+    $('muscleFilter').addEventListener('change', renderExerciseLibrary);
+    $('timerAdd').addEventListener('click', () => {timerLeft += 30;updateTimer()});
+    $('timerStop').addEventListener('click', stopTimer);
+
+    $('calculateMacros').addEventListener('click', calculateMacros);
+    $('generateMenu').addEventListener('click', generateMenu);
+    $('addMeal').addEventListener('click', addMeal);
+    $('recipeSearch').addEventListener('input', renderRecipes);
+
+    $('saveMetric').addEventListener('click', saveMetric);
+    $('photoFiles').addEventListener('change', e => preparePhotos(e.target));
+    $('photoCamera').addEventListener('change', e => preparePhotos(e.target));
+    $('savePhotos').addEventListener('click', savePhotos);
+    $('photoBefore').addEventListener('change', renderPhotoCompare);
+    $('photoAfter').addEventListener('change', renderPhotoCompare);
+
+    $('saveSettings').addEventListener('click', saveSettings);
+    $('exportData').addEventListener('click', exportData);
+    $('importData').addEventListener('change', e => importData(e.target.files[0]));
+    $('resetData').addEventListener('click', resetData);
+  }
+
+  function renderAll() {
+    applyTheme();
+    renderHome();
+    renderTraining();
+    renderNutrition();
+    renderProgress();
+    renderSettings();
+  }
+
+  function init() {
+    bindEvents();
+    renderAll();
+    if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(() => {});
+  }
+
+  document.addEventListener('DOMContentLoaded', init);
+})();
