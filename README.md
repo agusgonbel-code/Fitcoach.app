@@ -1,36 +1,35 @@
-# FitCoach Phase 6
+# FitCoach Phase 7
 
 ## Entrenamiento
-- Heavy Duty inspirado en Mike Mentzer.
-- HIT moderno.
-- Hipertrofia basada en evidencia.
-- Rest-Pause eficiente.
-- Drop Sets selectivos.
-- Powerbuilding científico.
-- Periodización ondulante.
-- Dosis mínima efectiva.
-- Fichas con frecuencia, volumen, RIR y explicación de evidencia.
-- Aplicación automática de programas.
-- Técnicas avanzadas visibles por ejercicio.
-- Weekly Readiness basado en sueño, energía, estrés y molestias.
+- Planificación por bloques de 4, 6 u 8 semanas.
+- Doble progresión, progresión de carga y progresión de volumen.
+- Semana de descarga automática o configurable.
+- RIR objetivo por semana.
+- Calendario mensual de entrenamientos.
+- Récords personales automáticos.
+- Weekly Readiness y control semanal.
+- Mantiene Heavy Duty, HIT, Rest-Pause, Drop Sets, PHUL, Powerbuilding y otros métodos.
 
 ## Nutrición
-- Plan semanal avanzado según calorías y macros.
-- Recomposición, ganancia muscular o pérdida de grasa.
-- Omnívoro o vegetariano.
-- Presupuesto económico o normal.
-- Preparación rápida o meal prep.
-- Exclusión de ingredientes.
-- Totales diarios y diferencia frente al objetivo.
-- Lista de compra automática.
+- Constructor de recetas personalizadas.
+- Base de alimentos editable mediante cantidades.
+- Cálculo automático de calorías y macros de la receta.
+- Adherencia nutricional por días.
+- Días con proteína lograda.
+- Días con calorías en rango.
+- Consistencia de comidas.
+- Menús semanales ajustados a macros y lista de compra.
 
-## Progreso y fotos
-- Mantiene comparador de fotos.
-- Elección desde la fototeca o cámara.
-- Progress Intelligence y Coach Intelligence.
+## Progreso
+- Comparativa mensual de peso, cintura, fuerza y sesiones.
+- Informe mensual automático.
+- Fotos desde galería o cámara.
+- Comparador de fotos y Progress Intelligence.
 
-## Nota metodológica
-Heavy Duty se incluye como protocolo inspirado en Mentzer. La app no afirma que entrenar al fallo o usar volumen mínimo sea universalmente superior. El usuario debe ajustar el método según recuperación, técnica y progreso.
+## Técnica
+- Sintaxis JavaScript validada.
+- Caché actualizada a Phase 7 para facilitar el despliegue.
 
 Commit recomendado:
-`FitCoach Phase 6 - Evidence Training & Advanced Nutrition`
+
+`FitCoach Phase 7 - Periodization, Calendar, PRs & Custom Nutrition`

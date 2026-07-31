@@ -1,11 +1,11 @@
 {
-  "name": "FitCoach Phase 6",
+  "name": "FitCoach Phase 7",
   "short_name": "FitCoach",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#090E1B",
   "theme_color": "#090E1B",
-  "description": "Protocolos basados en evidencia, planificación nutricional avanzada y readiness.",
+  "description": "Periodización, calendario, PRs, recetas personalizadas y analítica avanzada.",
   "icons": [
     {
       "src": "icon-192.png",

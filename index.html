@@ -1,4 +1,4 @@
-<!doctype html><html lang='es'><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1,viewport-fit=cover'><meta name='theme-color' content='#08101f'><meta name='apple-mobile-web-app-capable' content='yes'><link rel='manifest' href='manifest.webmanifest'><title>FitCoach Phase 6</title><style>
+<!doctype html><html lang='es'><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1,viewport-fit=cover'><meta name='theme-color' content='#08101f'><meta name='apple-mobile-web-app-capable' content='yes'><link rel='manifest' href='manifest.webmanifest'><title>FitCoach Phase 7</title><style>
 :root{--bg:#090e1b;--panel:#111a2d;--panel2:#18243b;--text:#f8fafc;--muted:#95a2b8;--accent:#39d176;--accent2:#7c5cff;--line:#27344d;--danger:#ff5b6e;--amber:#ffb020;--blue:#4da3ff;--shadow:0 18px 50px rgba(0,0,0,.28)}
 *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;min-height:100vh;background:radial-gradient(circle at 92% 0,rgba(124,92,255,.15),transparent 28%),radial-gradient(circle at 5% 5%,rgba(57,209,118,.10),transparent 25%),var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',sans-serif}
 header{position:sticky;top:0;z-index:30;padding:calc(env(safe-area-inset-top) + 13px) 16px 13px;background:rgba(9,14,27,.76);backdrop-filter:blur(24px);border-bottom:1px solid rgba(255,255,255,.07)}
@@ -62,9 +62,47 @@ nav{position:fixed;left:0;right:0;bottom:0;z-index:50;padding:8px 6px calc(8px +
 .meter{height:8px;background:#08111f;border-radius:999px;overflow:hidden}.meter>div{height:100%;background:linear-gradient(90deg,#39d176,#7c5cff)}
 .insight{padding:12px;border-radius:15px;background:rgba(124,92,255,.10);border:1px solid rgba(124,92,255,.22);font-size:12px;line-height:1.5}
 .foodChip{display:inline-flex;align-items:center;gap:5px;padding:6px 8px;border-radius:999px;background:#142239;color:#c8d5e8;font-size:11px;margin:3px}
+
+.calendarGrid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+.calHead{font-size:10px;color:var(--muted);text-align:center;padding:4px}
+.calDay{min-height:66px;border-radius:13px;background:#0b1425;border:1px solid rgba(255,255,255,.06);padding:7px;font-size:11px;position:relative}
+.calDay.today{border-color:rgba(57,209,118,.45)}
+.calDay.done:after{content:'✓';position:absolute;right:7px;bottom:5px;color:var(--accent);font-weight:900}
+.calDay .num{font-weight:800}
+.prGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.prCard{background:#0b1425;border:1px solid rgba(255,255,255,.07);border-radius:16px;padding:12px}
+.prCard strong{font-size:22px;display:block}
+.programBlock{margin-bottom:10px;padding:12px;border-radius:16px;background:#0c1628;border:1px solid rgba(255,255,255,.07)}
+.programBlock h3{margin-bottom:6px}
+.phaseChip{display:inline-block;padding:5px 8px;border-radius:999px;font-size:10px;font-weight:800;background:rgba(57,209,118,.12);color:#c9ffdb;border:1px solid rgba(57,209,118,.22);margin:3px}
+.deload{background:rgba(255,176,32,.10);border:1px solid rgba(255,176,32,.25);color:#ffe4af}
+.formGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.stickyAction{position:sticky;bottom:92px;z-index:20}
+.chartMini{height:120px;background:#0b1425;border-radius:14px}
+.recipeBuilderRow{display:grid;grid-template-columns:1fr 90px 40px;gap:7px;align-items:end;margin-top:8px}
+.recipeBuilderRow button{padding:10px}
+.tabs2{display:flex;gap:8px;overflow:auto}.tabs2 button{white-space:nowrap}
+.tabs2 button.active{background:rgba(57,209,118,.12);color:#c7ffd8;border:1px solid rgba(57,209,118,.22)}
+.summaryStrip{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px}
+.summaryStrip>div{background:#0b1425;border-radius:13px;padding:9px;text-align:center}
+.summaryStrip strong{display:block;font-size:17px}
+.aiBox{padding:14px;border-radius:17px;background:linear-gradient(135deg,rgba(124,92,255,.15),rgba(57,209,118,.08));border:1px solid rgba(124,92,255,.22)}
+@media(min-width:720px){.prGrid{grid-template-columns:repeat(4,1fr)}}
+
 @media(min-width:720px){.grid{grid-template-columns:repeat(4,1fr)}.recipeGrid{grid-template-columns:repeat(2,1fr)}.hero h1{font-size:44px}}
-</style></head><body><header><div class='brand'><div>FitCoach</div><span class='badge'>Phase 6</span></div></header><main>
+</style></head><body><header><div class='brand'><div>FitCoach</div><span class='badge'>Phase 7</span></div></header><main>
 <section id='inicio' class='section active'><div class='hero'><h1 id='hello'>Hola, Agustín</h1><p class='small'>Tu entrenamiento, nutrición y progreso con una experiencia más limpia, rápida y profesional.</p><button style='margin-top:12px' onclick="showTab('entreno',document.querySelectorAll('nav button')[1])">Entrenar ahora</button></div><div class='grid'><div class='card'><div class='stat' id='dSessions'>0</div><div class='label'>sesiones</div></div><div class='card'><div class='stat' id='dCalories'>0</div><div class='label'>kcal hoy</div></div><div class='card'><div class='stat' id='dProtein'>0 g</div><div class='label'>proteína hoy</div></div><div class='card'><div class='stat' id='dWeight'>81 kg</div><div class='label'>peso</div></div></div><h2>Macros de hoy</h2><div class='card' id='macroSummary'></div>
+
+<h2>Control semanal</h2>
+<div class='card'>
+  <div class='summaryStrip'>
+    <div><strong id='weekSessions'>0/4</strong><span class='small'>sesiones</span></div>
+    <div><strong id='weekVolume'>0</strong><span class='small'>kg volumen</span></div>
+    <div><strong id='weekProtein'>0%</strong><span class='small'>proteína</span></div>
+    <div><strong id='weekWeightTrend'>0</strong><span class='small'>peso 7d</span></div>
+  </div>
+  <div class='aiBox' id='weeklyDecision' style='margin-top:12px'></div>
+</div>
 <h2>Weekly Readiness</h2>
 <div class='card'>
   <div class='weekGrid'>
@@ -96,6 +134,29 @@ nav{position:fixed;left:0;right:0;bottom:0;z-index:50;padding:8px 6px calc(8px +
   </div>
   <button style='width:100%;margin-top:10px' onclick='applyTrainingMethod()'>Aplicar metodología</button>
 </div>
+
+<h2>Planificación por bloques</h2>
+<div class='card'>
+  <div class='formGrid'>
+    <div><label>Duración del bloque</label><select id='blockWeeks'><option value='4'>4 semanas</option><option value='6' selected>6 semanas</option><option value='8'>8 semanas</option></select></div>
+    <div><label>Estrategia</label><select id='blockStrategy'><option value='double' selected>Doble progresión</option><option value='load'>Progresión de carga</option><option value='volume'>Progresión de volumen</option></select></div>
+  </div>
+  <div class='formGrid'>
+    <div><label>Semana de descarga</label><select id='deloadWeek'><option value='0'>Automática</option><option value='4'>Semana 4</option><option value='5'>Semana 5</option><option value='6'>Semana 6</option><option value='8'>Semana 8</option></select></div>
+    <div><label>RIR inicial</label><select id='startRir'><option value='3'>3 RIR</option><option value='2' selected>2 RIR</option><option value='1'>1 RIR</option></select></div>
+  </div>
+  <button style='width:100%;margin-top:10px' onclick='createTrainingBlock()'>Crear bloque de entrenamiento</button>
+</div>
+<div id='trainingBlockOutput' style='margin-top:10px'></div>
+
+<h2>Calendario</h2>
+<div class='card'>
+  <div class='row'><button class='secondary' onclick='changeCalendar(-1)'>‹</button><strong id='calendarTitle' style='text-align:center'></strong><button class='secondary' onclick='changeCalendar(1)'>›</button></div>
+  <div class='calendarGrid' id='trainingCalendar' style='margin-top:10px'></div>
+</div>
+
+<h2>Récords personales</h2>
+<div class='prGrid' id='prGrid'></div>
 <h2>Entrenamiento</h2><div class='row'><select id='daySelect' onchange='renderWorkout()'><option>Lunes</option><option>Martes</option><option>Miércoles</option><option>Jueves</option></select><button class='secondary' onclick='openLibrary()'>+ Ejercicio</button></div><div class='card' style='margin-top:10px'><div class='small' style='margin-bottom:8px'>Plantillas rápidas</div><div class='templateGrid'><button onclick="applyTemplate('recomp')">Recomposición 4 días</button><button onclick="applyTemplate('upperlower')">Upper / Lower</button><button onclick="applyTemplate('fullbody')">Full Body</button><button onclick="applyTemplate('express')">Express 45 min</button></div></div><div id='workoutList' style='margin-top:10px'></div><label>Notas</label><textarea id='sessionNotes'></textarea><button style='width:100%;margin-top:10px' onclick='saveWorkout()'>Guardar entrenamiento</button><h2>Biblioteca y edición</h2><div class='card'><input id='exerciseSearch' placeholder='Buscar por ejercicio, músculo o material' oninput='renderLibrary()'><div class='row' style='margin-top:8px'><select id='muscleFilter' onchange='renderLibrary()'><option value=''>Todos los músculos</option><option>Pecho</option><option>Espalda</option><option>Hombros</option><option>Bíceps</option><option>Tríceps</option><option>Cuádriceps</option><option>Femoral</option><option>Glúteos</option><option>Gemelos</option><option>Core</option><option>Aductores</option><option>Trapecio</option><option>Antebrazos</option></select><select id='equipmentFilter' onchange='renderLibrary()'><option value=''>Todo el material</option><option>Mancuernas</option><option>Barra</option><option>Máquina</option><option>Polea</option><option>Peso corporal</option></select></div><div class='small' id='libraryCount' style='margin-top:10px'></div><div id='exerciseLibrary'></div></div><h2>Historial</h2><div class='card' id='workoutHistory'></div></section>
 <section id='nutricion' class='section'><h2>Calculadora de macros</h2><div class='card'><div class='row'><div><label>Sexo</label><select id='sex'><option value='m'>Hombre</option><option value='f'>Mujer</option></select></div><div><label>Edad</label><input id='age' type='number' value='46'></div></div><div class='row'><div><label>Peso</label><input id='weight' type='number' value='81'></div><div><label>Altura</label><input id='height' type='number' value='181'></div></div><label>Actividad</label><select id='activity'><option value='1.2'>Sedentario</option><option value='1.375'>Ligera</option><option value='1.55' selected>3-5 entrenos</option><option value='1.725'>Alta</option></select><label>Objetivo</label><select id='goal'><option value='-0.15'>Pérdida de grasa</option><option value='0'>Mantenimiento</option><option value='0.08' selected>Ganancia muscular</option></select><button style='width:100%;margin-top:10px' onclick='calculateMacros()'>Calcular y guardar</button></div><div id='macroResult' style='margin-top:10px'></div><h2>Diario de comidas</h2><div class='card'><label>Comida</label><select id='mealType'><option>Desayuno</option><option>Media mañana</option><option>Comida</option><option>Merienda</option><option>Cena</option></select><label>Descripción</label><input id='mealName'><div class='row'><div><label>kcal</label><input id='mealKcal' type='number'></div><div><label>Proteína</label><input id='mealP' type='number'></div></div><div class='row'><div><label>Carbohidratos</label><input id='mealC' type='number'></div><div><label>Grasas</label><input id='mealF' type='number'></div></div><button style='width:100%;margin-top:10px' onclick='addMeal()'>Añadir</button></div><h2>Hoy</h2><div class='card' id='todayMeals'></div></section>
 <section id='recetas' class='section'>
@@ -138,6 +199,31 @@ nav{position:fixed;left:0;right:0;bottom:0;z-index:50;padding:8px 6px calc(8px +
 
 
 
+
+<h2>Constructor de recetas</h2>
+<div class='card'>
+  <label>Nombre de la receta</label><input id='customRecipeName' placeholder='Ej.: bowl de pollo y arroz'>
+  <div id='customIngredients'></div>
+  <button class='secondary' style='width:100%;margin-top:8px' onclick='addIngredientRow()'>Añadir ingrediente</button>
+  <div class='summaryStrip' style='margin-top:10px'>
+    <div><strong id='customKcal'>0</strong><span class='small'>kcal</span></div>
+    <div><strong id='customP'>0</strong><span class='small'>proteína</span></div>
+    <div><strong id='customC'>0</strong><span class='small'>carbos</span></div>
+    <div><strong id='customF'>0</strong><span class='small'>grasas</span></div>
+  </div>
+  <button style='width:100%;margin-top:10px' onclick='saveCustomRecipe()'>Guardar receta personalizada</button>
+</div>
+
+<h2>Adherencia nutricional</h2>
+<div class='card'>
+  <div class='summaryStrip'>
+    <div><strong id='nutritionDaysLogged'>0</strong><span class='small'>días registrados</span></div>
+    <div><strong id='proteinHitDays'>0</strong><span class='small'>proteína lograda</span></div>
+    <div><strong id='calorieHitDays'>0</strong><span class='small'>calorías en rango</span></div>
+    <div><strong id='mealConsistency'>0%</strong><span class='small'>consistencia</span></div>
+  </div>
+  <div class='insight' id='nutritionAdherenceInsight' style='margin-top:10px'></div>
+</div>
 <h2>Plan nutricional avanzado</h2>
 <div class='card'>
   <div class='row'>
@@ -223,6 +309,17 @@ nav{position:fixed;left:0;right:0;bottom:0;z-index:50;padding:8px 6px calc(8px +
 </div>
 <div id='photoGrid' class='photoGrid' style='margin-top:10px'></div>
 
+
+<h2>Comparativa mensual</h2>
+<div class='card'>
+  <div class='summaryStrip'>
+    <div><strong id='monthWeightDelta'>0</strong><span class='small'>peso</span></div>
+    <div><strong id='monthWaistDelta'>0</strong><span class='small'>cintura</span></div>
+    <div><strong id='monthStrengthDelta'>0%</strong><span class='small'>fuerza</span></div>
+    <div><strong id='monthSessions'>0</strong><span class='small'>sesiones</span></div>
+  </div>
+  <div class='aiBox' id='monthlyReport' style='margin-top:12px'></div>
+</div>
 <h2>Informe automático</h2>
 <div class='card' id='progressReport'></div>
 
@@ -256,7 +353,7 @@ function calculateMacros(){let b=10*(+weight.value)+6.25*(+height.value)-5*(+age
 const tk=()=>new Date().toISOString().slice(0,10);function addMeal(){let a=S.g('meals',[]);a.push({id:Date.now(),date:tk(),type:mealType.value,name:mealName.value||'Comida',kcal:+mealKcal.value||0,p:+mealP.value||0,c:+mealC.value||0,f:+mealF.value||0});S.s('meals',a);mealName.value=mealKcal.value=mealP.value=mealC.value=mealF.value='';renderMeals();refresh()}
 function deleteMeal(id){S.s('meals',S.g('meals',[]).filter(x=>x.id!==id));renderMeals();refresh()}function renderMeals(){let m=S.g('meals',[]).filter(x=>x.date===tk());todayMeals.innerHTML=m.length?m.map(x=>`<div class='history'><strong>${x.type}: ${x.name}</strong><div class='small'>${x.kcal} kcal · P ${x.p} · C ${x.c} · G ${x.f}</div><button class='danger' style='margin-top:6px;padding:6px 8px' onclick='deleteMeal(${x.id})'>Eliminar</button></div>`).join(''):`<div class='empty'>Sin comidas hoy.</div>`}
 function totals(){return S.g('meals',[]).filter(x=>x.date===tk()).reduce((a,x)=>({k:a.k+x.kcal,p:a.p+x.p,c:a.c+x.c,f:a.f+x.f}),{k:0,p:0,c:0,f:0})}function line(n,v,t){return `<div style='margin:9px 0'><div class='small'>${n}: ${Math.round(v)} / ${t}</div><div class='progress'><div style='width:${Math.min(100,v/t*100)}%'></div></div></div>`}
-function renderRecipes(){let q=(recipeSearch.value||'').toLowerCase(),mf=recipeMealFilter.value,pf=+recipeProteinFilter.value,cf=+(recipeCalFilter?.value||9999),tf=recipeTagFilter?.value||'';let list=recipes.filter(r=>(r.n+' '+r.i.join(' ')+' '+(r.tag||'')).toLowerCase().includes(q)&&(!mf||r.m===mf)&&r.p>=pf&&r.k<=cf&&(!tf||(r.tag||'')===tf));recipeCount.textContent=list.length+' recetas encontradas · '+recipes.length+' en la biblioteca';recipeList.innerHTML=list.map(r=>`<div class='card'><h3>${r.n}</h3><span class='pill'>${r.m}</span><span class='pill'>${r.tag||'Equilibrada'}</span><div class='kcal'>${r.k} kcal</div><div class='small'>P ${r.p} g · C ${r.c} g · G ${r.f} g</div><p class='small'>${r.i.join('<br>')}</p><div class='row'><button onclick='addRecipe(${recipes.indexOf(r)})'>Añadir</button><button class='secondary swapBtn' onclick='suggestRecipeSwap(${recipes.indexOf(r)})'>Alternativa</button></div></div>`).join('')||`<div class='empty'>Sin resultados.</div>`}function addRecipe(i){let r=recipes[i],a=S.g('meals',[]);a.push({id:Date.now(),date:tk(),type:r.m,name:r.n,kcal:r.k,p:r.p,c:r.c,f:r.f});S.s('meals',a);refresh();alert('Receta añadida')}
+function renderRecipes(){mergeCustomRecipes();let q=(recipeSearch.value||'').toLowerCase(),mf=recipeMealFilter.value,pf=+recipeProteinFilter.value,cf=+(recipeCalFilter?.value||9999),tf=recipeTagFilter?.value||'';let list=recipes.filter(r=>(r.n+' '+r.i.join(' ')+' '+(r.tag||'')).toLowerCase().includes(q)&&(!mf||r.m===mf)&&r.p>=pf&&r.k<=cf&&(!tf||(r.tag||'')===tf));recipeCount.textContent=list.length+' recetas encontradas · '+recipes.length+' en la biblioteca';recipeList.innerHTML=list.map(r=>`<div class='card'><h3>${r.n}</h3><span class='pill'>${r.m}</span><span class='pill'>${r.tag||'Equilibrada'}</span><div class='kcal'>${r.k} kcal</div><div class='small'>P ${r.p} g · C ${r.c} g · G ${r.f} g</div><p class='small'>${r.i.join('<br>')}</p><div class='row'><button onclick='addRecipe(${recipes.indexOf(r)})'>Añadir</button><button class='secondary swapBtn' onclick='suggestRecipeSwap(${recipes.indexOf(r)})'>Alternativa</button></div></div>`).join('')||`<div class='empty'>Sin resultados.</div>`}function addRecipe(i){let r=recipes[i],a=S.g('meals',[]);a.push({id:Date.now(),date:tk(),type:r.m,name:r.n,kcal:r.k,p:r.p,c:r.c,f:r.f});S.s('meals',a);refresh();alert('Receta añadida')}
 function pickMeal(m){let p=recipes.filter(r=>r.m===m);return p[Math.floor(Math.random()*p.length)]}
 function closestCombination(mealTypes,targetKcal,tolerance){let best=null;for(let n=0;n<350;n++){let ms=mealTypes.map(pickMeal),k=ms.reduce((a,r)=>a+r.k,0),diff=Math.abs(targetKcal-k);if(!best||diff<best.diff)best={ms,k,diff};if(diff<=tolerance)break}return best.ms}
 function renderPlannedMenu(ms,title){let sum=ms.reduce((a,r)=>({k:a.k+r.k,p:a.p+r.p,c:a.c+r.c,f:a.f+r.f}),{k:0,p:0,c:0,f:0});return `<div class='card mealPlanDay'><h3>${title}</h3>${ms.map((r,i)=>`<div class='history'><strong>${r.m}: ${r.n}</strong><div class='small'>${r.k} kcal · P ${r.p} g</div><button class='secondary swapBtn' onclick='swapPlannedMeal(${i})'>Cambiar</button></div>`).join('')}<div class='kcal'>Total ${sum.k} kcal · P ${sum.p} g · C ${sum.c} g · G ${sum.f} g</div></div>`}
@@ -283,7 +380,7 @@ function renderPhotoComparison(){let a=S.g('photos',[]);if(a.length<2){photoComp
 function delPhoto(i){let a=S.g('photos',[]);a.splice(i,1);S.s('photos',a);renderPhotos()}
 function renderProgressReport(){let m=S.g('metrics',[]),w=S.g('workouts',[]),r=S.g('recovery',[]),items=[];if(m.length>=2){let wd=metricDelta(m,'weight'),wa=metricDelta(m,'waist');items.push(`<div class='reportItem'><span class='aiTag'>Composición</span> El peso ha cambiado ${wd>=0?'+':''}${wd.toFixed(1)} kg y la cintura ${wa>=0?'+':''}${wa.toFixed(1)} cm desde el primer registro.</div>`)}if(w.length){let last30=w.filter(x=>Date.now()-new Date(x.date).getTime()<=30*86400000);items.push(`<div class='reportItem'><span class='aiTag'>Entrenamiento</span> Has completado ${last30.length} sesiones en los últimos 30 días, con ${Math.round(last30.reduce((a,x)=>a+x.volume,0)).toLocaleString('es-ES')} kg de volumen.</div>`)}if(r.length){let recent=r.slice(-7),sleep=recent.reduce((a,x)=>a+x.sleep,0)/recent.length,energy=recent.reduce((a,x)=>a+x.energy,0)/recent.length,stress=recent.reduce((a,x)=>a+x.stress,0)/recent.length;items.push(`<div class='reportItem'><span class='aiTag'>Recuperación</span> Sueño medio ${sleep.toFixed(1)} h, energía ${energy.toFixed(1)}/5 y estrés ${stress.toFixed(1)}/5.</div>`)}if(!items.length)items.push(`<div class='empty'>Añade datos para generar el informe.</div>`);progressReport.innerHTML=items.join('')}
 function advancedCoach(){let w=S.g('workouts',[]),m=S.g('metrics',[]),r=S.g('recovery',[]),t=S.g('targets',{protein:156,kcal:3014}),x=totals(),tips=[];if(w.length){let recent=w.slice(-4),avgR=[];recent.forEach(a=>a.exercises.forEach(e=>e.sets.forEach(s=>avgR.push(s.rir))));let rir=avgR.length?avgR.reduce((a,b)=>a+b,0)/avgR.length:2;if(rir<=1)tips.push('Tus últimas sesiones han sido muy exigentes. Mantén cargas y prioriza recuperación.');else if(rir>=3)tips.push('Tienes margen de esfuerzo: progresa con repeticiones o una pequeña subida de carga.');let last14=w.filter(x=>Date.now()-new Date(x.date).getTime()<=14*86400000);if(last14.length<6)tips.push('La frecuencia reciente está por debajo de cuatro sesiones semanales.')}else tips.push('Registra tu primera sesión para activar el análisis de entrenamiento.');if(x.p<t.protein*.75)tips.push('La proteína de hoy está por debajo del 75 % del objetivo.');if(r.length){let q=r.slice(-3),sleep=q.reduce((a,b)=>a+b.sleep,0)/q.length,stress=q.reduce((a,b)=>a+b.stress,0)/q.length,sore=q.reduce((a,b)=>a+b.soreness,0)/q.length;if(sleep<6.5||stress>=4||sore>=4)tips.push('Los datos de recuperación aconsejan no aumentar el volumen por ahora.')}if(m.length>=3){let recent=m.slice(-3),trend=recent[recent.length-1].weight-recent[0].weight;if(Math.abs(trend)>1.5)tips.push('El peso está cambiando con rapidez; revisa calorías y adherencia.')}return `<div class='good'>${tips.map(t=>'• '+t).join('<br><br>')}</div>`}
-function refresh(){updateReadiness();nutritionAnalytics();let p=S.g('profile',{name:'Agustín'}),t=S.g('targets',{kcal:3014,protein:156,carbs:422,fat:78}),x=totals(),w=S.g('workouts',[]),m=S.g('metrics',[]);hello.textContent='Hola, '+p.name;dSessions.textContent=w.length;dCalories.textContent=Math.round(x.k);dProtein.textContent=Math.round(x.p)+' g';dWeight.textContent=m.length&&m[m.length-1].weight?m[m.length-1].weight+' kg':'81 kg';macroSummary.innerHTML=line('Calorías',x.k,t.kcal)+line('Proteína',x.p,t.protein)+line('Carbohidratos',x.c,t.carbs)+line('Grasas',x.f,t.fat);coachBox.innerHTML=advancedCoach();profileName.value=p.name}
+function refresh(){updateWeeklyControl();updateReadiness();nutritionAnalytics();updateNutritionAdherence();updateMonthlyComparison();renderPRs();let p=S.g('profile',{name:'Agustín'}),t=S.g('targets',{kcal:3014,protein:156,carbs:422,fat:78}),x=totals(),w=S.g('workouts',[]),m=S.g('metrics',[]);hello.textContent='Hola, '+p.name;dSessions.textContent=w.length;dCalories.textContent=Math.round(x.k);dProtein.textContent=Math.round(x.p)+' g';dWeight.textContent=m.length&&m[m.length-1].weight?m[m.length-1].weight+' kg':'81 kg';macroSummary.innerHTML=line('Calorías',x.k,t.kcal)+line('Proteína',x.p,t.protein)+line('Carbohidratos',x.c,t.carbs)+line('Grasas',x.f,t.fat);coachBox.innerHTML=advancedCoach();profileName.value=p.name}
 function saveProfile(){S.s('profile',{name:profileName.value});refresh();alert('Perfil guardado')}function exportData(){let d={profile:S.g('profile',{}),targets:S.g('targets',{}),routines:S.g('routines',routines),workouts:S.g('workouts',[]),meals:S.g('meals',[]),metrics:S.g('metrics',[]),photos:S.g('photos',[]),recovery:S.g('recovery',[])};let b=new Blob([JSON.stringify(d,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='fitcoach-backup-'+tk()+'.json';a.click()}function importData(e){let f=e.target.files[0],r=new FileReader();r.onload=()=>{try{let d=JSON.parse(r.result);Object.entries(d).forEach(([k,v])=>S.s(k,v));init();alert('Datos importados')}catch{alert('Archivo no válido')}};r.readAsText(f)}function resetData(){if(confirm('¿Borrar todos los datos?')){localStorage.clear();init()}}
-function init(){renderScienceMethods();renderMethods();Object.assign(routines,S.g('routines',routines));renderLibrary();renderWorkout();renderHistory();renderMeals();renderRecipes();renderProgress();nutritionAnalytics();refresh()}if('serviceWorker'in navigator)navigator.serviceWorker.register('./sw.js');init();
+function init(){mergeCustomRecipes();renderScienceMethods();renderMethods();renderTrainingBlock();renderCalendar();renderPRs();if(!customIngredients.children.length)addIngredientRow();Object.assign(routines,S.g('routines',routines));renderLibrary();renderWorkout();renderHistory();renderMeals();renderRecipes();renderProgress();nutritionAnalytics();refresh()}if('serviceWorker'in navigator)navigator.serviceWorker.register('./sw.js');init();
 </script></body></html>
