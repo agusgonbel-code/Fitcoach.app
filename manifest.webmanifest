@@ -1,11 +1,11 @@
 {
-  "name": "FitCoach Phase 7",
+  "name": "FitCoach Phase 8",
   "short_name": "FitCoach",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#090E1B",
   "theme_color": "#090E1B",
-  "description": "Periodización, calendario, PRs, recetas personalizadas y analítica avanzada.",
+  "description": "Planes por objetivos, calculadora científica, recetas paso a paso y Photo Intelligence.",
   "icons": [
     {
       "src": "icon-192.png",
