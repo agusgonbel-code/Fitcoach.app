@@ -1,5 +1,5 @@
 {
-  "name": "FitCoach Phase 3",
+  "name": "FitCoach Phase 4",
   "short_name": "FitCoach",
   "start_url": "./",
   "display": "standalone",
@@ -17,5 +17,5 @@
       "type": "image/png"
     }
   ],
-  "description": "Nutrition Intelligence, planificador inteligente, recetas y lista de compra."
+  "description": "Progress Intelligence, comparador de fotos, recuperación y Coach Intelligence."
 }
