@@ -1,15 +1,15 @@
-# FitCoach Beta 0.7
+# FitCoach Phase 1
 
-PWA instalable para iPhone y Android.
+Rediseño visual completo compatible con GitHub Pages.
 
-## Mejoras reales
-- 230 ejercicios en la biblioteca.
-- 55 recetas con calorías y macros.
-- Filtros de recetas por comida y proteína.
-- Generador de menú diario y semanal.
-- Lista de compra automática.
-- Registro de entrenamientos, RIR, métricas, fotos y nutrición.
-- Copia de seguridad incluyendo fotos.
+## Novedades
+- Interfaz estilo Apple más limpia.
+- Dashboard renovado.
+- Tarjetas, fondos, animaciones y navegación mejoradas.
+- Se mantienen entrenamiento, recetas, macros, progreso y copias de seguridad.
+- Compatible con los datos locales de la Beta 0.7.
 
-## Instalación
-Publica esta carpeta completa en un servicio HTTPS como Netlify. Abre la URL en Safari y pulsa Compartir > Añadir a pantalla de inicio.
+## Actualización en GitHub
+Sustituye en la raíz del repositorio todos estos archivos y haz un commit con el mensaje:
+
+`FitCoach Phase 1 - rediseño completo`
