@@ -1,10 +1,11 @@
 {
-  "name": "FitCoach Phase 4",
+  "name": "FitCoach Phase 5",
   "short_name": "FitCoach",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#090E1B",
   "theme_color": "#090E1B",
+  "description": "Metodologías de entrenamiento, menús completos por macros y fotos desde la galería.",
   "icons": [
     {
       "src": "icon-192.png",
@@ -16,6 +17,5 @@
       "sizes": "512x512",
       "type": "image/png"
     }
-  ],
-  "description": "Progress Intelligence, comparador de fotos, recuperación y Coach Intelligence."
+  ]
 }
