@@ -446,26 +446,59 @@
     const count = Number($('menuMeals').value);
     const days = Number($('menuDays').value);
     const dayNames = ['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'];
-    const meals = count === 4 ? ['Desayuno','Comida','Merienda','Cena'] : ['Desayuno','Merienda','Comida','Merienda','Cena'];
+    const mealTypes = count === 4
+      ? ['Desayuno','Comida','Merienda','Cena']
+      : ['Desayuno','Merienda','Comida','Merienda','Cena'];
     const weights = count === 4 ? [.24,.34,.14,.28] : [.20,.12,.30,.13,.25];
-    const all = [];
-    $('menuOutput').innerHTML = Array.from({length:days},(_,di) => {
-      const used = new Set();
-      const selected = meals.map((meal,i) => {
-        const recipe = chooseRecipe(meal,state.targets.kcal*weights[i],state.targets.protein*weights[i],used);
-        if (recipe) used.add(recipe.id);
-        return recipe;
-      }).filter(Boolean);
-      all.push(...selected);
-      const sum = selected.reduce((a,r) => ({kcal:a.kcal+r.kcal,p:a.p+r.p,c:a.c+r.c,f:a.f+r.f}),{kcal:0,p:0,c:0,f:0});
-      return `<div class="card" style="margin-bottom:10px"><h3>${dayNames[di]}</h3>${selected.map(r => `<div class="history"><strong>${r.meal}: ${r.name}</strong><div class="small">${r.kcal} kcal · P ${r.p} · C ${r.c} · G ${r.f}</div><button class="secondary menuRecipe" data-id="${r.id}" style="margin-top:6px;padding:8px 10px">Ver receta</button></div>`).join('')}<div class="kcal">Total ${sum.kcal} kcal · P ${sum.p} g</div><div class="small">Objetivo: ${state.targets.kcal} kcal · ${state.targets.protein} g proteína</div></div>`;
+    const globalUsed = new Set();
+    const allRecipes = [];
+
+    function pickUniqueRecipe(meal,targetK,targetP) {
+      let pool = DATA.recipes.filter(r => r.meal === meal && !globalUsed.has(r.id));
+      if (!pool.length) pool = DATA.recipes.filter(r => r.meal === meal);
+      pool.sort((a,b) =>
+        (Math.abs(a.kcal-targetK)+Math.abs(a.p-targetP)*7) -
+        (Math.abs(b.kcal-targetK)+Math.abs(b.p-targetP)*7)
+      );
+      const top = pool.slice(0,Math.min(4,pool.length));
+      const selected = top[Math.floor(Math.random()*top.length)] || pool[0];
+      if (selected) globalUsed.add(selected.id);
+      return selected;
+    }
+
+    $('menuOutput').innerHTML = Array.from({length:days},(_,dayIndex) => {
+      const selected = mealTypes.map((meal,i) =>
+        pickUniqueRecipe(meal,state.targets.kcal*weights[i],state.targets.protein*weights[i])
+      ).filter(Boolean);
+
+      allRecipes.push(...selected);
+
+      const sum = selected.reduce(
+        (a,r)=>({kcal:a.kcal+r.kcal,p:a.p+r.p,c:a.c+r.c,f:a.f+r.f}),
+        {kcal:0,p:0,c:0,f:0}
+      );
+
+      return `<div class="card" style="margin-bottom:10px">
+        <h3>${dayNames[dayIndex]}</h3>
+        ${selected.map((r,mealIndex)=>`
+          <div class="history">
+            <strong>${mealTypes[mealIndex]}: ${r.name}</strong>
+            <div class="small">${r.kcal} kcal · P ${r.p} · C ${r.c} · G ${r.f}</div>
+            <button class="secondary menuRecipe" data-id="${r.id}" style="margin-top:6px;padding:8px 10px">Ver receta</button>
+          </div>`).join('')}
+        <div class="kcal">Total ${sum.kcal} kcal · P ${sum.p} g</div>
+        <div class="small">Objetivo: ${state.targets.kcal} kcal · ${state.targets.protein} g proteína</div>
+      </div>`;
     }).join('');
+
     $$('.menuRecipe').forEach(btn => btn.addEventListener('click', () => {
       showNutritionPanel('recipes');
-      $('recipeSearch').value = DATA.recipes.find(r => r.id === btn.dataset.id).name;
+      const recipe = DATA.recipes.find(r => r.id === btn.dataset.id);
+      $('recipeSearch').value = recipe ? recipe.name : '';
       renderRecipes();
     }));
-    renderShoppingList(all);
+
+    renderShoppingList(allRecipes);
   }
 
   function renderShoppingList(recipes) {

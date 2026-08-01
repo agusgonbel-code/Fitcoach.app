@@ -1,11 +1,11 @@
 {
-  "name": "FitCoach Stable 1.3 AppStore",
+  "name": "FitCoach Stable 1.3.1",
   "short_name": "FitCoach",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#080E1A",
   "theme_color": "#080E1A",
-  "description": "Readiness, calendario, logros y base para App Store.",
+  "description": "Menús semanales variados con recetas diferentes cada día.",
   "icons": [
     {
       "src": "icon-192.png",
