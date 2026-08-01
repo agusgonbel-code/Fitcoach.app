@@ -28,7 +28,8 @@
     workouts: [],
     meals: [],
     metrics: [],
-    photos: []
+    photos: [],
+    recovery: []
   };
 
   let state = {
@@ -39,7 +40,8 @@
     workouts: Store.get('workouts', defaults.workouts),
     meals: Store.get('meals', defaults.meals),
     metrics: Store.get('metrics', defaults.metrics),
-    photos: Store.get('photos', defaults.photos)
+    photos: Store.get('photos', defaults.photos),
+    recovery: Store.get('recovery', defaults.recovery)
   };
 
   let timerId = null;
@@ -164,6 +166,7 @@
   function applyTheme() {
     document.body.classList.toggle('light', state.settings.theme === 'light');
     $('theme').value = state.settings.theme;
+    renderAchievements();
     $('weeklySessionGoal').value = state.settings.weeklySessionGoal || 4;
     $('stepGoal').value = state.settings.stepGoal || 8000;
   }
@@ -199,6 +202,21 @@
   function scaleIngredient(t,s){const m=t.match(/^(\d+(?:[.,]\d+)?)\s*(g|ml)?\s*(.*)$/i);if(!m)return `${s.toFixed(2)} × ${t}`;return `${Math.round(parseFloat(m[1].replace(',','.'))*s)} ${m[2]||''} ${m[3]||''}`.replace(/\s+/g,' ').trim()}
   function generatePortionMenu(){const kcal=+$('portionKcal').value,protein=+$('portionProtein').value,count=+$('portionMeals').value,meals=count===4?['Desayuno','Comida','Merienda','Cena']:['Desayuno','Merienda','Comida','Merienda','Cena'],w=count===4?[.24,.34,.14,.28]:[.20,.12,.30,.13,.25];const selected=meals.map((meal,i)=>{const pool=DATA.recipes.filter(r=>r.meal===meal).slice();pool.sort((a,b)=>(Math.abs(a.kcal-kcal*w[i])+Math.abs(a.p-protein*w[i])*7)-(Math.abs(b.kcal-kcal*w[i])+Math.abs(b.p-protein*w[i])*7));const r=pool[0],s=Math.max(.55,Math.min(1.7,(kcal*w[i]/r.kcal)*.65+(protein*w[i]/r.p)*.35));return {...r,scale:s,kcal:Math.round(r.kcal*s),p:Math.round(r.p*s),c:Math.round(r.c*s),f:Math.round(r.f*s),scaledIngredients:r.ingredients.map(x=>scaleIngredient(x,s))}});const sum=selected.reduce((a,r)=>({kcal:a.kcal+r.kcal,p:a.p+r.p,c:a.c+r.c,f:a.f+r.f}),{kcal:0,p:0,c:0,f:0});$('portionMenuOutput').innerHTML=`<div class="card">${selected.map((r,i)=>`<div class="menuMeal"><strong>${meals[i]}: ${r.name}</strong> <span class="portionBadge">x${r.scale.toFixed(2)}</span><div class="small">${r.kcal} kcal · P ${r.p} · C ${r.c} · G ${r.f}</div><div class="small">${r.scaledIngredients.join('<br>')}</div></div>`).join('')}<div class="kcal">Total ${sum.kcal} kcal · P ${sum.p} g · C ${sum.c} g · G ${sum.f} g</div><div class="noteBox">Ajusta según etiquetas reales.</div></div>`}
   function renderMonthlyReport(){const s=Date.now()-30*86400000,w=state.workouts.filter(x=>new Date(x.date).getTime()>=s),m=state.metrics.filter(x=>new Date(x.date).getTime()>=s),meals=state.meals.filter(x=>new Date(x.date).getTime()>=s),wd=m.length>=2&&m[0].weight&&m.at(-1).weight?m.at(-1).weight-m[0].weight:0,wa=m.length>=2&&m[0].waist&&m.at(-1).waist?m.at(-1).waist-m[0].waist:0,d={};meals.forEach(x=>{d[x.date]??={p:0};d[x.date].p+=x.p});const pd=Object.values(d).filter(x=>x.p>=state.targets.protein*.9).length;$('monthlyReport').innerHTML=`<div class="kpiGrid"><div><div class="stat">${w.length}</div><div class="label">sesiones</div></div><div><div class="stat">${wd>=0?'+':''}${wd.toFixed(1)} kg</div><div class="label">peso</div></div><div><div class="stat">${wa>=0?'+':''}${wa.toFixed(1)} cm</div><div class="label">cintura</div></div><div><div class="stat">${pd}</div><div class="label">días proteína</div></div></div>`}
+
+
+  let calendarCursor=new Date();
+  function saveRecovery(){state.recovery.push({id:Date.now(),date:new Date().toISOString(),sleep:+$('recoverySleep').value||0,energy:+$('recoveryEnergy').value||0,stress:+$('recoveryStress').value||0,soreness:+$('recoverySoreness').value||0});saveState();renderReadiness();alert('Recuperación guardada.')}
+  function readinessScore(){if(!state.recovery.length)return 0;const x=state.recovery.at(-1);return Math.round(Math.max(0,Math.min(100,50+(x.sleep-6.5)*9+(x.energy-3)*10-(x.stress-3)*9-(x.soreness-2)*7)))}
+  function renderReadiness(){const s=readinessScore();$('homeReadiness').textContent=s;$('homeRecoveryStreak').textContent=state.recovery.length;$('readinessBar').style.width=s+'%';$('readinessText').textContent=s>=75?'Buena preparación.':s>=50?'Preparación media.':s>0?'Preparación baja.':'Registra recuperación.'}
+  function renderCalendar(){const y=calendarCursor.getFullYear(),m=calendarCursor.getMonth(),f=new Date(y,m,1),l=new Date(y,m+1,0),off=(f.getDay()+6)%7;$('calendarTitle').textContent=f.toLocaleDateString('es-ES',{month:'long',year:'numeric'});let o=['L','M','X','J','V','S','D'].map(x=>`<div class="calHead">${x}</div>`).join('');for(let i=0;i<off;i++)o+='<div></div>';const wd=new Set(state.workouts.map(x=>x.date.slice(0,10))),md=new Set(state.metrics.map(x=>x.date.slice(0,10)));for(let d=1;d<=l.getDate();d++){const date=new Date(y,m,d),k=date.toISOString().slice(0,10),t=date.toDateString()===new Date().toDateString();o+=`<div class="calDay ${t?'today':''} ${wd.has(k)?'workout':''} ${md.has(k)?'metric':''}"><strong>${d}</strong></div>`}$('activityCalendar').innerHTML=o}
+  function achievements(){const pd={};state.meals.forEach(m=>pd[m.date]=(pd[m.date]||0)+m.p);const ph=Object.values(pd).filter(p=>p>=state.targets.protein*.9).length;return[{n:'Primer entrenamiento',d:'Guarda tu primera sesión.',ok:state.workouts.length>=1},{n:'Constancia inicial',d:'Completa 4 entrenamientos.',ok:state.workouts.length>=4},{n:'Mes activo',d:'Completa 12 entrenamientos.',ok:state.workouts.length>=12},{n:'Nutrición constante',d:'Alcanza proteína 7 días.',ok:ph>=7},{n:'Seguimiento corporal',d:'Registra 4 métricas.',ok:state.metrics.length>=4},{n:'Comparación visual',d:'Guarda al menos 2 fotos.',ok:state.photos.length>=2}]}
+  function renderAchievements(){$('achievementList').innerHTML=achievements().map(a=>`<div class="achievement ${a.ok?'':'locked'}"><strong>${a.ok?'🏆':'🔒'} ${a.n}</strong><div class="small">${a.d}</div></div>`).join('')}
+  const privacyText=`FitCoach guarda localmente entrenamientos, comidas, métricas, ajustes y fotografías. En esta versión no se envían a servidores ni se usan para publicidad. Puedes exportar o borrar los datos desde Ajustes.`;
+  const termsText=`FitCoach ofrece herramientas generales de registro y planificación. No sustituye atención médica ni asesoramiento profesional.`;
+  function openLegal(t){$('legalTitle').textContent=t==='privacy'?'Política de privacidad':'Términos de uso';$('legalContent').textContent=t==='privacy'?privacyText:termsText;$('legalModal').classList.add('open')}
+  async function shareApp(){if(navigator.share){try{await navigator.share({title:'FitCoach',text:'Entrenamiento, nutrición y progreso.',url:location.href})}catch{}}}
+  function maybeOnboarding(){if(!Store.get('onboardingDone',false))$('onboardingModal').classList.add('open')}
+  function finishOnboarding(){state.profile.name=$('onboardingName').value.trim()||'Agustín';$('planGoal').value=$('onboardingGoal').value;$('planDays').value=$('onboardingDays').value;$('planMinutes').value=$('onboardingMinutes').value;generatePlan();Store.set('onboardingDone',true);$('onboardingModal').classList.remove('open');saveState();renderHome()}
 
   function renderHome() {
     const today = totalsToday();
@@ -612,6 +630,7 @@
     $('profileName').value = state.profile.name || '';
     $('restSeconds').value = state.settings.rest;
     $('theme').value = state.settings.theme;
+    renderAchievements();
     $('weeklySessionGoal').value = state.settings.weeklySessionGoal || 4;
     $('stepGoal').value = state.settings.stepGoal || 8000;
   }
@@ -681,6 +700,9 @@
     $('recipeSearch').addEventListener('input', renderRecipes);
 
     $('saveMetric').addEventListener('click', saveMetric);
+    $('saveRecovery').addEventListener('click', saveRecovery);
+    $('calendarPrev').addEventListener('click',()=>{calendarCursor.setMonth(calendarCursor.getMonth()-1);renderCalendar()});
+    $('calendarNext').addEventListener('click',()=>{calendarCursor.setMonth(calendarCursor.getMonth()+1);renderCalendar()});
     $('photoFiles').addEventListener('change', e => preparePhotos(e.target));
     $('photoCamera').addEventListener('change', e => preparePhotos(e.target));
     $('savePhotos').addEventListener('click', savePhotos);
@@ -691,6 +713,11 @@
     $('exportData').addEventListener('click', exportData);
     $('importData').addEventListener('change', e => importData(e.target.files[0]));
     $('resetData').addEventListener('click', resetData);
+    $('openPrivacy').addEventListener('click',()=>openLegal('privacy'));
+    $('openTerms').addEventListener('click',()=>openLegal('terms'));
+    $('closeLegal').addEventListener('click',()=>$('legalModal').classList.remove('open'));
+    $('shareApp').addEventListener('click',shareApp);
+    $('finishOnboarding').addEventListener('click',finishOnboarding);
     $('applyPriority').addEventListener('click', applyPriorityToPlan);
     $('analyzeProgression').addEventListener('click', analyzeProgression);
     $('generatePortionMenu').addEventListener('click', generatePortionMenu);
@@ -709,6 +736,7 @@
   function init() {
     bindEvents();
     renderAll();
+    maybeOnboarding();
     if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(() => {});
   }
 

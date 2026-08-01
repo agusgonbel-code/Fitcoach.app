@@ -1,5 +1,5 @@
-# FitCoach Stable 1.2 Pro
+# FitCoach Stable 1.3 AppStore
 
-Progresión sugerida, menús por porciones, resumen semanal e informe mensual.
+Onboarding, readiness, calendario, logros, privacidad y base Capacitor para iOS.
 
-Commit: `FitCoach Stable 1.2 Pro - Progression, Exact Menus & Monthly Reports`
+Commit: `FitCoach Stable 1.3 - App Store Foundation`

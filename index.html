@@ -10,13 +10,13 @@
   <link rel="apple-touch-icon" href="icon-192.png">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="stylesheet" href="styles.css">
-  <title>FitCoach Stable 1.2 Pro</title>
+  <title>FitCoach Stable 1.3 AppStore</title>
 </head>
 <body>
 <header>
   <div class="topbar">
     <div class="brand"><div class="logo">F</div><div>FitCoach</div></div>
-    <span class="version">Stable 1.2 Pro</span>
+    <span class="version">Stable 1.3</span>
   </div>
 </header>
 
@@ -38,7 +38,7 @@
       <div class="card"><div class="stat" id="homeProtein">0 g</div><div class="label">proteína hoy</div></div>
     </div>
     <h2>Resumen Pro</h2><div class="kpiGrid"><div class="kpiCard"><div class="score" id="scoreAdherence">0%</div><div class="label">adherencia 7 días</div></div><div class="kpiCard"><div class="score" id="scoreStrength">0%</div><div class="label">progreso fuerza</div></div><div class="kpiCard"><div class="score" id="scoreWeight">0 kg</div><div class="label">tendencia peso</div></div><div class="kpiCard"><div class="score" id="scoreNutrition">0</div><div class="label">nutrition score</div></div></div><h2>Semana actual</h2><div class="card"><div class="weekDays" id="weekTracker"></div></div><h2>Macros de hoy</h2><div class="card" id="homeMacros"></div>
-    <h2>Coach</h2><div class="card" id="homeCoach"></div>
+    <h2>Readiness</h2><div class="card"><div class="row"><div><div class="stat" id="homeReadiness">0</div><div class="label">preparación diaria</div></div><div><div class="stat" id="homeRecoveryStreak">0</div><div class="label">registros</div></div></div><div class="progress" style="margin-top:10px"><div id="readinessBar" style="width:0%"></div></div><div class="small" id="readinessText" style="margin-top:8px">Registra recuperación.</div></div><h2>Coach</h2><div class="card" id="homeCoach"></div>
     <h2>Última actividad</h2><div class="card" id="homeLast"></div>
   </section>
 
@@ -139,7 +139,7 @@
   </section>
 
   <section id="progress" class="page">
-    <h2>Métricas corporales</h2>
+    <h2>Recuperación</h2><div class="card"><div class="row"><div><label>Sueño (h)</label><input id="recoverySleep" type="number" step="0.1" value="7"></div><div><label>Energía 1-5</label><input id="recoveryEnergy" type="number" min="1" max="5" value="3"></div></div><div class="row"><div><label>Estrés 1-5</label><input id="recoveryStress" type="number" min="1" max="5" value="3"></div><div><label>Molestias 0-5</label><input id="recoverySoreness" type="number" min="0" max="5" value="1"></div></div><button id="saveRecovery" style="width:100%;margin-top:10px">Guardar recuperación</button></div><h2>Calendario</h2><div class="card"><div class="row"><button id="calendarPrev" class="secondary">‹</button><strong id="calendarTitle" style="text-align:center"></strong><button id="calendarNext" class="secondary">›</button></div><div class="calendarGrid" id="activityCalendar" style="margin-top:10px"></div></div><h2>Métricas corporales</h2>
     <div class="card">
       <div class="row"><div><label>Peso</label><input id="metricWeight" type="number" step="0.1"></div><div><label>Grasa %</label><input id="metricFat" type="number" step="0.1"></div></div>
       <div class="row"><div><label>Cintura</label><input id="metricWaist" type="number" step="0.1"></div><div><label>Pecho</label><input id="metricChest" type="number" step="0.1"></div></div>
@@ -176,7 +176,7 @@
       <div class="row"><div><label>Descanso</label><select id="restSeconds"><option value="60">60 s</option><option value="90" selected>90 s</option><option value="120">120 s</option><option value="180">180 s</option></select></div><div><label>Tema</label><select id="theme"><option value="dark">Oscuro</option><option value="light">Claro</option></select></div></div>
       <button id="saveSettings" style="width:100%;margin-top:10px">Guardar ajustes</button>
     </div>
-    <h2>Preferencias de progreso</h2><div class="card"><div class="row"><div><label>Objetivo semanal de sesiones</label><select id="weeklySessionGoal"><option value="3">3</option><option value="4" selected>4</option><option value="5">5</option></select></div><div><label>Objetivo de pasos</label><input id="stepGoal" type="number" value="8000"></div></div><button id="saveProgressPrefs" style="width:100%;margin-top:10px">Guardar preferencias</button></div><h2>Copia de seguridad</h2>
+    <h2>Logros</h2><div class="card" id="achievementList"></div><h2>Privacidad y App Store</h2><div class="card"><button id="openPrivacy" class="secondary" style="width:100%">Política de privacidad</button><button id="openTerms" class="secondary" style="width:100%;margin-top:8px">Términos de uso</button><button id="shareApp" class="secondary" style="width:100%;margin-top:8px">Compartir FitCoach</button></div><h2>Preferencias de progreso</h2><div class="card"><div class="row"><div><label>Objetivo semanal de sesiones</label><select id="weeklySessionGoal"><option value="3">3</option><option value="4" selected>4</option><option value="5">5</option></select></div><div><label>Objetivo de pasos</label><input id="stepGoal" type="number" value="8000"></div></div><button id="saveProgressPrefs" style="width:100%;margin-top:10px">Guardar preferencias</button></div><h2>Copia de seguridad</h2>
     <div class="card">
       <div class="row">
         <button id="exportData" class="secondary">Exportar</button>
@@ -204,5 +204,5 @@
 
 <script src="data.js"></script>
 <script src="app.js"></script>
-</body>
+<div id="onboardingModal" class="modal"><div class="modalBox"><h2>Configura FitCoach</h2><label>Nombre</label><input id="onboardingName" value="Agustín"><label>Objetivo</label><select id="onboardingGoal"><option value="recomp">Recomposición</option><option value="hypertrophy">Hipertrofia</option><option value="strength">Fuerza</option><option value="fatloss">Pérdida de grasa</option></select><div class="row"><div><label>Días</label><select id="onboardingDays"><option value="3">3</option><option value="4" selected>4</option></select></div><div><label>Duración</label><select id="onboardingMinutes"><option value="45">45 min</option><option value="60" selected>60 min</option></select></div></div><button id="finishOnboarding" style="width:100%;margin-top:12px">Crear mi plan inicial</button></div></div><div id="legalModal" class="modal"><div class="modalBox"><div class="row"><h2 id="legalTitle" style="margin:0"></h2><button id="closeLegal" class="secondary">Cerrar</button></div><div id="legalContent" class="small" style="margin-top:12px;white-space:pre-line"></div></div></div></body>
 </html>
