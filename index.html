@@ -10,13 +10,13 @@
   <link rel="apple-touch-icon" href="icon-192.png">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="stylesheet" href="styles.css">
-  <title>FitCoach Stable 1.1 AI</title>
+  <title>FitCoach Stable 1.2 Pro</title>
 </head>
 <body>
 <header>
   <div class="topbar">
     <div class="brand"><div class="logo">F</div><div>FitCoach</div></div>
-    <span class="version">Stable 1.1 AI</span>
+    <span class="version">Stable 1.2 Pro</span>
   </div>
 </header>
 
@@ -37,7 +37,7 @@
       <div class="card"><div class="stat" id="homeKcal">0</div><div class="label">kcal hoy</div></div>
       <div class="card"><div class="stat" id="homeProtein">0 g</div><div class="label">proteína hoy</div></div>
     </div>
-    <h2>Macros de hoy</h2><div class="card" id="homeMacros"></div>
+    <h2>Resumen Pro</h2><div class="kpiGrid"><div class="kpiCard"><div class="score" id="scoreAdherence">0%</div><div class="label">adherencia 7 días</div></div><div class="kpiCard"><div class="score" id="scoreStrength">0%</div><div class="label">progreso fuerza</div></div><div class="kpiCard"><div class="score" id="scoreWeight">0 kg</div><div class="label">tendencia peso</div></div><div class="kpiCard"><div class="score" id="scoreNutrition">0</div><div class="label">nutrition score</div></div></div><h2>Semana actual</h2><div class="card"><div class="weekDays" id="weekTracker"></div></div><h2>Macros de hoy</h2><div class="card" id="homeMacros"></div>
     <h2>Coach</h2><div class="card" id="homeCoach"></div>
     <h2>Última actividad</h2><div class="card" id="homeLast"></div>
   </section>
@@ -62,7 +62,7 @@
       <div class="small" style="margin-top:8px">Heavy Duty se incluye como opción de bajo volumen y alto esfuerzo, no como método universalmente superior.</div>
     </div>
 
-    <h2>Entrenamiento del día</h2>
+    <h2>Constructor rápido</h2><div class="card"><div class="row"><div><label>Prioridad muscular</label><select id="priorityMuscle"><option value="balanced">Equilibrado</option><option value="shoulders">Hombros</option><option value="back">Espalda</option><option value="legs">Piernas</option></select></div><div><label>Progresión</label><select id="progressionMode"><option value="double">Doble progresión</option><option value="load">Subida de carga</option><option value="reps">Subida de repeticiones</option></select></div></div><button id="applyPriority" style="width:100%;margin-top:10px">Aplicar prioridad al plan</button></div><h2>Progresión sugerida</h2><div class="card"><button id="analyzeProgression" style="width:100%">Analizar últimos entrenamientos</button><div id="progressionOutput" style="margin-top:10px"></div></div><h2>Entrenamiento del día</h2>
     <div class="row">
       <select id="trainingDay"></select>
       <button id="openLibrary" class="secondary">Biblioteca</button>
@@ -107,7 +107,7 @@
     </div>
 
     <div id="nutrition-planner" class="nutritionPanel" hidden>
-      <h2>Menú diario según objetivo</h2>
+      <h2>Menú exacto por porciones</h2><div class="card"><div class="row"><div><label>Calorías objetivo</label><input id="portionKcal" type="number" value="3014"></div><div><label>Proteína objetivo</label><input id="portionProtein" type="number" value="156"></div></div><div class="row"><div><label>Comidas</label><select id="portionMeals"><option value="4">4</option><option value="5" selected>5</option></select></div><div><label>Precisión</label><select id="portionTolerance"><option value="100">±100 kcal</option><option value="150" selected>±150 kcal</option><option value="250">±250 kcal</option></select></div></div><button id="generatePortionMenu" style="width:100%;margin-top:10px">Generar menú por porciones</button></div><div id="portionMenuOutput" style="margin-top:10px"></div><h2>Menú diario según objetivo</h2>
       <div class="card">
         <div class="row">
           <div><label>Comidas</label><select id="menuMeals"><option value="4">4</option><option value="5" selected>5</option></select></div>
@@ -166,20 +166,7 @@
     </div>
     <div id="photoGrid" class="photoGrid" style="margin-top:10px"></div>
 
-
-    <h2>Comparación con IA</h2>
-    <div class="card">
-      <div class="notice">
-        Para usar esta función debes desplegar el backend incluido y configurar su dirección en Ajustes.
-        Las imágenes se enviarán al servicio de IA únicamente cuando pulses analizar.
-      </div>
-      <label><input id="aiConsent" type="checkbox" style="width:auto;margin-right:8px"> Autorizo el envío temporal de estas dos fotos para generar el análisis.</label>
-      <button id="runAiCompare" style="width:100%;margin-top:10px">Analizar fotos con IA</button>
-      <div id="aiCompareStatus" class="small" style="margin-top:8px"></div>
-    </div>
-    <div id="aiCompareResult" class="card" style="margin-top:10px"><div class="empty">Selecciona dos fotos y conecta el backend.</div></div>
-
-    <h2>Historial corporal</h2><div class="card" id="metricHistory"></div>
+    <h2>Informe mensual</h2><div class="card" id="monthlyReport"></div><h2>Historial corporal</h2><div class="card" id="metricHistory"></div>
   </section>
 
   <section id="settings" class="page">
@@ -187,10 +174,9 @@
     <div class="card">
       <label>Nombre</label><input id="profileName" value="Agustín">
       <div class="row"><div><label>Descanso</label><select id="restSeconds"><option value="60">60 s</option><option value="90" selected>90 s</option><option value="120">120 s</option><option value="180">180 s</option></select></div><div><label>Tema</label><select id="theme"><option value="dark">Oscuro</option><option value="light">Claro</option></select></div></div>
-      <label>URL del backend de IA</label><input id="aiBackendUrl" placeholder="https://tu-backend.vercel.app/api/analyze-photos">
       <button id="saveSettings" style="width:100%;margin-top:10px">Guardar ajustes</button>
     </div>
-    <h2>Copia de seguridad</h2>
+    <h2>Preferencias de progreso</h2><div class="card"><div class="row"><div><label>Objetivo semanal de sesiones</label><select id="weeklySessionGoal"><option value="3">3</option><option value="4" selected>4</option><option value="5">5</option></select></div><div><label>Objetivo de pasos</label><input id="stepGoal" type="number" value="8000"></div></div><button id="saveProgressPrefs" style="width:100%;margin-top:10px">Guardar preferencias</button></div><h2>Copia de seguridad</h2>
     <div class="card">
       <div class="row">
         <button id="exportData" class="secondary">Exportar</button>

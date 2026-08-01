@@ -22,7 +22,7 @@
 
   const defaults = {
     profile: {name:'Agustín'},
-    settings: {rest:90,theme:'dark',aiBackendUrl:''},
+    settings: {rest:90,theme:'dark',weeklySessionGoal:4,stepGoal:8000},
     targets: {kcal:3014,protein:156,carbs:422,fat:78},
     routines: createEvidenceRoutine(),
     workouts: [],
@@ -164,7 +164,8 @@
   function applyTheme() {
     document.body.classList.toggle('light', state.settings.theme === 'light');
     $('theme').value = state.settings.theme;
-    $('aiBackendUrl').value = state.settings.aiBackendUrl || '';
+    $('weeklySessionGoal').value = state.settings.weeklySessionGoal || 4;
+    $('stepGoal').value = state.settings.stepGoal || 8000;
   }
 
   function totalsToday() {
@@ -187,6 +188,18 @@
     return start;
   }
 
+
+  function renderWeekTracker(){const set=new Set(state.workouts.map(w=>w.date.slice(0,10))),labels=['L','M','X','J','V','S','D'],start=weekStart();$('weekTracker').innerHTML=Array.from({length:7},(_,i)=>{const d=new Date(start);d.setDate(start.getDate()+i);const k=d.toISOString().slice(0,10);return `<div class="weekDay ${set.has(k)?'done':''} ${k===todayKey()?'today':''}"><strong>${labels[i]}</strong><div>${d.getDate()}</div>${set.has(k)?'<div>✓</div>':''}</div>`}).join('')}
+  function nutritionScore(){const t=state.targets,x=totalsToday();return Math.round(Math.max(0,100-Math.abs(x.kcal-t.kcal)/Math.max(1,t.kcal)*45-Math.max(0,t.protein-x.p)/Math.max(1,t.protein)*55))}
+  function strengthTrend(){const h={};state.workouts.forEach(w=>w.exercises.forEach(e=>{const b=Math.max(0,...e.sets.map(s=>s.kg*(1+s.reps/30)));(h[e.name]??=[]).push(b)}));const c=Object.values(h).filter(v=>v.length>=2).map(v=>(v.at(-1)/Math.max(.1,v[0])-1)*100);return c.length?c.reduce((a,b)=>a+b,0)/c.length:0}
+  function weightTrend7d(){const s=Date.now()-7*86400000,l=state.metrics.filter(m=>m.weight&&new Date(m.date).getTime()>=s);return l.length>=2?l.at(-1).weight-l[0].weight:0}
+  function updateProScores(){const g=Number(state.settings.weeklySessionGoal||4),n=state.workouts.filter(w=>new Date(w.date)>=weekStart()).length,st=strengthTrend(),wt=weightTrend7d();$('scoreAdherence').textContent=`${Math.min(100,Math.round(n/g*100))}%`;$('scoreStrength').textContent=`${st>=0?'+':''}${st.toFixed(1)}%`;$('scoreWeight').textContent=`${wt>=0?'+':''}${wt.toFixed(1)} kg`;$('scoreNutrition').textContent=nutritionScore()}
+  function applyPriorityToPlan(){const p=$('priorityMuscle').value,m={shoulders:['Press militar sentado','Elevaciones laterales','Pájaros en máquina'],back:['Remo con apoyo de pecho','Remo en polea','Jalón al pecho'],legs:['Prensa de piernas','Peso muerto rumano','Curl femoral sentado','Hip thrust','Zancada atrás']};if(p==='balanced')return alert('El plan ya está equilibrado.');Object.values(state.routines).forEach(d=>d.forEach(e=>{if((m[p]||[]).includes(e[0]))e[1]=Math.min(5,Number(e[1])+1)}));saveState();renderTraining();alert('Prioridad aplicada.')}
+  function analyzeProgression(){const out=[],names=[...new Set(state.workouts.flatMap(w=>w.exercises.map(e=>e.name)))];names.forEach(name=>{let ex=null;for(let i=state.workouts.length-1;i>=0;i--){ex=state.workouts[i].exercises.find(x=>x.name===name);if(ex)break}if(!ex)return;const s=ex.sets.filter(x=>x.kg>0&&x.reps>0);if(!s.length)return;const rir=s.reduce((a,x)=>a+x.rir,0)/s.length,reps=s.reduce((a,x)=>a+x.reps,0)/s.length,kg=Math.max(...s.map(x=>x.kg));let a='Mantener',r='Mantén la carga y mejora la técnica.';if(rir>=3&&reps>=8){a=$('progressionMode').value==='reps'?'Añadir 1-2 repeticiones':`Subir a ${(kg*1.025).toFixed(1)} kg`;r='Tienes margen de esfuerzo.'}else if(rir<=1){a='Mantener o reducir 2-5%';r='La última sesión fue muy exigente.'}else if(rir>=2){a='Añadir 1 repetición por serie';r='Progresión conservadora.'}out.push({name,a,r})});$('progressionOutput').innerHTML=out.length?out.map(x=>`<div class="history"><strong>${x.name}</strong><div>${x.a}</div><div class="small">${x.r}</div></div>`).join(''):'<div class="empty">Necesitas al menos un entrenamiento registrado.</div>'}
+  function scaleIngredient(t,s){const m=t.match(/^(\d+(?:[.,]\d+)?)\s*(g|ml)?\s*(.*)$/i);if(!m)return `${s.toFixed(2)} × ${t}`;return `${Math.round(parseFloat(m[1].replace(',','.'))*s)} ${m[2]||''} ${m[3]||''}`.replace(/\s+/g,' ').trim()}
+  function generatePortionMenu(){const kcal=+$('portionKcal').value,protein=+$('portionProtein').value,count=+$('portionMeals').value,meals=count===4?['Desayuno','Comida','Merienda','Cena']:['Desayuno','Merienda','Comida','Merienda','Cena'],w=count===4?[.24,.34,.14,.28]:[.20,.12,.30,.13,.25];const selected=meals.map((meal,i)=>{const pool=DATA.recipes.filter(r=>r.meal===meal).slice();pool.sort((a,b)=>(Math.abs(a.kcal-kcal*w[i])+Math.abs(a.p-protein*w[i])*7)-(Math.abs(b.kcal-kcal*w[i])+Math.abs(b.p-protein*w[i])*7));const r=pool[0],s=Math.max(.55,Math.min(1.7,(kcal*w[i]/r.kcal)*.65+(protein*w[i]/r.p)*.35));return {...r,scale:s,kcal:Math.round(r.kcal*s),p:Math.round(r.p*s),c:Math.round(r.c*s),f:Math.round(r.f*s),scaledIngredients:r.ingredients.map(x=>scaleIngredient(x,s))}});const sum=selected.reduce((a,r)=>({kcal:a.kcal+r.kcal,p:a.p+r.p,c:a.c+r.c,f:a.f+r.f}),{kcal:0,p:0,c:0,f:0});$('portionMenuOutput').innerHTML=`<div class="card">${selected.map((r,i)=>`<div class="menuMeal"><strong>${meals[i]}: ${r.name}</strong> <span class="portionBadge">x${r.scale.toFixed(2)}</span><div class="small">${r.kcal} kcal · P ${r.p} · C ${r.c} · G ${r.f}</div><div class="small">${r.scaledIngredients.join('<br>')}</div></div>`).join('')}<div class="kcal">Total ${sum.kcal} kcal · P ${sum.p} g · C ${sum.c} g · G ${sum.f} g</div><div class="noteBox">Ajusta según etiquetas reales.</div></div>`}
+  function renderMonthlyReport(){const s=Date.now()-30*86400000,w=state.workouts.filter(x=>new Date(x.date).getTime()>=s),m=state.metrics.filter(x=>new Date(x.date).getTime()>=s),meals=state.meals.filter(x=>new Date(x.date).getTime()>=s),wd=m.length>=2&&m[0].weight&&m.at(-1).weight?m.at(-1).weight-m[0].weight:0,wa=m.length>=2&&m[0].waist&&m.at(-1).waist?m.at(-1).waist-m[0].waist:0,d={};meals.forEach(x=>{d[x.date]??={p:0};d[x.date].p+=x.p});const pd=Object.values(d).filter(x=>x.p>=state.targets.protein*.9).length;$('monthlyReport').innerHTML=`<div class="kpiGrid"><div><div class="stat">${w.length}</div><div class="label">sesiones</div></div><div><div class="stat">${wd>=0?'+':''}${wd.toFixed(1)} kg</div><div class="label">peso</div></div><div><div class="stat">${wa>=0?'+':''}${wa.toFixed(1)} cm</div><div class="label">cintura</div></div><div><div class="stat">${pd}</div><div class="label">días proteína</div></div></div>`}
+
   function renderHome() {
     const today = totalsToday();
     const week = state.workouts.filter(w => new Date(w.date) >= weekStart());
@@ -207,6 +220,7 @@
     if (week.length < 2 && new Date().getDay() >= 4) tips.push('La frecuencia semanal está baja para un plan de 4 días.');
     if (!tips.length) tips.push('Los registros actuales están dentro de un rango razonable. Mantén el plan.');
     $('homeCoach').innerHTML = `<div class="good">${tips.join('<br><br>')}</div>`;
+    updateProScores();renderWeekTracker();
 
     const last = state.workouts[state.workouts.length-1];
     $('homeLast').innerHTML = last
@@ -584,73 +598,6 @@
     $('photoCompare').innerHTML = `<div><div class="small">ANTES</div><img src="${before.data}"><div class="small">${before.note}</div></div><div><div class="small">DESPUÉS</div><img src="${after.data}"><div class="small">${after.note}</div></div>`;
   }
 
-
-  async function runAiCompare() {
-    if (!state.settings.aiBackendUrl) return alert('Configura la URL del backend en Ajustes.');
-    if (!$('aiConsent').checked) return alert('Debes autorizar el envío temporal de las fotos.');
-    if (state.photos.length < 2) return alert('Añade al menos dos fotos.');
-
-    const before = state.photos[Number($('photoBefore').value)||0];
-    const after = state.photos[Number($('photoAfter').value)||state.photos.length-1];
-    const firstMetric = state.metrics[0] || null;
-    const lastMetric = state.metrics[state.metrics.length-1] || null;
-
-    $('aiCompareStatus').textContent = 'Analizando...';
-    $('runAiCompare').disabled = true;
-
-    try {
-      const response = await fetch(state.settings.aiBackendUrl, {
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({
-          beforeImage:before.data,
-          afterImage:after.data,
-          beforeDate:before.date,
-          afterDate:after.date,
-          beforeNote:before.note,
-          afterNote:after.note,
-          metrics:{before:firstMetric,after:lastMetric}
-        })
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(errorText || `Error ${response.status}`);
-      }
-
-      const result = await response.json();
-      renderAiResult(result);
-      $('aiCompareStatus').textContent = 'Análisis completado.';
-    } catch (error) {
-      $('aiCompareStatus').textContent = 'No se pudo completar el análisis.';
-      $('aiCompareResult').innerHTML = `<div class="notice">${String(error.message || error)}</div>`;
-    } finally {
-      $('runAiCompare').disabled = false;
-    }
-  }
-
-  function renderAiResult(result) {
-    const positives = Array.isArray(result.positive_changes) ? result.positive_changes : [];
-    const limitations = Array.isArray(result.limitations) ? result.limitations : [];
-    const recommendations = Array.isArray(result.recommendations) ? result.recommendations : [];
-
-    $('aiCompareResult').innerHTML = `<div class="aiResult">
-      <h3>Resumen</h3>
-      <div class="good">${result.summary || 'Sin resumen disponible.'}</div>
-      <div class="aiScore">
-        <div><div class="stat">${result.confidence ?? '-'}</div><div class="label">confianza orientativa</div></div>
-        <div><div class="stat">${result.photo_quality ?? '-'}</div><div class="label">calidad comparativa</div></div>
-      </div>
-      <h3>Cambios observables</h3>
-      ${positives.length ? `<ul>${positives.map(x=>`<li>${x}</li>`).join('')}</ul>` : `<div class="small">No se identificaron cambios claros.</div>`}
-      <h3>Limitaciones</h3>
-      ${limitations.length ? `<ul>${limitations.map(x=>`<li>${x}</li>`).join('')}</ul>` : `<div class="small">Sin observaciones.</div>`}
-      <h3>Recomendaciones</h3>
-      ${recommendations.length ? `<ul>${recommendations.map(x=>`<li>${x}</li>`).join('')}</ul>` : `<div class="small">Sin recomendaciones.</div>`}
-      <div class="notice">Este análisis es orientativo y no sustituye una valoración profesional ni estima de forma clínica el porcentaje de grasa.</div>
-    </div>`;
-  }
-
   function renderMetricHistory() {
     $('metricHistory').innerHTML = state.metrics.length ? state.metrics.slice().reverse().map(m => `<div class="history"><strong>${new Date(m.date).toLocaleDateString('es-ES')}</strong><div class="small">${m.weight ?? '-'} kg · grasa ${m.fat ?? '-'}% · cintura ${m.waist ?? '-'} cm · pecho ${m.chest ?? '-'} cm</div></div>`).join('') : `<div class="empty">Sin métricas.</div>`;
   }
@@ -658,21 +605,21 @@
   function renderProgress() {
     drawWeightChart();
     renderPhotos();
-    renderMetricHistory();
+    renderMetricHistory();renderMonthlyReport();
   }
 
   function renderSettings() {
     $('profileName').value = state.profile.name || '';
     $('restSeconds').value = state.settings.rest;
     $('theme').value = state.settings.theme;
-    $('aiBackendUrl').value = state.settings.aiBackendUrl || '';
+    $('weeklySessionGoal').value = state.settings.weeklySessionGoal || 4;
+    $('stepGoal').value = state.settings.stepGoal || 8000;
   }
 
   function saveSettings() {
     state.profile.name = $('profileName').value.trim() || 'Agustín';
     state.settings.rest = Number($('restSeconds').value);
     state.settings.theme = $('theme').value;
-    state.settings.aiBackendUrl = $('aiBackendUrl').value.trim();
     saveState();
     applyTheme();
     renderHome();
@@ -739,12 +686,15 @@
     $('savePhotos').addEventListener('click', savePhotos);
     $('photoBefore').addEventListener('change', renderPhotoCompare);
     $('photoAfter').addEventListener('change', renderPhotoCompare);
-    $('runAiCompare').addEventListener('click', runAiCompare);
 
     $('saveSettings').addEventListener('click', saveSettings);
     $('exportData').addEventListener('click', exportData);
     $('importData').addEventListener('change', e => importData(e.target.files[0]));
     $('resetData').addEventListener('click', resetData);
+    $('applyPriority').addEventListener('click', applyPriorityToPlan);
+    $('analyzeProgression').addEventListener('click', analyzeProgression);
+    $('generatePortionMenu').addEventListener('click', generatePortionMenu);
+    $('saveProgressPrefs').addEventListener('click',()=>{state.settings.weeklySessionGoal=+$('weeklySessionGoal').value;state.settings.stepGoal=+$('stepGoal').value||8000;saveState();renderHome();alert('Preferencias guardadas.')});
   }
 
   function renderAll() {
