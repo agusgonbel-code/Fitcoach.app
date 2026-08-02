@@ -10,13 +10,13 @@
   <link rel="apple-touch-icon" href="icon-192.png">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="stylesheet" href="styles.css">
-  <title>FitCoach Stable 1.3.1</title>
+  <title>FitCoach Stable 1.3.2</title>
 </head>
 <body>
 <header>
   <div class="topbar">
     <div class="brand"><div class="logo">F</div><div>FitCoach</div></div>
-    <span class="version">Stable 1.3.1</span>
+    <span class="version">Stable 1.3.2</span>
   </div>
 </header>
 
@@ -52,14 +52,13 @@
     <div class="card">
       <div class="row">
         <div><label>Objetivo</label><select id="planGoal"><option value="recomp">Recomposición</option><option value="hypertrophy">Hipertrofia</option><option value="strength">Fuerza</option><option value="fatloss">Pérdida de grasa</option></select></div>
-        <div><label>Método</label><select id="planMethod"><option value="evidence">Basado en evidencia</option><option value="mentzer">Heavy Duty inspirado en Mentzer</option><option value="powerbuilding">Powerbuilding</option><option value="minimum">Dosis mínima efectiva</option></select></div>
+        <div><label>Método</label><select id="planMethod"><option value="evidence">Hipertrofia equilibrada 4D</option><option value="upperlower">Upper / Lower 4D</option><option value="fullbody">Full Body 3D</option><option value="strength">Fuerza 4D</option><option value="powerbuilding">Powerbuilding 4D</option><option value="minimum">Dosis mínima efectiva 3D</option><option value="lowload">Bajo impacto / cargas moderadas</option><option value="mentzer">Heavy Duty inspirado en Mentzer</option></select></div>
       </div>
       <div class="row">
         <div><label>Días</label><select id="planDays"><option value="3">3 días</option><option value="4" selected>4 días</option></select></div>
         <div><label>Duración</label><select id="planMinutes"><option value="45">45 min</option><option value="60" selected>60 min</option></select></div>
       </div>
-      <button id="generatePlan" style="width:100%;margin-top:10px">Generar plan</button>
-      <div class="small" style="margin-top:8px">Heavy Duty se incluye como opción de bajo volumen y alto esfuerzo, no como método universalmente superior.</div>
+      <button id="generatePlan" style="width:100%;margin-top:10px">Generar plan</button><div id="planEvidence" class="evidencePanel" style="margin-top:10px"></div>
     </div>
 
     <h2>Constructor rápido</h2><div class="card"><div class="row"><div><label>Prioridad muscular</label><select id="priorityMuscle"><option value="balanced">Equilibrado</option><option value="shoulders">Hombros</option><option value="back">Espalda</option><option value="legs">Piernas</option></select></div><div><label>Progresión</label><select id="progressionMode"><option value="double">Doble progresión</option><option value="load">Subida de carga</option><option value="reps">Subida de repeticiones</option></select></div></div><button id="applyPriority" style="width:100%;margin-top:10px">Aplicar prioridad al plan</button></div><h2>Progresión sugerida</h2><div class="card"><button id="analyzeProgression" style="width:100%">Analizar últimos entrenamientos</button><div id="progressionOutput" style="margin-top:10px"></div></div><h2>Entrenamiento del día</h2>
@@ -174,7 +173,7 @@
     <div class="card">
       <label>Nombre</label><input id="profileName" value="Agustín">
       <div class="row"><div><label>Descanso</label><select id="restSeconds"><option value="60">60 s</option><option value="90" selected>90 s</option><option value="120">120 s</option><option value="180">180 s</option></select></div><div><label>Tema</label><select id="theme"><option value="dark">Oscuro</option><option value="light">Claro</option></select></div></div>
-      <button id="saveSettings" style="width:100%;margin-top:10px">Guardar ajustes</button>
+      <button id="saveSettings" style="width:100%;margin-top:10px">Guardar ajustes</button><div id="preferenceStatus" class="small" style="margin-top:8px">Las preferencias se guardan automáticamente.</div>
     </div>
     <h2>Logros</h2><div class="card" id="achievementList"></div><h2>Privacidad y App Store</h2><div class="card"><button id="openPrivacy" class="secondary" style="width:100%">Política de privacidad</button><button id="openTerms" class="secondary" style="width:100%;margin-top:8px">Términos de uso</button><button id="shareApp" class="secondary" style="width:100%;margin-top:8px">Compartir FitCoach</button></div><h2>Preferencias de progreso</h2><div class="card"><div class="row"><div><label>Objetivo semanal de sesiones</label><select id="weeklySessionGoal"><option value="3">3</option><option value="4" selected>4</option><option value="5">5</option></select></div><div><label>Objetivo de pasos</label><input id="stepGoal" type="number" value="8000"></div></div><button id="saveProgressPrefs" style="width:100%;margin-top:10px">Guardar preferencias</button></div><h2>Copia de seguridad</h2>
     <div class="card">
@@ -204,5 +203,5 @@
 
 <script src="data.js"></script>
 <script src="app.js"></script>
-<div id="onboardingModal" class="modal"><div class="modalBox"><h2>Configura FitCoach</h2><label>Nombre</label><input id="onboardingName" value="Agustín"><label>Objetivo</label><select id="onboardingGoal"><option value="recomp">Recomposición</option><option value="hypertrophy">Hipertrofia</option><option value="strength">Fuerza</option><option value="fatloss">Pérdida de grasa</option></select><div class="row"><div><label>Días</label><select id="onboardingDays"><option value="3">3</option><option value="4" selected>4</option></select></div><div><label>Duración</label><select id="onboardingMinutes"><option value="45">45 min</option><option value="60" selected>60 min</option></select></div></div><button id="finishOnboarding" style="width:100%;margin-top:12px">Crear mi plan inicial</button></div></div><div id="legalModal" class="modal"><div class="modalBox"><div class="row"><h2 id="legalTitle" style="margin:0"></h2><button id="closeLegal" class="secondary">Cerrar</button></div><div id="legalContent" class="small" style="margin-top:12px;white-space:pre-line"></div></div></div></body>
+<div id="onboardingModal" class="modal"><div class="modalBox"><h2>Configura FitCoach</h2><label>Nombre</label><input id="onboardingName" value="Agustín"><label>Objetivo</label><select id="onboardingGoal"><option value="recomp">Recomposición</option><option value="hypertrophy">Hipertrofia</option><option value="strength">Fuerza</option><option value="fatloss">Pérdida de grasa</option></select><div class="row"><div><label>Días</label><select id="onboardingDays"><option value="3">3</option><option value="4" selected>4</option></select></div><div><label>Duración</label><select id="onboardingMinutes"><option value="45">45 min</option><option value="60" selected>60 min</option></select></div></div><button id="finishOnboarding" style="width:100%;margin-top:12px">Crear mi plan inicial</button></div></div><div id="menuRecipeModal" class="modal"><div class="modalBox"><div class="row"><h2 id="menuRecipeTitle" style="margin:0">Receta</h2><button id="closeMenuRecipe" class="secondary">Cerrar</button></div><div id="menuRecipeContent" style="margin-top:12px"></div></div></div><div id="legalModal" class="modal"><div class="modalBox"><div class="row"><h2 id="legalTitle" style="margin:0"></h2><button id="closeLegal" class="secondary">Cerrar</button></div><div id="legalContent" class="small" style="margin-top:12px;white-space:pre-line"></div></div></div></body>
 </html>

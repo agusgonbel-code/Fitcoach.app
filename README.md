@@ -11,3 +11,8 @@ Commit: `FitCoach Stable 1.3 - App Store Foundation`
 - Lista de compra completa del plan semanal.
 
 Commit: `FitCoach Stable 1.3.1 - Unique Weekly Menus`
+
+## Stable 1.3.2
+Preferencias persistentes, nuevos planes basados en evidencia y recetas visibles dentro de Menús.
+
+Commit: `FitCoach Stable 1.3.2 - Persistent Preferences, Evidence Plans & In-Menu Recipes`

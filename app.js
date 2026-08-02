@@ -29,7 +29,8 @@
     meals: [],
     metrics: [],
     photos: [],
-    recovery: []
+    recovery: [],
+    preferences:{planGoal:'recomp',planMethod:'evidence',planDays:'4',planMinutes:'60',priorityMuscle:'balanced',progressionMode:'double',calcEquation:'mifflin',calcSex:'m',calcAge:'46',calcHeight:'181',calcWeight:'81',calcFat:'22',calcActivity:'1.6',calcGoal:'recomp',menuMeals:'5',menuDays:'7',portionMeals:'5',portionTolerance:'150'}
   };
 
   let state = {
@@ -41,12 +42,34 @@
     meals: Store.get('meals', defaults.meals),
     metrics: Store.get('metrics', defaults.metrics),
     photos: Store.get('photos', defaults.photos),
-    recovery: Store.get('recovery', defaults.recovery)
+    recovery: Store.get('recovery', defaults.recovery),
+    preferences: Store.get('preferences', defaults.preferences)
   };
 
   let timerId = null;
   let timerLeft = 0;
   let pendingPhotos = [];
+
+
+  const planEvidenceMap={
+    evidence:{title:'Hipertrofia equilibrada',text:'Volumen moderado en cuatro sesiones, frecuencia aproximada de dos estímulos por músculo y trabajo normalmente a 1-3 RIR.',tags:['6-15 repeticiones','1-3 RIR','volumen moderado']},
+    upperlower:{title:'Upper / Lower',text:'Divide torso y pierna en dos sesiones semanales cada uno. La frecuencia ayuda a distribuir el volumen y la fatiga.',tags:['4 días','frecuencia 2','recuperación predecible']},
+    fullbody:{title:'Full Body',text:'Tres sesiones de cuerpo completo con menor volumen por sesión. Útil para adherencia y aprendizaje técnico.',tags:['3 días','cuerpo completo','adherencia alta']},
+    strength:{title:'Fuerza',text:'Prioriza cargas altas y rangos bajos en movimientos principales, con accesorios moderados.',tags:['3-6 repeticiones','descansos amplios','especificidad']},
+    powerbuilding:{title:'Powerbuilding',text:'Combina movimientos principales pesados con accesorios de hipertrofia.',tags:['fuerza + hipertrofia','4 días','doble progresión']},
+    minimum:{title:'Dosis mínima efectiva',text:'Tres sesiones breves y pocos ejercicios prioritarios. Añade volumen solo cuando el progreso se estanque.',tags:['3 días','45 minutos','volumen bajo']},
+    lowload:{title:'Bajo impacto / cargas moderadas',text:'Máquinas, poleas y 10-20 repeticiones para reducir cargas articulares externas manteniendo esfuerzo suficiente.',tags:['10-20 repeticiones','máquinas','2-3 RIR']},
+    mentzer:{title:'Heavy Duty inspirado en Mentzer',text:'Muy bajo volumen y esfuerzo alto. No se presenta como superior y evita exigir fallo absoluto en ejercicios complejos.',tags:['bajo volumen','0-2 RIR','fatiga vigilada']}
+  };
+  function createUpperLowerRoutine(){return createEvidenceRoutine()}
+  function createFullBodyRoutine(){return {Lunes:createEvidenceRoutine().Lunes.slice(0,6),Miércoles:createEvidenceRoutine().Martes.slice(0,6),Viernes:createEvidenceRoutine().Miércoles.slice(0,6)}}
+  function createMinimumRoutine(){return {Lunes:createEvidenceRoutine().Lunes.slice(0,5),Miércoles:createEvidenceRoutine().Martes.slice(0,5),Viernes:createEvidenceRoutine().Miércoles.slice(0,5)}}
+  function createLowLoadRoutine(){const r=createEvidenceRoutine();Object.values(r).forEach(day=>day.forEach(e=>{e[2]=e[0].includes('Gemelo')?'15-20':'10-20'}));return r}
+  function renderPlanEvidence(){const i=planEvidenceMap[$('planMethod').value]||planEvidenceMap.evidence;$('planEvidence').innerHTML=`<strong>${i.title}</strong>${i.text}<div class="planEvidenceTags">${i.tags.map(t=>`<span>${t}</span>`).join('')}</div>`}
+  function preferenceFields(){return ['planGoal','planMethod','planDays','planMinutes','priorityMuscle','progressionMode','calcEquation','calcSex','calcAge','calcHeight','calcWeight','calcFat','calcActivity','calcGoal','menuMeals','menuDays','portionMeals','portionTolerance']}
+  function savePreferences(){preferenceFields().forEach(id=>{const el=$(id);if(el)state.preferences[id]=el.value});Store.set('preferences',state.preferences);if($('preferenceStatus'))$('preferenceStatus').textContent='Preferencias guardadas automáticamente.'}
+  function restorePreferences(){preferenceFields().forEach(id=>{const el=$(id),v=state.preferences?.[id];if(el&&v!==undefined)el.value=String(v)});renderPlanEvidence()}
+  function showMenuRecipe(id){const r=DATA.recipes.find(x=>x.id===id);if(!r)return;$('menuRecipeTitle').textContent=r.name;$('menuRecipeContent').innerHTML=`<span class="pill">${r.meal}</span><div class="recipeModalMacros"><div><strong>${r.kcal}</strong><span class="small">kcal</span></div><div><strong>${r.p} g</strong><span class="small">proteína</span></div><div><strong>${r.c} g</strong><span class="small">carbos</span></div><div><strong>${r.f} g</strong><span class="small">grasas</span></div></div><h3>Ingredientes</h3><div class="small">${r.ingredients.join('<br>')}</div><h3 style="margin-top:12px">Preparación</h3><ol>${r.steps.map(s=>`<li>${s}</li>`).join('')}</ol><button id="addModalRecipe" style="width:100%;margin-top:10px">Añadir al diario</button>`;$('menuRecipeModal').classList.add('open');$('addModalRecipe').addEventListener('click',()=>{state.meals.push({id:Date.now(),date:todayKey(),type:r.meal,name:r.name,kcal:r.kcal,p:r.p,c:r.c,f:r.f});saveState();renderHome();$('menuRecipeModal').classList.remove('open');alert('Receta añadida al diario.')},{once:true})}
 
   function createEvidenceRoutine() {
     return {
@@ -249,10 +272,11 @@
   function generatePlan() {
     const method = $('planMethod').value;
     const goal = $('planGoal').value;
-    let routine = method === 'mentzer' ? createMentzerRoutine() : goal === 'strength' || method === 'powerbuilding' ? createStrengthRoutine() : createEvidenceRoutine();
+    let routine;if(method==='mentzer')routine=createMentzerRoutine();else if(method==='upperlower')routine=createUpperLowerRoutine();else if(method==='fullbody')routine=createFullBodyRoutine();else if(method==='minimum')routine=createMinimumRoutine();else if(method==='lowload')routine=createLowLoadRoutine();else if(method==='strength'||method==='powerbuilding'||goal==='strength')routine=createStrengthRoutine();else routine=createEvidenceRoutine();
     const days = Number($('planDays').value);
     const keys = Object.keys(routine).slice(0,days);
     state.routines = Object.fromEntries(keys.map(k => [k,routine[k]]));
+    savePreferences();
     saveState();
     renderTraining();
     alert('Plan generado correctamente.');
@@ -491,12 +515,7 @@
       </div>`;
     }).join('');
 
-    $$('.menuRecipe').forEach(btn => btn.addEventListener('click', () => {
-      showNutritionPanel('recipes');
-      const recipe = DATA.recipes.find(r => r.id === btn.dataset.id);
-      $('recipeSearch').value = recipe ? recipe.name : '';
-      renderRecipes();
-    }));
+    $$('.menuRecipe').forEach(btn => btn.addEventListener('click', () => showMenuRecipe(btn.dataset.id)));
 
     renderShoppingList(allRecipes);
   }
@@ -661,6 +680,7 @@
 
   function renderSettings() {
     $('profileName').value = state.profile.name || '';
+    restorePreferences();
     $('restSeconds').value = state.settings.rest;
     $('theme').value = state.settings.theme;
     renderAchievements();
@@ -718,6 +738,9 @@
     $$('[data-nutrition-tab]').forEach(btn => btn.addEventListener('click', () => showNutritionPanel(btn.dataset.nutritionTab)));
 
     $('generatePlan').addEventListener('click', generatePlan);
+    $('planMethod').addEventListener('change',()=>{renderPlanEvidence();savePreferences()});
+    preferenceFields().forEach(id=>{const el=$(id);if(el)el.addEventListener('change',savePreferences)});
+    $('closeMenuRecipe').addEventListener('click',()=>$('menuRecipeModal').classList.remove('open'));
     $('trainingDay').addEventListener('change', renderWorkoutList);
     $('saveWorkout').addEventListener('click', saveWorkout);
     $('openLibrary').addEventListener('click', openLibrary);
@@ -768,6 +791,7 @@
 
   function init() {
     bindEvents();
+    restorePreferences();
     renderAll();
     maybeOnboarding();
     if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(() => {});
