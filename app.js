@@ -700,10 +700,14 @@
 
   function exportData() {
     const blob = new Blob([JSON.stringify(state,null,2)],{type:'application/json'});
+    const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
+    link.href = url;
     link.download = `fitcoach-backup-${todayKey()}.json`;
+    document.body.appendChild(link);
     link.click();
+    link.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
   }
 
   function importData(file) {
@@ -712,6 +716,11 @@
     reader.onload = () => {
       try {
         const data = JSON.parse(reader.result);
+        if (!data || typeof data !== 'object' || Array.isArray(data)) throw new Error('Formato no válido');
+        const arrayKeys = ['workouts','meals','metrics','photos','recovery'];
+        const objectKeys = ['profile','settings','targets','routines','preferences'];
+        arrayKeys.forEach(key => { if (key in data && !Array.isArray(data[key])) throw new Error(`Campo ${key} no válido`); });
+        objectKeys.forEach(key => { if (key in data && (!data[key] || typeof data[key] !== 'object' || Array.isArray(data[key]))) throw new Error(`Campo ${key} no válido`); });
         state = {...state,...data};
         saveState();
         applyTheme();
@@ -789,12 +798,40 @@
     renderSettings();
   }
 
+  function registerServiceWorker() {
+    if (!('serviceWorker' in navigator)) return;
+    let refreshing = false;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (refreshing) return;
+      refreshing = true;
+      window.location.reload();
+    });
+    navigator.serviceWorker.register('./sw.js').then(registration => {
+      const banner = $('updateBanner');
+      const updateButton = $('updateApp');
+      const showUpdate = worker => {
+        if (!worker || !banner || !updateButton) return;
+        banner.hidden = false;
+        updateButton.onclick = () => worker.postMessage({type:'SKIP_WAITING'});
+      };
+      if (registration.waiting) showUpdate(registration.waiting);
+      registration.addEventListener('updatefound', () => {
+        const worker = registration.installing;
+        if (!worker) return;
+        worker.addEventListener('statechange', () => {
+          if (worker.state === 'installed' && navigator.serviceWorker.controller) showUpdate(worker);
+        });
+      });
+      window.addEventListener('online', () => registration.update().catch(() => {}));
+    }).catch(() => {});
+  }
+
   function init() {
     bindEvents();
     restorePreferences();
     renderAll();
     maybeOnboarding();
-    if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(() => {});
+    registerServiceWorker();
   }
 
   document.addEventListener('DOMContentLoaded', init);

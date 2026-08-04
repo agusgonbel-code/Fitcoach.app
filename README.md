@@ -16,3 +16,12 @@ Commit: `FitCoach Stable 1.3.1 - Unique Weekly Menus`
 Preferencias persistentes, nuevos planes basados en evidencia y recetas visibles dentro de Menús.
 
 Commit: `FitCoach Stable 1.3.2 - Persistent Preferences, Evidence Plans & In-Menu Recipes`
+
+
+## Stable 1.3.3
+- Actualización segura de la PWA con aviso visible cuando hay una nueva versión.
+- Navegación offline más fiable y caché limitada a recursos propios válidos.
+- Importación de copias de seguridad con validación de estructura.
+- Exportación de datos más compatible con Safari en iPhone.
+
+Commit recomendado: `FitCoach Stable 1.3.3 - Offline Safety & Backup Validation`
