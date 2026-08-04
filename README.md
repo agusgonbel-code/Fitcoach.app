@@ -17,11 +17,20 @@ Preferencias persistentes, nuevos planes basados en evidencia y recetas visibles
 
 Commit: `FitCoach Stable 1.3.2 - Persistent Preferences, Evidence Plans & In-Menu Recipes`
 
+## Stable 1.3.4
+- Menús semanales ajustados por porciones para mantener cada día cerca del objetivo calórico.
+- Desviación diaria visible y cantidades recalculadas en cada receta.
+- Lista de compra basada en las porciones ajustadas.
 
-## Stable 1.3.3
-- Actualización segura de la PWA con aviso visible cuando hay una nueva versión.
-- Navegación offline más fiable y caché limitada a recursos propios válidos.
-- Importación de copias de seguridad con validación de estructura.
-- Exportación de datos más compatible con Safari en iPhone.
+Commit: `FitCoach Stable 1.3.4 - Balanced Weekly Calories`
 
-Commit recomendado: `FitCoach Stable 1.3.3 - Offline Safety & Backup Validation`
+
+## Stable 1.3.5
+- Biblioteca ampliada con más ejercicios y alternativas.
+- Rutinas diferenciadas para hipertrofia, Upper/Lower, Full Body, fuerza, Powerbuilding, dosis mínima, cargas moderadas y Heavy Duty inspirado en Mentzer.
+- Registro de peso, repeticiones y RIR operativo en todas las modalidades.
+- Los datos previos se cargan automáticamente al repetir cada ejercicio.
+- Historial desplegable con detalle por serie y sugerencias de progresión.
+- Las recetas del menú semanal muestran ingredientes ajustados, macros y preparación completa según la porción.
+
+Commit: `FitCoach Stable 1.3.5 - Expanded Training & Persistent Exercise History`

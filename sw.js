@@ -1,4 +1,4 @@
-const CACHE = 'fitcoach-stable-1-3-3-offline-safety-v1';
+const CACHE = 'fitcoach-stable-1-3-5-training-history-v1';
 const APP_SHELL = ['./','./index.html','./styles.css','./data.js','./app.js','./manifest.webmanifest','./icon-192.png','./icon-512.png'];
 
 self.addEventListener('install', event => {

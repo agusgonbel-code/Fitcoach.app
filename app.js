@@ -61,15 +61,49 @@
     lowload:{title:'Bajo impacto / cargas moderadas',text:'Máquinas, poleas y 10-20 repeticiones para reducir cargas articulares externas manteniendo esfuerzo suficiente.',tags:['10-20 repeticiones','máquinas','2-3 RIR']},
     mentzer:{title:'Heavy Duty inspirado en Mentzer',text:'Muy bajo volumen y esfuerzo alto. No se presenta como superior y evita exigir fallo absoluto en ejercicios complejos.',tags:['bajo volumen','0-2 RIR','fatiga vigilada']}
   };
-  function createUpperLowerRoutine(){return createEvidenceRoutine()}
-  function createFullBodyRoutine(){return {Lunes:createEvidenceRoutine().Lunes.slice(0,6),Miércoles:createEvidenceRoutine().Martes.slice(0,6),Viernes:createEvidenceRoutine().Miércoles.slice(0,6)}}
-  function createMinimumRoutine(){return {Lunes:createEvidenceRoutine().Lunes.slice(0,5),Miércoles:createEvidenceRoutine().Martes.slice(0,5),Viernes:createEvidenceRoutine().Miércoles.slice(0,5)}}
-  function createLowLoadRoutine(){const r=createEvidenceRoutine();Object.values(r).forEach(day=>day.forEach(e=>{e[2]=e[0].includes('Gemelo')?'15-20':'10-20'}));return r}
+  function createUpperLowerRoutine(){
+    return {
+      Lunes:[['Press banca con mancuernas',3,'6-10','Press en máquina'],['Remo con apoyo de pecho',3,'8-12','Remo en polea'],['Press militar sentado',3,'8-12','Press de hombros en máquina'],['Jalón al pecho',3,'8-12','Dominada asistida'],['Elevaciones laterales',3,'12-20','Elevación lateral en polea'],['Curl con barra EZ',2,'10-15','Curl con mancuernas'],['Extensión de tríceps en polea',2,'10-15','Fondos asistidos']],
+      Martes:[['Sentadilla goblet',3,'8-12','Prensa de piernas'],['Peso muerto rumano',3,'6-10','Curl femoral'],['Prensa de piernas',3,'10-15','Hack squat'],['Curl femoral sentado',3,'10-15','Curl femoral tumbado'],['Gemelo de pie',4,'10-20','Gemelo en prensa'],['Dead bug',3,'8-12','Plancha']],
+      Miércoles:[['Press inclinado con mancuernas',3,'8-12','Press inclinado en máquina'],['Remo unilateral con mancuerna',3,'8-12','Remo en polea'],['Aperturas en polea',2,'12-15','Pec deck'],['Pullover en polea',3,'10-15','Jalón al pecho'],['Pájaros en máquina',3,'12-20','Face pull'],['Curl martillo',2,'10-15','Curl con cuerda'],['Tríceps por encima de la cabeza',2,'10-15','Press francés']],
+      Jueves:[['Hip thrust',3,'6-10','Puente de glúteo'],['Zancada atrás',3,'8-12','Step-up'],['Extensión de cuádriceps',3,'12-15','Prensa de piernas'],['Curl femoral sentado',3,'10-15','Curl femoral tumbado'],['Abducción de cadera en máquina',3,'12-20','Caminata lateral con banda'],['Gemelo sentado',4,'12-20','Gemelo de pie'],['Crunch en polea',3,'10-15','Reverse crunch']]
+    };
+  }
+  function createFullBodyRoutine(){
+    return {
+      Lunes:[['Prensa de piernas',3,'6-10','Sentadilla goblet'],['Press banca con mancuernas',3,'6-10','Press en máquina'],['Remo con apoyo de pecho',3,'8-12','Remo en polea'],['Peso muerto rumano',2,'8-12','Curl femoral'],['Elevaciones laterales',2,'12-20','Elevación lateral en polea'],['Curl con barra EZ',2,'10-15','Curl con mancuernas'],['Crunch en polea',2,'10-15','Dead bug']],
+      Miércoles:[['Hip thrust',3,'6-10','Puente de glúteo'],['Press militar sentado',3,'8-12','Press de hombros en máquina'],['Jalón al pecho',3,'8-12','Dominada asistida'],['Zancada atrás',2,'8-12','Step-up'],['Aperturas en polea',2,'12-15','Pec deck'],['Extensión de tríceps en polea',2,'10-15','Fondos asistidos'],['Gemelo de pie',3,'12-20','Gemelo en prensa']],
+      Viernes:[['Sentadilla goblet',3,'8-12','Prensa de piernas'],['Press inclinado con mancuernas',3,'8-12','Press inclinado en máquina'],['Remo unilateral con mancuerna',3,'8-12','Remo en polea'],['Curl femoral sentado',2,'10-15','Curl femoral tumbado'],['Pájaros en máquina',2,'12-20','Face pull'],['Curl martillo',2,'10-15','Curl con cuerda'],['Plancha',3,'30-60 s','Dead bug']]
+    };
+  }
+  function createMinimumRoutine(){
+    return {
+      Lunes:[['Prensa de piernas',3,'6-10','Sentadilla goblet'],['Press banca con mancuernas',3,'6-10','Press en máquina'],['Remo con apoyo de pecho',3,'8-12','Remo en polea'],['Peso muerto rumano',2,'8-12','Curl femoral'],['Elevaciones laterales',2,'12-20','Elevación lateral en polea']],
+      Miércoles:[['Hip thrust',3,'6-10','Puente de glúteo'],['Press militar sentado',3,'8-12','Press de hombros en máquina'],['Jalón al pecho',3,'8-12','Dominada asistida'],['Zancada atrás',2,'8-12','Step-up'],['Curl con barra EZ',2,'10-15','Curl con mancuernas']],
+      Viernes:[['Sentadilla goblet',3,'8-12','Prensa de piernas'],['Press inclinado con mancuernas',3,'8-12','Press inclinado en máquina'],['Remo en polea',3,'8-12','Remo unilateral'],['Curl femoral sentado',2,'10-15','Curl femoral tumbado'],['Extensión de tríceps en polea',2,'10-15','Fondos asistidos']]
+    };
+  }
+  function createLowLoadRoutine(){
+    return {
+      Lunes:[['Press en máquina',3,'10-15','Press banca con mancuernas'],['Remo en máquina',3,'10-15','Remo con apoyo de pecho'],['Press de hombros en máquina',3,'10-15','Press militar sentado'],['Jalón al pecho',3,'10-15','Dominada asistida'],['Elevación lateral en polea',3,'12-20','Elevaciones laterales'],['Curl en polea',2,'12-20','Curl martillo'],['Extensión de tríceps en polea',2,'12-20','Fondos asistidos']],
+      Martes:[['Prensa de piernas',3,'10-15','Sentadilla goblet'],['Curl femoral sentado',3,'12-20','Curl femoral tumbado'],['Extensión de cuádriceps',3,'12-20','Step-up bajo'],['Hip thrust en máquina',3,'10-15','Hip thrust'],['Abducción de cadera en máquina',3,'15-25','Caminata lateral con banda'],['Gemelo en prensa',4,'12-20','Gemelo de pie'],['Dead bug',3,'8-12','Plancha']],
+      Miércoles:[['Press inclinado en máquina',3,'10-15','Press inclinado con mancuernas'],['Remo en polea',3,'10-15','Remo unilateral'],['Pec deck',3,'12-20','Aperturas en polea'],['Pullover en polea',3,'12-20','Jalón al pecho'],['Face pull',3,'12-20','Pájaros en máquina'],['Curl con cuerda',2,'12-20','Curl martillo'],['Tríceps por encima de la cabeza',2,'12-20','Press francés']],
+      Jueves:[['Prensa de piernas',3,'12-20','Hack squat'],['Curl femoral sentado',3,'12-20','Curl femoral tumbado'],['Extensión de cuádriceps',3,'12-20','Step-up bajo'],['Puente de glúteo',3,'12-20','Hip thrust'],['Aducción de cadera en máquina',3,'15-25','Copenhagen plank'],['Gemelo sentado',4,'12-20','Gemelo de pie'],['Crunch en polea',3,'12-20','Reverse crunch']]
+    };
+  }
+  function createPowerbuildingRoutine(){
+    return {
+      Lunes:[['Press banca con mancuernas',4,'4-6','Press en máquina'],['Remo con apoyo de pecho',4,'5-8','Remo en máquina'],['Press inclinado con mancuernas',3,'8-12','Press inclinado en máquina'],['Jalón al pecho',3,'8-12','Dominada asistida'],['Elevaciones laterales',3,'12-20','Elevación lateral en polea'],['Extensión de tríceps en polea',3,'10-15','Fondos asistidos']],
+      Martes:[['Prensa de piernas',4,'4-6','Hack squat'],['Peso muerto rumano',4,'5-8','Curl femoral'],['Hip thrust',3,'6-10','Puente de glúteo'],['Extensión de cuádriceps',3,'10-15','Step-up'],['Gemelo de pie',4,'10-20','Gemelo en prensa'],['Crunch en polea',3,'10-15','Reverse crunch']],
+      Miércoles:[['Press militar sentado',4,'4-6','Press de hombros en máquina'],['Remo en polea',4,'5-8','Remo unilateral'],['Aperturas en polea',3,'10-15','Pec deck'],['Pullover en polea',3,'10-15','Jalón al pecho'],['Pájaros en máquina',3,'12-20','Face pull'],['Curl con barra EZ',3,'8-12','Curl con mancuernas']],
+      Jueves:[['Hip thrust',4,'4-6','Puente de glúteo'],['Sentadilla goblet',4,'6-10','Prensa de piernas'],['Curl femoral sentado',3,'8-12','Curl femoral tumbado'],['Zancada atrás',3,'8-12','Step-up'],['Abducción de cadera en máquina',3,'12-20','Caminata lateral con banda'],['Gemelo sentado',4,'10-20','Gemelo de pie']]
+    };
+  }
   function renderPlanEvidence(){const i=planEvidenceMap[$('planMethod').value]||planEvidenceMap.evidence;$('planEvidence').innerHTML=`<strong>${i.title}</strong>${i.text}<div class="planEvidenceTags">${i.tags.map(t=>`<span>${t}</span>`).join('')}</div>`}
   function preferenceFields(){return ['planGoal','planMethod','planDays','planMinutes','priorityMuscle','progressionMode','calcEquation','calcSex','calcAge','calcHeight','calcWeight','calcFat','calcActivity','calcGoal','menuMeals','menuDays','portionMeals','portionTolerance']}
   function savePreferences(){preferenceFields().forEach(id=>{const el=$(id);if(el)state.preferences[id]=el.value});Store.set('preferences',state.preferences);if($('preferenceStatus'))$('preferenceStatus').textContent='Preferencias guardadas automáticamente.'}
   function restorePreferences(){preferenceFields().forEach(id=>{const el=$(id),v=state.preferences?.[id];if(el&&v!==undefined)el.value=String(v)});renderPlanEvidence()}
-  function showMenuRecipe(id){const r=DATA.recipes.find(x=>x.id===id);if(!r)return;$('menuRecipeTitle').textContent=r.name;$('menuRecipeContent').innerHTML=`<span class="pill">${r.meal}</span><div class="recipeModalMacros"><div><strong>${r.kcal}</strong><span class="small">kcal</span></div><div><strong>${r.p} g</strong><span class="small">proteína</span></div><div><strong>${r.c} g</strong><span class="small">carbos</span></div><div><strong>${r.f} g</strong><span class="small">grasas</span></div></div><h3>Ingredientes</h3><div class="small">${r.ingredients.join('<br>')}</div><h3 style="margin-top:12px">Preparación</h3><ol>${r.steps.map(s=>`<li>${s}</li>`).join('')}</ol><button id="addModalRecipe" style="width:100%;margin-top:10px">Añadir al diario</button>`;$('menuRecipeModal').classList.add('open');$('addModalRecipe').addEventListener('click',()=>{state.meals.push({id:Date.now(),date:todayKey(),type:r.meal,name:r.name,kcal:r.kcal,p:r.p,c:r.c,f:r.f});saveState();renderHome();$('menuRecipeModal').classList.remove('open');alert('Receta añadida al diario.')},{once:true})}
+  function showMenuRecipe(id,scale=1){const r=DATA.recipes.find(x=>x.id===id);if(!r)return;const factor=Math.max(.5,Math.min(2,Number(scale)||1)),portion={kcal:Math.round(r.kcal*factor),p:Math.round(r.p*factor),c:Math.round(r.c*factor),f:Math.round(r.f*factor),ingredients:r.ingredients.map(x=>scaleIngredient(x,factor))};$('menuRecipeTitle').textContent=r.name;$('menuRecipeContent').innerHTML=`<span class="pill">${r.meal}</span>${Math.abs(factor-1)>.02?`<span class="portionBadge">Porción x${factor.toFixed(2)}</span>`:''}<div class="recipeModalMacros"><div><strong>${portion.kcal}</strong><span class="small">kcal</span></div><div><strong>${portion.p} g</strong><span class="small">proteína</span></div><div><strong>${portion.c} g</strong><span class="small">carbos</span></div><div><strong>${portion.f} g</strong><span class="small">grasas</span></div></div><h3>Ingredientes ajustados</h3><div class="small">${portion.ingredients.join('<br>')}</div><h3 style="margin-top:12px">Preparación</h3><ol>${r.steps.map(s=>`<li>${s}</li>`).join('')}</ol><button id="addModalRecipe" style="width:100%;margin-top:10px">Añadir al diario</button>`;$('menuRecipeModal').classList.add('open');$('addModalRecipe').addEventListener('click',()=>{state.meals.push({id:Date.now(),date:todayKey(),type:r.meal,name:r.name,kcal:portion.kcal,p:portion.p,c:portion.c,f:portion.f});saveState();renderHome();$('menuRecipeModal').classList.remove('open');alert('Receta añadida al diario.')},{once:true})}
 
   function createEvidenceRoutine() {
     return {
@@ -272,7 +306,7 @@
   function generatePlan() {
     const method = $('planMethod').value;
     const goal = $('planGoal').value;
-    let routine;if(method==='mentzer')routine=createMentzerRoutine();else if(method==='upperlower')routine=createUpperLowerRoutine();else if(method==='fullbody')routine=createFullBodyRoutine();else if(method==='minimum')routine=createMinimumRoutine();else if(method==='lowload')routine=createLowLoadRoutine();else if(method==='strength'||method==='powerbuilding'||goal==='strength')routine=createStrengthRoutine();else routine=createEvidenceRoutine();
+    let routine;if(method==='mentzer')routine=createMentzerRoutine();else if(method==='upperlower')routine=createUpperLowerRoutine();else if(method==='fullbody')routine=createFullBodyRoutine();else if(method==='minimum')routine=createMinimumRoutine();else if(method==='lowload')routine=createLowLoadRoutine();else if(method==='powerbuilding')routine=createPowerbuildingRoutine();else if(method==='strength'||goal==='strength')routine=createStrengthRoutine();else routine=createEvidenceRoutine();
     const days = Number($('planDays').value);
     const keys = Object.keys(routine).slice(0,days);
     state.routines = Object.fromEntries(keys.map(k => [k,routine[k]]));
@@ -292,9 +326,21 @@
   function lastExercise(name) {
     for (let i=state.workouts.length-1;i>=0;i--) {
       const found = state.workouts[i].exercises.find(e => e.name === name);
-      if (found) return found;
+      if (found) return {exercise:found,date:state.workouts[i].date,day:state.workouts[i].day};
     }
     return null;
+  }
+
+  function progressionSuggestion(last,repsRange) {
+    if (!last?.exercise?.sets?.length) return 'Primera sesión: usa una carga cómoda y termina con 2-3 RIR.';
+    const completed = last.exercise.sets.filter(s => s.reps > 0);
+    if (!completed.length) return 'No hay series completas previas.';
+    const maxRep = Number(String(repsRange).match(/\d+$/)?.[0]) || 12;
+    const allTop = completed.every(s => s.reps >= maxRep && s.rir >= 1);
+    const tooHard = completed.some(s => s.rir <= 0 || s.reps < Math.max(1,maxRep-4));
+    if (allTop) return 'Sugerencia: aumenta la carga un 2-5% y vuelve al rango bajo.';
+    if (tooHard) return 'Sugerencia: mantén o reduce ligeramente la carga hasta recuperar el RIR objetivo.';
+    return 'Sugerencia: mantén la carga e intenta sumar 1 repetición total.';
   }
 
   function renderWorkoutList() {
@@ -305,7 +351,7 @@
       const last = lastExercise(name);
       let rows = '';
       for (let si=0;si<sets;si++) {
-        const prev = last?.sets?.[si] || {};
+        const prev = last?.exercise?.sets?.[si] || {};
         rows += `<div class="setRow">
           <div class="setNo">${si+1}</div>
           <input class="setKg" data-e="${ei}" data-s="${si}" type="number" step="0.5" placeholder="kg" value="${prev.kg ?? ''}">
@@ -313,7 +359,7 @@
           <input class="setRir" data-e="${ei}" data-s="${si}" type="number" placeholder="RIR" value="${prev.rir ?? ''}">
         </div>`;
       }
-      const lastText = last ? `<div class="small" style="margin-top:5px">Última vez: ${last.sets.map(s => `${s.kg} kg × ${s.reps} · RIR ${s.rir}`).join(' | ')}</div>` : '';
+      const lastText = last ? `<div class="previousSession"><strong>Último registro · ${new Date(last.date).toLocaleDateString('es-ES')}</strong><div class="small">${last.exercise.sets.map(s => `${s.kg} kg × ${s.reps} · RIR ${s.rir}`).join(' | ')}</div><div class="small">${progressionSuggestion(last,reps)}</div></div>` : `<div class="small">Sin registros anteriores.</div>`;
       return `<div class="card workoutCard">
         <div class="exerciseHead"><div><h3>${name}</h3><span class="pill">${sets} series</span><span class="pill">${reps}</span></div><button class="secondary restButton">Descanso</button></div>
         <div class="small">Alternativa: ${alt}</div>${lastText}${rows}
@@ -336,22 +382,24 @@
       $$('.setKg').filter(el => Number(el.dataset.e) === ei).forEach((kgEl,si) => {
         const repsEl = document.querySelector(`.setReps[data-e="${ei}"][data-s="${si}"]`);
         const rirEl = document.querySelector(`.setRir[data-e="${ei}"][data-s="${si}"]`);
-        sets.push({kg:Number(kgEl.value)||0,reps:Number(repsEl.value)||0,rir:Number(rirEl.value)||0});
+        sets.push({kg:Number(kgEl.value)||0,reps:Number(repsEl.value)||0,rir:rirEl.value===''?null:Number(rirEl.value)});
       });
-      return {name:e[0],sets};
+      return {name:e[0],targetSets:e[1],targetReps:e[2],sets};
     });
-    const volume = exercises.reduce((a,e) => a + e.sets.reduce((b,s) => b+s.kg*s.reps,0),0);
-    state.workouts.push({id:Date.now(),date:new Date().toISOString(),day,notes:$('workoutNotes').value.trim(),volume,exercises});
+    const completedExercises = exercises.filter(e => e.sets.some(s => s.kg > 0 || s.reps > 0));
+    if (!completedExercises.length) return alert('Introduce al menos una serie antes de guardar.');
+    const volume = completedExercises.reduce((a,e) => a + e.sets.reduce((b,s) => b+s.kg*s.reps,0),0);
+    state.workouts.push({id:Date.now(),date:new Date().toISOString(),day,method:state.preferences.planMethod,goal:state.preferences.planGoal,notes:$('workoutNotes').value.trim(),volume,exercises:completedExercises});
     $('workoutNotes').value = '';
     saveState();
     renderTraining();
     renderHome();
-    alert('Entrenamiento guardado.');
+    alert('Entrenamiento guardado. Los datos aparecerán la próxima vez que repitas estos ejercicios.');
   }
 
   function renderWorkoutHistory() {
     $('workoutHistory').innerHTML = state.workouts.length
-      ? state.workouts.slice().reverse().map(w => `<div class="history"><strong>${w.day}</strong><div class="small">${new Date(w.date).toLocaleDateString('es-ES')} · ${Math.round(w.volume).toLocaleString('es-ES')} kg · ${w.exercises.length} ejercicios</div></div>`).join('')
+      ? state.workouts.slice().reverse().map(w => `<details class="history workoutHistoryItem"><summary><strong>${w.day}</strong><span class="small">${new Date(w.date).toLocaleDateString('es-ES')} · ${Math.round(w.volume).toLocaleString('es-ES')} kg · ${w.exercises.length} ejercicios</span></summary>${w.exercises.map(e=>`<div class="historyExercise"><strong>${e.name}</strong><div class="small">${e.sets.map(s=>`${s.kg} kg × ${s.reps}${s.rir===null?'':` · RIR ${s.rir}`}`).join(' | ')}</div></div>`).join('')}${w.notes?`<div class="small"><strong>Notas:</strong> ${w.notes}</div>`:''}</details>`).join('')
       : `<div class="empty">Sin entrenamientos.</div>`;
   }
 
@@ -484,44 +532,72 @@
         (Math.abs(a.kcal-targetK)+Math.abs(a.p-targetP)*7) -
         (Math.abs(b.kcal-targetK)+Math.abs(b.p-targetP)*7)
       );
-      const top = pool.slice(0,Math.min(4,pool.length));
+      const top = pool.slice(0,Math.min(3,pool.length));
       const selected = top[Math.floor(Math.random()*top.length)] || pool[0];
       if (selected) globalUsed.add(selected.id);
       return selected;
     }
 
+    function fitDayPortions(recipes) {
+      let fitted = recipes.map((r,i) => {
+        const targetK = state.targets.kcal*weights[i];
+        const targetP = state.targets.protein*weights[i];
+        const kcalScale = targetK/Math.max(1,r.kcal);
+        const proteinScale = targetP/Math.max(1,r.p);
+        const scale = Math.max(.55,Math.min(1.85,kcalScale*.78+proteinScale*.22));
+        return {...r,scale};
+      });
+
+      for (let pass=0; pass<3; pass++) {
+        const total = fitted.reduce((sum,r)=>sum+r.kcal*r.scale,0);
+        const correction = state.targets.kcal/Math.max(1,total);
+        fitted = fitted.map(r=>({...r,scale:Math.max(.5,Math.min(2,r.scale*correction))}));
+      }
+
+      return fitted.map(r=>({
+        ...r,
+        kcal:Math.round(r.kcal*r.scale),
+        p:Math.round(r.p*r.scale),
+        c:Math.round(r.c*r.scale),
+        f:Math.round(r.f*r.scale),
+        scaledIngredients:r.ingredients.map(x=>scaleIngredient(x,r.scale))
+      }));
+    }
+
     $('menuOutput').innerHTML = Array.from({length:days},(_,dayIndex) => {
-      const selected = mealTypes.map((meal,i) =>
+      const base = mealTypes.map((meal,i) =>
         pickUniqueRecipe(meal,state.targets.kcal*weights[i],state.targets.protein*weights[i])
       ).filter(Boolean);
-
+      const selected = fitDayPortions(base);
       allRecipes.push(...selected);
 
       const sum = selected.reduce(
         (a,r)=>({kcal:a.kcal+r.kcal,p:a.p+r.p,c:a.c+r.c,f:a.f+r.f}),
         {kcal:0,p:0,c:0,f:0}
       );
+      const deviation = sum.kcal-state.targets.kcal;
+      const deviationText = `${deviation>0?'+':''}${deviation} kcal`;
 
       return `<div class="card" style="margin-bottom:10px">
         <h3>${dayNames[dayIndex]}</h3>
         ${selected.map((r,mealIndex)=>`
           <div class="history">
-            <strong>${mealTypes[mealIndex]}: ${r.name}</strong>
+            <strong>${mealTypes[mealIndex]}: ${r.name}</strong> <span class="portionBadge">x${r.scale.toFixed(2)}</span>
             <div class="small">${r.kcal} kcal · P ${r.p} · C ${r.c} · G ${r.f}</div>
-            <button class="secondary menuRecipe" data-id="${r.id}" style="margin-top:6px;padding:8px 10px">Ver receta</button>
+            <button class="secondary menuRecipe" data-id="${r.id}" data-scale="${r.scale.toFixed(4)}" style="margin-top:6px;padding:8px 10px">Ver receta ajustada</button>
           </div>`).join('')}
         <div class="kcal">Total ${sum.kcal} kcal · P ${sum.p} g</div>
-        <div class="small">Objetivo: ${state.targets.kcal} kcal · ${state.targets.protein} g proteína</div>
+        <div class="small">Objetivo: ${state.targets.kcal} kcal · desviación ${deviationText} · ${state.targets.protein} g proteína</div>
       </div>`;
     }).join('');
 
-    $$('.menuRecipe').forEach(btn => btn.addEventListener('click', () => showMenuRecipe(btn.dataset.id)));
+    $$('.menuRecipe').forEach(btn => btn.addEventListener('click', () => showMenuRecipe(btn.dataset.id,btn.dataset.scale)));
 
     renderShoppingList(allRecipes);
   }
 
   function renderShoppingList(recipes) {
-    const items = [...new Set(recipes.flatMap(r => r.ingredients))];
+    const items = [...new Set(recipes.flatMap(r => r.scaledIngredients || r.ingredients))];
     $('shoppingList').innerHTML = items.length ? items.map(i => `<label class="history"><input type="checkbox" style="width:auto;margin-right:8px"> ${i}</label>`).join('') : `<div class="empty">Sin elementos.</div>`;
   }
 

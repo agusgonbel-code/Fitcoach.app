@@ -110,3 +110,7 @@ nav button.active{color:var(--accent);background:rgba(47,211,116,.10)}
 .updateBanner{position:sticky;top:74px;z-index:45;max-width:980px;margin:8px auto 0;padding:10px 13px;border-radius:14px;background:rgba(255,182,72,.96);color:#231600;display:flex;align-items:center;justify-content:space-between;gap:10px;box-shadow:var(--shadow);font-size:12px;font-weight:800}
 .updateBanner[hidden]{display:none}.updateBanner button{padding:9px 11px;background:#231600;color:#fff;white-space:nowrap}
 @media(max-width:520px){.updateBanner{margin:8px 10px 0;align-items:flex-start}.updateBanner button{padding:8px 9px}}
+
+.previousSession{margin:8px 0;padding:10px;border-radius:12px;background:rgba(53,208,186,.08);border:1px solid rgba(53,208,186,.2)}
+.workoutHistoryItem summary{cursor:pointer;display:flex;justify-content:space-between;gap:10px;align-items:center}
+.historyExercise{padding:8px 0;border-top:1px solid var(--line)}
