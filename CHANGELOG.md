@@ -1,3 +1,10 @@
+## 1.3.6 - 2026-08-05
+- Añadido control semanal de series por grupo muscular.
+- Rangos de referencia distintos para hipertrofia, fuerza, Full Body, dosis mínima y Heavy Duty.
+- Integración de RIR medio y readiness para detectar acumulación de fatiga.
+- Recomendaciones de mantener, vigilar o descargar sin presentar un volumen universal como obligatorio.
+- Nueva caché del service worker y carpeta www sincronizada.
+
 ## 1.3.5 - 2026-08-04
 - Amplía la biblioteca de ejercicios y las rutinas de todas las modalidades.
 - Añade rutinas específicas para Upper/Lower, Full Body, Powerbuilding, dosis mínima y cargas moderadas.

@@ -34,3 +34,12 @@ Commit: `FitCoach Stable 1.3.4 - Balanced Weekly Calories`
 - Las recetas del menú semanal muestran ingredientes ajustados, macros y preparación completa según la porción.
 
 Commit: `FitCoach Stable 1.3.5 - Expanded Training & Persistent Exercise History`
+
+## Stable 1.3.6
+- Panel de series efectivas semanales por grupo muscular.
+- Rangos orientativos adaptados al método seleccionado.
+- Lectura conjunta de volumen, RIR y recuperación.
+- Recomendación conservadora de descarga cuando coinciden varias señales de fatiga.
+- El análisis se actualiza al guardar entrenamientos y puede refrescarse manualmente.
+
+Commit: `FitCoach Stable 1.3.6 - Weekly Volume & Fatigue Control`

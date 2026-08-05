@@ -368,10 +368,77 @@
     $$('.restButton').forEach(btn => btn.addEventListener('click', startTimer));
   }
 
+  function exerciseMuscle(name) {
+    return DATA.exercises.find(ex => ex.name === name)?.muscle || 'Otros';
+  }
+
+  function weeklyVolumeTargets() {
+    const method = state.preferences?.planMethod || 'evidence';
+    if (method === 'mentzer') return {min:2,max:6};
+    if (method === 'minimum') return {min:4,max:8};
+    if (method === 'strength') return {min:4,max:10};
+    if (method === 'fullbody') return {min:6,max:12};
+    return {min:6,max:14};
+  }
+
+  function weeklyTrainingSummary() {
+    const start = weekStart();
+    const workouts = state.workouts.filter(w => new Date(w.date) >= start);
+    const muscles = {};
+    let rirTotal = 0;
+    let rirCount = 0;
+    workouts.forEach(workout => workout.exercises.forEach(exercise => {
+      const muscle = exerciseMuscle(exercise.name);
+      const validSets = exercise.sets.filter(set => set.reps > 0 || set.kg > 0);
+      muscles[muscle] = (muscles[muscle] || 0) + validSets.length;
+      validSets.forEach(set => {
+        if (Number.isFinite(set.rir)) {
+          rirTotal += set.rir;
+          rirCount += 1;
+        }
+      });
+    }));
+    const latestRecovery = state.recovery.at(-1);
+    const readiness = latestRecovery ? readinessScore() : null;
+    return {workouts,muscles,averageRir:rirCount ? rirTotal/rirCount : null,readiness};
+  }
+
+  function renderWeeklyVolume() {
+    const output = $('weeklyVolumeOutput');
+    if (!output) return;
+    const summary = weeklyTrainingSummary();
+    if (!summary.workouts.length) {
+      output.innerHTML = '<div class="empty">Guarda entrenamientos para calcular el volumen semanal.</div>';
+      return;
+    }
+    const target = weeklyVolumeTargets();
+    const rows = Object.entries(summary.muscles).sort((a,b)=>b[1]-a[1]).map(([muscle,sets]) => {
+      let status = 'Dentro del rango orientativo';
+      let cls = 'volume-ok';
+      if (sets < target.min) { status = 'Estímulo bajo esta semana'; cls = 'volume-low'; }
+      if (sets > target.max) { status = 'Volumen alto: vigila recuperación'; cls = 'volume-high'; }
+      const pct = Math.min(100, sets/Math.max(1,target.max)*100);
+      return `<div class="volumeRow"><div class="volumeHead"><strong>${muscle}</strong><span>${sets} series</span></div><div class="volumeTrack"><div class="${cls}" style="width:${pct}%"></div></div><div class="small">${status} · referencia ${target.min}-${target.max}</div></div>`;
+    }).join('');
+    const fatigueSignals = [];
+    if (summary.averageRir !== null && summary.averageRir <= 1) fatigueSignals.push('RIR medio muy bajo');
+    if (summary.readiness !== null && summary.readiness < 55) fatigueSignals.push('recuperación baja');
+    if (summary.workouts.length >= 4 && Object.values(summary.muscles).some(v => v > target.max)) fatigueSignals.push('volumen alto acumulado');
+    const recommendation = fatigueSignals.length >= 2
+      ? `Considera reducir 20-35% las series durante 5-7 días. Motivos: ${fatigueSignals.join(', ')}.`
+      : fatigueSignals.length
+        ? `Mantén la progresión conservadora y revisa descanso. Señal detectada: ${fatigueSignals[0]}.`
+        : 'La carga semanal parece tolerable. Mantén el plan mientras rendimiento, sueño y molestias evolucionen bien.';
+    const rirText = summary.averageRir === null ? 'sin datos suficientes' : summary.averageRir.toFixed(1);
+    const readinessText = summary.readiness === null ? 'sin registro' : Math.round(summary.readiness);
+    output.innerHTML = `${rows}<div class="volumeAdvice"><strong>Lectura global</strong><div class="small">${summary.workouts.length} sesiones · RIR medio ${rirText} · readiness ${readinessText}</div><div>${recommendation}</div></div>`;
+  }
+
   function renderTraining() {
     populateDays();
     renderWorkoutList();
     renderWorkoutHistory();
+    renderWeeklyVolume();
   }
 
   function saveWorkout() {
@@ -861,6 +928,7 @@
     $('finishOnboarding').addEventListener('click',finishOnboarding);
     $('applyPriority').addEventListener('click', applyPriorityToPlan);
     $('analyzeProgression').addEventListener('click', analyzeProgression);
+    $('refreshWeeklyVolume').addEventListener('click', renderWeeklyVolume);
     $('generatePortionMenu').addEventListener('click', generatePortionMenu);
     $('saveProgressPrefs').addEventListener('click',()=>{state.settings.weeklySessionGoal=+$('weeklySessionGoal').value;state.settings.stepGoal=+$('stepGoal').value||8000;saveState();renderHome();alert('Preferencias guardadas.')});
   }

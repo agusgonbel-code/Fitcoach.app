@@ -10,13 +10,13 @@
   <link rel="apple-touch-icon" href="icon-192.png">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="stylesheet" href="styles.css">
-  <title>FitCoach Stable 1.3.5</title>
+  <title>FitCoach Stable 1.3.6</title>
 </head>
 <body>
 <header>
   <div class="topbar">
     <div class="brand"><div class="logo">F</div><div>FitCoach</div></div>
-    <span class="version">Stable 1.3.5</span>
+    <span class="version">Stable 1.3.6</span>
   </div>
 </header>
 
@@ -61,7 +61,8 @@
       <button id="generatePlan" style="width:100%;margin-top:10px">Generar plan</button><div id="planEvidence" class="evidencePanel" style="margin-top:10px"></div>
     </div>
 
-    <h2>Constructor rápido</h2><div class="card"><div class="row"><div><label>Prioridad muscular</label><select id="priorityMuscle"><option value="balanced">Equilibrado</option><option value="shoulders">Hombros</option><option value="back">Espalda</option><option value="legs">Piernas</option></select></div><div><label>Progresión</label><select id="progressionMode"><option value="double">Doble progresión</option><option value="load">Subida de carga</option><option value="reps">Subida de repeticiones</option></select></div></div><button id="applyPriority" style="width:100%;margin-top:10px">Aplicar prioridad al plan</button></div><h2>Progresión sugerida</h2><div class="card"><button id="analyzeProgression" style="width:100%">Analizar últimos entrenamientos</button><div id="progressionOutput" style="margin-top:10px"></div></div><h2>Entrenamiento del día</h2>
+    <h2>Constructor rápido</h2><div class="card"><div class="row"><div><label>Prioridad muscular</label><select id="priorityMuscle"><option value="balanced">Equilibrado</option><option value="shoulders">Hombros</option><option value="back">Espalda</option><option value="legs">Piernas</option></select></div><div><label>Progresión</label><select id="progressionMode"><option value="double">Doble progresión</option><option value="load">Subida de carga</option><option value="reps">Subida de repeticiones</option></select></div></div><button id="applyPriority" style="width:100%;margin-top:10px">Aplicar prioridad al plan</button></div><h2>Progresión sugerida</h2><div class="card"><button id="analyzeProgression" style="width:100%">Analizar últimos entrenamientos</button><div id="progressionOutput" style="margin-top:10px"></div></div>
+    <h2>Volumen y fatiga semanal</h2><div class="card"><div class="small">Series efectivas registradas desde el lunes. Se usa como orientación, no como límite universal.</div><div id="weeklyVolumeOutput" style="margin-top:10px"></div><button id="refreshWeeklyVolume" class="secondary" style="width:100%;margin-top:10px">Actualizar análisis</button></div><h2>Entrenamiento del día</h2>
     <div class="row">
       <select id="trainingDay"></select>
       <button id="openLibrary" class="secondary">Biblioteca</button>
