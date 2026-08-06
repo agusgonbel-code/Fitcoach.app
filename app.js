@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  const APP_VERSION = '2.0.1';
+  const APP_VERSION = '2.0.2';
 
   const RAW_DATA = window.FITCOACH_DATA || {};
   const DATA = {
@@ -23,7 +23,13 @@
       }
     },
     set(key, value) {
-      localStorage.setItem(key, JSON.stringify(value));
+      try {
+        localStorage.setItem(key, JSON.stringify(value));
+        return true;
+      } catch (error) {
+        console.error(`FitCoach: no se pudo guardar ${key}`, error);
+        return false;
+      }
     }
   };
 
@@ -251,8 +257,23 @@
     };
   }
 
+  function showRuntimeStatus(message, type = 'error') {
+    const box = $('runtimeStatus');
+    if (!box) return;
+    box.hidden = false;
+    box.className = type === 'error' ? 'runtimeStatus runtimeError' : 'runtimeStatus runtimeWarning';
+    box.textContent = message;
+  }
+
   function saveState() {
-    Object.entries(state).forEach(([key,value]) => Store.set(key,value));
+    const failed = Object.entries(state)
+      .filter(([key,value]) => !Store.set(key,value))
+      .map(([key]) => key);
+    if (failed.length) {
+      showRuntimeStatus(`No se pudieron guardar algunos datos (${failed.join(', ')}). Exporta una copia y elimina fotos grandes.`, 'error');
+      return false;
+    }
+    return true;
   }
 
   function todayKey() {
@@ -900,16 +921,34 @@
     $('selectedPhotos').textContent = pendingPhotos.length ? `${pendingPhotos.length} foto(s) seleccionada(s)` : 'Ninguna foto seleccionada.';
   }
 
+  function compressPhoto(file, maxSide = 1280, quality = 0.78) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onerror = reject;
+      reader.onload = () => {
+        const image = new Image();
+        image.onerror = reject;
+        image.onload = () => {
+          const ratio = Math.min(1, maxSide / Math.max(image.width, image.height));
+          const canvas = document.createElement('canvas');
+          canvas.width = Math.max(1, Math.round(image.width * ratio));
+          canvas.height = Math.max(1, Math.round(image.height * ratio));
+          const context = canvas.getContext('2d');
+          if (!context) return reject(new Error('No se pudo procesar la imagen.'));
+          context.drawImage(image, 0, 0, canvas.width, canvas.height);
+          resolve(canvas.toDataURL('image/jpeg', quality));
+        };
+        image.src = reader.result;
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
   async function savePhotos() {
     if (!pendingPhotos.length) return alert('Selecciona una o varias fotos.');
     for (const file of pendingPhotos) {
       if (file.size > 5*1024*1024) continue;
-      const data = await new Promise((resolve,reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-      });
+      const data = await compressPhoto(file);
       state.photos.push({id:Date.now()+Math.random(),date:new Date().toISOString(),note:$('photoNote').value.trim() || file.name,data});
     }
     pendingPhotos = [];
@@ -917,12 +956,13 @@
     $('photoCamera').value = '';
     $('photoNote').value = '';
     $('selectedPhotos').textContent = 'Ninguna foto seleccionada.';
-    try {
-      saveState();
+    if (!saveState()) {
+      state.photos = Store.get('photos', []);
+      alert('No hay espacio suficiente. Las fotos nuevas no se han guardado.');
       renderPhotos();
-    } catch {
-      alert('No hay espacio suficiente. Usa fotos más pequeñas.');
+      return;
     }
+    renderPhotos();
   }
 
   function renderPhotos() {
@@ -1143,14 +1183,25 @@
     $('crossWodList')?.addEventListener('click',e=>{const start=e.target.closest('.crossStart'),copy=e.target.closest('.crossCopy');if(start)startCrossWod(start.dataset.crossId);if(copy)copyCrossWod(copy.dataset.crossId)});
   }
 
+  function safeRun(name, task) {
+    try {
+      task();
+      return true;
+    } catch (error) {
+      console.error(`FitCoach: error en ${name}`, error);
+      showRuntimeStatus(`Se produjo un error en ${name}. El resto de FitCoach seguirá disponible.`, 'error');
+      return false;
+    }
+  }
+
   function renderAll() {
-    applyTheme();
-    renderHome();
-    renderTraining();
-    renderNutrition();
-    renderProgress();
-    renderSettings();
-    renderCrossTraining();
+    safeRun('tema', applyTheme);
+    safeRun('inicio', renderHome);
+    safeRun('entrenamiento', renderTraining);
+    safeRun('nutrición', renderNutrition);
+    safeRun('progreso', renderProgress);
+    safeRun('ajustes', renderSettings);
+    safeRun('Crosstraining', renderCrossTraining);
   }
 
   function registerServiceWorker() {
@@ -1195,12 +1246,27 @@
   }
 
   function init() {
-    bindEvents();
-    restorePreferences();
+    const dataProblems = [];
+    if (!DATA.exercises.length) dataProblems.push('ejercicios');
+    if (!DATA.recipes.length) dataProblems.push('recetas');
+    if (!CROSS_WODS.length) dataProblems.push('WODs');
+    if (dataProblems.length) showRuntimeStatus(`No se han cargado correctamente: ${dataProblems.join(', ')}.`, 'error');
+    safeRun('controles', bindEvents);
+    safeRun('preferencias', restorePreferences);
     renderAll();
-    maybeOnboarding();
-    registerServiceWorker();
+    safeRun('configuración inicial', maybeOnboarding);
+    safeRun('actualizaciones', registerServiceWorker);
   }
 
-  document.addEventListener('DOMContentLoaded', init);
+  window.addEventListener('error', event => {
+    console.error('FitCoach: error global', event.error || event.message);
+    showRuntimeStatus('FitCoach detectó un error. Cierra y vuelve a abrir la aplicación; tus datos permanecen guardados.', 'error');
+  });
+  window.addEventListener('unhandledrejection', event => {
+    console.error('FitCoach: promesa rechazada', event.reason);
+    showRuntimeStatus('Una operación no pudo completarse. Revisa la conexión y vuelve a intentarlo.', 'error');
+  });
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init, {once:true});
+  else init();
 })();

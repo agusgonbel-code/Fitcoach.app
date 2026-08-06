@@ -142,3 +142,7 @@ nav button.active{color:var(--accent);background:rgba(47,211,116,.10)}
 .equivalentOption{min-height:76px;text-align:left}
 .workoutCard input:focus{outline:2px solid var(--accent);outline-offset:1px}
 @media(max-width:520px){#monthlyPlanControls .row{grid-template-columns:1fr 1fr}.nutritionDayCard{scroll-margin-top:160px}}
+
+.runtimeStatus{position:sticky;top:64px;z-index:45;margin:8px 12px;padding:10px 12px;border-radius:12px;font-size:.9rem;box-shadow:0 8px 24px rgba(0,0,0,.25)}
+.runtimeError{background:#4a1820;color:#ffe7eb;border:1px solid #a83b4c}
+.runtimeWarning{background:#463814;color:#fff5cc;border:1px solid #a8872a}
