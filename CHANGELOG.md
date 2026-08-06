@@ -64,3 +64,11 @@
 - Nuevos métodos: PPL, PHUL, 5x5 adaptado, casa, circuito y especialización.
 - Preferencias de dieta, presupuesto, tiempo, exclusiones y estrategia calórica.
 - 300 recetas y mejor plan mensual con regeneración por día y métricas de calidad.
+
+
+## 1.6.1
+- Corregido el problema que impedía recibir actualizaciones en iPhone.
+- Añadido banner de actualización que faltaba en HTML.
+- Registro del service worker con `updateViaCache: none`.
+- Comprobación al abrir, volver a la app y recuperar conexión.
+- Caché de recursos principales en modo network-first.

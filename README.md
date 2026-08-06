@@ -76,3 +76,10 @@ Commit sugerido: `FitCoach Stable 1.4.0 - Premium Recipe Library`
 - Filtros por formato, nivel, material y duración.
 - Generador aleatorio compatible y registro persistente de resultados.
 - Formatos AMRAP, EMOM, For Time, Chipper, Tabata e intervalos.
+
+
+## Stable 1.6.1
+- Actualización forzada y fiable en Safari/PWA.
+- Aviso de nueva versión restaurado.
+- Recursos JS/CSS versionados para evitar caché antigua.
+- Manifest actualizado.

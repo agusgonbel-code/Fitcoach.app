@@ -1110,7 +1110,7 @@
       refreshing = true;
       window.location.reload();
     });
-    navigator.serviceWorker.register('./sw.js').then(registration => {
+    navigator.serviceWorker.register('./sw.js?v=1.6.1', {updateViaCache:'none'}).then(registration => {
       const banner = $('updateBanner');
       const updateButton = $('updateApp');
       const showUpdate = worker => {
@@ -1126,7 +1126,11 @@
           if (worker.state === 'installed' && navigator.serviceWorker.controller) showUpdate(worker);
         });
       });
+      registration.update().catch(() => {});
       window.addEventListener('online', () => registration.update().catch(() => {}));
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') registration.update().catch(() => {});
+      });
     }).catch(() => {});
   }
 
