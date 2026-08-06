@@ -1,6 +1,8 @@
 (() => {
   'use strict';
 
+  const APP_VERSION = '2.0.1';
+
   const RAW_DATA = window.FITCOACH_DATA || {};
   const DATA = {
     exercises: Array.isArray(RAW_DATA.exercises) ? RAW_DATA.exercises.filter(Boolean) : [],
@@ -1159,7 +1161,7 @@
       refreshing = true;
       window.location.reload();
     });
-    navigator.serviceWorker.register('./sw.js?v=1.6.4', {updateViaCache:'none'}).then(registration => {
+    navigator.serviceWorker.register(`./sw.js?v=${APP_VERSION}`, {updateViaCache:'none'}).then(registration => {
       const banner = $('updateBanner');
       const updateButton = $('updateApp');
       const showUpdate = worker => {
@@ -1179,7 +1181,7 @@
         fetch('./version.json?t=' + Date.now(), {cache:'no-store'})
           .then(response => response.ok ? response.json() : null)
           .then(info => {
-            if (info?.version && info.version !== '1.6.4') registration.update().catch(() => {});
+            if (info?.version && info.version !== APP_VERSION) registration.update().catch(() => {});
           })
           .catch(() => {})
           .finally(() => registration.update().catch(() => {}));

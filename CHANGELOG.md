@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.0.1 — Version Audit
+- Corregido el registro del service worker, que conservaba `v=1.6.4`.
+- Corregida la comparación de `version.json`, que seguía usando `1.6.4`.
+- Añadida constante `APP_VERSION` y validación automática de coherencia.
+- Actualizados recursos, manifest, caché y carpeta `www`.
+
 ## 2.0.0 — Product Foundation
 - Corrección del fallo de sintaxis por declaración duplicada en el cálculo de volumen semanal.
 - Corrección de fecha en el selector de equivalentes.

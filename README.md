@@ -1,4 +1,4 @@
-# FitCoach 2.0.0
+# FitCoach 2.0.1
 
 Versión de producto reorganizada sobre la base estable 1.6.4.
 
@@ -15,3 +15,8 @@ Versión de producto reorganizada sobre la base estable 1.6.4.
 
 ## Calidad
 Ejecuta `npm run audit` para verificar sintaxis, IDs, datos, versiones y sincronización con `www`.
+
+## Revisión 2.0.1
+- Corrige el registro del service worker que aún apuntaba a 1.6.4.
+- La comprobación remota usa ahora una constante de versión única.
+- Auditoría reforzada para detectar referencias de versión obsoletas.
