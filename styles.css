@@ -133,3 +133,12 @@ nav button.active{color:var(--accent);background:rgba(47,211,116,.10)}
 
 /* Stable 1.6.0 · Crosstraining Studio */
 .crossHero{background:linear-gradient(135deg,rgba(255,182,72,.16),rgba(120,104,255,.12))}.crossGrid{display:grid;gap:10px}.crossWod h3{margin:7px 0 0}.crossHead{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.crossMoves{padding-left:22px;margin:12px 0;line-height:1.65}.crossMoves strong{display:inline-block;min-width:54px;color:var(--accent)}@media(min-width:760px){.crossGrid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:420px){nav button{font-size:9px}.navIcon{font-size:16px}}
+
+
+/* FitCoach 2.0 */
+#workoutDraftStatus{border-left:4px solid var(--accent);font-size:.88rem}
+.monthWeekHeader{font-weight:800;font-size:1.05rem;margin:18px 0 8px;color:var(--accent)}
+#monthlyPlanControls{position:sticky;top:72px;z-index:4}
+.equivalentOption{min-height:76px;text-align:left}
+.workoutCard input:focus{outline:2px solid var(--accent);outline-offset:1px}
+@media(max-width:520px){#monthlyPlanControls .row{grid-template-columns:1fr 1fr}.nutritionDayCard{scroll-margin-top:160px}}

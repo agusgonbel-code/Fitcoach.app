@@ -1,7 +1,11 @@
 (() => {
   'use strict';
 
-  const DATA = window.FITCOACH_DATA;
+  const RAW_DATA = window.FITCOACH_DATA || {};
+  const DATA = {
+    exercises: Array.isArray(RAW_DATA.exercises) ? RAW_DATA.exercises.filter(Boolean) : [],
+    recipes: Array.isArray(RAW_DATA.recipes) ? RAW_DATA.recipes.filter(Boolean) : []
+  };
   const CROSS_WODS = window.FITCOACH_CROSS_WODS || [];
   const DAYS = ['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
   const $ = id => document.getElementById(id);
@@ -33,7 +37,9 @@
     recovery: [],
     nutritionPlan: null,
     crossHistory: [],
-    preferences:{planGoal:'recomp',planMethod:'evidence',planDays:'4',planMinutes:'60',priorityMuscle:'balanced',progressionMode:'double',calcEquation:'mifflin',calcSex:'m',calcAge:'46',calcHeight:'181',calcWeight:'81',calcFat:'22',calcActivity:'1.6',calcGoal:'recomp',menuMeals:'5',menuDays:'7',portionMeals:'5',portionTolerance:'150',trainingExperience:'intermediate',trainingLocation:'gym',dietStyle:'omnivore',nutritionBudget:'any',nutritionMaxPrep:'0',calorieStrategy:'flat',excludedIngredients:''}
+    workoutDraft: null,
+    monthViewWeek: 0,
+    preferences:{planGoal:'recomp',planMethod:'evidence',planDays:'4',planMinutes:'60',priorityMuscle:'balanced',progressionMode:'double',calcEquation:'mifflin',calcSex:'m',calcAge:'46',calcHeight:'181',calcWeight:'81',calcFat:'22',calcActivity:'1.6',calcGoal:'recomp',menuMeals:'5',menuDays:'7',portionMeals:'5',portionTolerance:'150',trainingExperience:'intermediate',trainingLocation:'gym',dietStyle:'omnivore',nutritionBudget:'any',nutritionMaxPrep:'0',calorieStrategy:'flat',excludedIngredients:'',preferredIngredients:''}
   };
 
   let state = {
@@ -48,6 +54,8 @@
     recovery: Store.get('recovery', defaults.recovery),
     nutritionPlan: Store.get('nutritionPlan', defaults.nutritionPlan),
     crossHistory: Store.get('crossHistory', defaults.crossHistory),
+    workoutDraft: Store.get('workoutDraft', defaults.workoutDraft),
+    monthViewWeek: Store.get('monthViewWeek', defaults.monthViewWeek),
     preferences: Store.get('preferences', defaults.preferences)
   };
 
@@ -66,6 +74,8 @@
     minimum:{title:'Dosis mínima efectiva',text:'Tres sesiones breves y pocos ejercicios prioritarios. Añade volumen solo cuando el progreso se estanque.',tags:['3 días','45 minutos','volumen bajo']},
     lowload:{title:'Bajo impacto / cargas moderadas',text:'Máquinas, poleas y 10-20 repeticiones para reducir cargas articulares externas manteniendo esfuerzo suficiente.',tags:['10-20 repeticiones','máquinas','2-3 RIR']},
     mentzer:{title:'Heavy Duty inspirado en Mentzer',text:'Muy bajo volumen y esfuerzo alto. No se presenta como superior y evita exigir fallo absoluto en ejercicios complejos.',tags:['bajo volumen','0-2 RIR','fatiga vigilada']},
+    antagonist:{title:'Superseries antagonistas',text:'Alterna músculos opuestos para ahorrar tiempo manteniendo descansos suficientes y técnica estable.',tags:['4 días','superseries','densidad controlada']},
+    hybrid3:{title:'Torso / Pierna / Full Body',text:'Tres sesiones que combinan especialización y una tercera exposición global, útil cuando hay pocos días disponibles.',tags:['3 días','frecuencia 2','flexible']},
     ppl:{title:'Push / Pull / Legs',text:'Organiza el trabajo por patrones de empuje, tracción y pierna. Se adapta a 3 o más días sin exigir seis sesiones.',tags:['3-6 días','volumen distribuido','flexible']},
     phul:{title:'PHUL adaptado',text:'Alterna sesiones orientadas a fuerza con sesiones de hipertrofia, manteniendo volumen recuperable.',tags:['4 días','fuerza + hipertrofia','periodización ondulante']},
     fivebyfive:{title:'5x5 adaptado',text:'Prioriza práctica de patrones básicos con cinco series moderadas. Los accesorios y la carga se ajustan para controlar la fatiga.',tags:['fuerza','5x5','técnica']},
@@ -129,8 +139,16 @@
   }}
   function createMetabolicRoutine(){const r=createFullBodyRoutine();Object.values(r).forEach(day=>day.forEach(e=>{e[1]=3;e[2]='10-15'}));return r}
   function createSpecializationRoutine(){const r=createUpperLowerRoutine(),priority=state.preferences?.priorityMuscle||'balanced';const map={shoulders:'Hombros',back:'Espalda',legs:'Cuádriceps'};const muscle=map[priority];if(muscle)Object.values(r).forEach(day=>day.forEach(e=>{if(exerciseMuscle(e[0])===muscle)e[1]=Math.min(5,e[1]+1)}));return r}
+
+  function createAntagonistRoutine(){return {
+    Lunes:[['Press banca con mancuernas',3,'6-10','Press en máquina'],['Remo con apoyo de pecho',3,'8-12','Remo en polea'],['Press inclinado con mancuernas',3,'8-12','Press inclinado en máquina'],['Jalón al pecho',3,'8-12','Dominada asistida'],['Curl con barra EZ',3,'10-15','Curl en polea'],['Extensión de tríceps en polea',3,'10-15','Fondos asistidos']],
+    Martes:[['Prensa de piernas',4,'8-12','Sentadilla goblet'],['Curl femoral sentado',4,'10-15','Curl femoral tumbado'],['Extensión de cuádriceps',3,'12-15','Step-up bajo'],['Hip thrust',3,'8-12','Puente de glúteo'],['Gemelo sentado',4,'12-20','Gemelo de pie']],
+    Jueves:[['Press militar sentado',3,'6-10','Press de hombros en máquina'],['Jalón al pecho',3,'8-12','Dominada asistida'],['Aperturas en polea',3,'12-15','Pec deck'],['Remo en polea',3,'8-12','Remo unilateral'],['Elevaciones laterales',3,'12-20','Elevación lateral en polea'],['Face pull',3,'12-20','Pájaros en máquina']],
+    Viernes:[['Peso muerto rumano',4,'6-10','Curl femoral'],['Prensa de piernas',4,'8-12','Hack squat'],['Zancada atrás',3,'8-12','Step-up'],['Abducción de cadera en máquina',3,'15-25','Caminata lateral con banda'],['Crunch en polea',3,'10-15','Reverse crunch']]
+  }}
+  function createHybridThreeRoutine(){const u=createUpperLowerRoutine(),f=createFullBodyRoutine();return {Lunes:u.Lunes,Miércoles:u.Martes,Viernes:f.Viernes||Object.values(f)[2]}}
   function renderPlanEvidence(){const i=planEvidenceMap[$('planMethod').value]||planEvidenceMap.evidence;$('planEvidence').innerHTML=`<strong>${i.title}</strong>${i.text}<div class="planEvidenceTags">${i.tags.map(t=>`<span>${t}</span>`).join('')}</div>`}
-  function preferenceFields(){return ['planGoal','planMethod','planDays','planMinutes','priorityMuscle','progressionMode','calcEquation','calcSex','calcAge','calcHeight','calcWeight','calcFat','calcActivity','calcGoal','menuMeals','menuDays','portionMeals','portionTolerance','trainingExperience','trainingLocation','dietStyle','nutritionBudget','nutritionMaxPrep','calorieStrategy','excludedIngredients']}
+  function preferenceFields(){return ['planGoal','planMethod','planDays','planMinutes','priorityMuscle','progressionMode','calcEquation','calcSex','calcAge','calcHeight','calcWeight','calcFat','calcActivity','calcGoal','menuMeals','menuDays','portionMeals','portionTolerance','trainingExperience','trainingLocation','dietStyle','nutritionBudget','nutritionMaxPrep','calorieStrategy','excludedIngredients','preferredIngredients']}
   function savePreferences(){preferenceFields().forEach(id=>{const el=$(id);if(el)state.preferences[id]=el.value});Store.set('preferences',state.preferences);if($('preferenceStatus'))$('preferenceStatus').textContent='Preferencias guardadas automáticamente.'}
   function restorePreferences(){preferenceFields().forEach(id=>{const el=$(id),v=state.preferences?.[id];if(el&&v!==undefined)el.value=String(v)});renderPlanEvidence()}
   function showMenuRecipe(id,scale=1){const r=DATA.recipes.find(x=>x.id===id);if(!r)return;const factor=Math.max(.5,Math.min(2,Number(scale)||1)),portion={kcal:Math.round(r.kcal*factor),p:Math.round(r.p*factor),c:Math.round(r.c*factor),f:Math.round(r.f*factor),ingredients:r.ingredients.map(x=>scaleIngredient(x,factor))};$('menuRecipeTitle').textContent=r.name;$('menuRecipeContent').innerHTML=`<span class="pill">${r.meal}</span>${Math.abs(factor-1)>.02?`<span class="portionBadge">Porción x${factor.toFixed(2)}</span>`:''}<div class="recipeModalMacros"><div><strong>${portion.kcal}</strong><span class="small">kcal</span></div><div><strong>${portion.p} g</strong><span class="small">proteína</span></div><div><strong>${portion.c} g</strong><span class="small">carbos</span></div><div><strong>${portion.f} g</strong><span class="small">grasas</span></div></div><h3>Ingredientes ajustados</h3><div class="small">${portion.ingredients.join('<br>')}</div><h3 style="margin-top:12px">Preparación</h3><ol>${r.steps.map(s=>`<li>${s}</li>`).join('')}</ol><button id="addModalRecipe" style="width:100%;margin-top:10px">Añadir al diario</button>`;$('menuRecipeModal').classList.add('open');$('addModalRecipe').addEventListener('click',()=>{state.meals.push({id:Date.now(),date:todayKey(),type:r.meal,name:r.name,kcal:portion.kcal,p:portion.p,c:portion.c,f:portion.f});saveState();renderHome();$('menuRecipeModal').classList.remove('open');alert('Receta añadida al diario.')},{once:true})}
@@ -337,7 +355,7 @@
   function generatePlan() {
     const method = $('planMethod').value;
     const goal = $('planGoal').value;
-    let routine;if(method==='mentzer')routine=createMentzerRoutine();else if(method==='upperlower')routine=createUpperLowerRoutine();else if(method==='fullbody')routine=createFullBodyRoutine();else if(method==='minimum')routine=createMinimumRoutine();else if(method==='lowload')routine=createLowLoadRoutine();else if(method==='powerbuilding')routine=createPowerbuildingRoutine();else if(method==='ppl')routine=createPPLRoutine();else if(method==='phul')routine=createPHULRoutine();else if(method==='fivebyfive')routine=createFiveByFiveRoutine();else if(method==='home')routine=createHomeRoutine();else if(method==='metabolic')routine=createMetabolicRoutine();else if(method==='specialization')routine=createSpecializationRoutine();else if(method==='strength'||goal==='strength')routine=createStrengthRoutine();else routine=createEvidenceRoutine();
+    let routine;if(method==='mentzer')routine=createMentzerRoutine();else if(method==='upperlower')routine=createUpperLowerRoutine();else if(method==='fullbody')routine=createFullBodyRoutine();else if(method==='minimum')routine=createMinimumRoutine();else if(method==='lowload')routine=createLowLoadRoutine();else if(method==='powerbuilding')routine=createPowerbuildingRoutine();else if(method==='ppl')routine=createPPLRoutine();else if(method==='phul')routine=createPHULRoutine();else if(method==='fivebyfive')routine=createFiveByFiveRoutine();else if(method==='home')routine=createHomeRoutine();else if(method==='metabolic')routine=createMetabolicRoutine();else if(method==='specialization')routine=createSpecializationRoutine();else if(method==='antagonist')routine=createAntagonistRoutine();else if(method==='hybrid3')routine=createHybridThreeRoutine();else if(method==='strength'||goal==='strength')routine=createStrengthRoutine();else routine=createEvidenceRoutine();
     const days = Number($('planDays').value);
     const keys = Object.keys(routine).slice(0,days);
     state.routines = Object.fromEntries(keys.map(k => [k,routine[k]]));
@@ -389,7 +407,7 @@
     const {day,exerciseIndex}=equivalentContext,current=state.routines[day]?.[exerciseIndex];if(!current)return;
     const query=($('equivalentSearch')?.value||'').toLowerCase(),equipment=$('equivalentEquipment')?.value||'';
     const options=equivalentExercises(current[0]).filter(ex=>(!query||`${ex.name} ${ex.muscle} ${ex.pattern}`.toLowerCase().includes(query))&&(!equipment||ex.equipment===equipment));
-    $('equivalentList').innerHTML=options.length?options.map(ex=>{const last=lastExercise(ex.name);return `<button class="equivalentOption" data-name="${ex.name}"><strong>${ex.name}</strong><span class="small">${ex.muscle} · ${ex.pattern} · ${ex.equipment}</span><span class="small">${last?`Última vez: ${new Date(last.workout.date).toLocaleDateString('es-ES')}`:'Sin registros previos'}</span></button>`}).join(''):'<div class="empty">No hay equivalentes con estos filtros.</div>';
+    $('equivalentList').innerHTML=options.length?options.map(ex=>{const last=lastExercise(ex.name);return `<button class="equivalentOption" data-name="${ex.name}"><strong>${ex.name}</strong><span class="small">${ex.muscle} · ${ex.pattern} · ${ex.equipment}</span><span class="small">${last?`Última vez: ${new Date(last.date).toLocaleDateString('es-ES')}`:'Sin registros previos'}</span></button>`}).join(''):'<div class="empty">No hay equivalentes con estos filtros.</div>';
     $$('.equivalentOption').forEach(btn=>btn.addEventListener('click',()=>selectEquivalentExercise(btn.dataset.name)));
   }
   function openEquivalentSelector(exerciseIndex) {
@@ -415,6 +433,22 @@
     renderWorkoutList();
   }
 
+
+  function saveWorkoutDraft(){
+    const day=$('trainingDay')?.value;if(!day)return;
+    const values={};
+    $$('.setKg,.setReps,.setRir').forEach(el=>{values[`${el.className.split(' ')[0]}:${el.dataset.e}:${el.dataset.s}`]=el.value});
+    state.workoutDraft={day,values,notes:$('workoutNotes')?.value||'',updatedAt:new Date().toISOString()};
+    Store.set('workoutDraft',state.workoutDraft);
+    if($('workoutDraftStatus'))$('workoutDraftStatus').textContent=`Autoguardado · ${new Date().toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'})}`;
+  }
+  function restoreWorkoutDraft(){
+    const d=state.workoutDraft;if(!d||d.day!==$('trainingDay')?.value)return;
+    Object.entries(d.values||{}).forEach(([key,value])=>{const [cls,e,s]=key.split(':');const el=document.querySelector(`.${cls}[data-e="${e}"][data-s="${s}"]`);if(el)el.value=value});
+    if($('workoutNotes')&&d.notes)$('workoutNotes').value=d.notes;
+    if($('workoutDraftStatus'))$('workoutDraftStatus').textContent=`Borrador recuperado · ${new Date(d.updatedAt).toLocaleString('es-ES')}`;
+  }
+  function clearWorkoutDraft(){state.workoutDraft=null;Store.set('workoutDraft',null)}
   function renderWorkoutList() {
     const day = $('trainingDay').value;
     const exercises = state.routines[day] || [];
@@ -440,6 +474,8 @@
     }).join('') || `<div class="empty">No hay ejercicios para este día.</div>`;
     $$('.restButton').forEach(btn => btn.addEventListener('click', startTimer));
     $$('.equivalentButton').forEach(btn => btn.addEventListener('click', () => openEquivalentSelector(Number(btn.dataset.e))));
+    $$('.setKg,.setReps,.setRir').forEach(el=>el.addEventListener('input',saveWorkoutDraft));
+    restoreWorkoutDraft();
   }
 
   function exerciseMuscle(name) {
@@ -532,6 +568,7 @@
     const volume = completedExercises.reduce((a,e) => a + e.sets.reduce((b,s) => b+s.kg*s.reps,0),0);
     state.workouts.push({id:Date.now(),date:new Date().toISOString(),day,method:state.preferences.planMethod,goal:state.preferences.planGoal,notes:$('workoutNotes').value.trim(),volume,exercises:completedExercises});
     $('workoutNotes').value = '';
+    clearWorkoutDraft();
     saveState();
     renderTraining();
     renderHome();
@@ -655,26 +692,30 @@
     return candidates[0];
   }
 
-  function nutritionPreferences(){return {style:state.preferences.dietStyle||'omnivore',budget:state.preferences.nutritionBudget||'any',maxPrep:Number(state.preferences.nutritionMaxPrep)||0,strategy:state.preferences.calorieStrategy||'flat',excluded:String(state.preferences.excludedIngredients||'').toLowerCase().split(',').map(x=>x.trim()).filter(Boolean)}}
-  function recipeAllowed(r){const p=nutritionPreferences(),hay=`${r.name} ${r.ingredients.join(' ')} ${(r.tags||[]).join(' ')}`.toLowerCase();if(p.maxPrep&&Number(r.time)>p.maxPrep)return false;if(p.excluded.some(x=>hay.includes(x)))return false;if(p.style==='vegetarian'&&!((r.tags||[]).some(t=>/veget/i.test(t))||/tofu|tempeh|huevo|yogur|queso|legumbre|garbanzo|lenteja/.test(hay)))return false;if(p.style==='mediterranean'&&!/mediterr|pollo|pavo|pescado|merluza|bacalao|atún|arroz|legumbre|verdura|yogur/.test(hay))return false;if(p.style==='highprotein'&&r.p<25&&r.meal!=='Merienda')return false;if(p.budget==='low'&&/salmón|gambas|atún fresco|ternera/.test(hay))return false;return true}
+  function nutritionPreferences(){return {style:state.preferences.dietStyle||'omnivore',budget:state.preferences.nutritionBudget||'any',maxPrep:Number(state.preferences.nutritionMaxPrep)||0,strategy:state.preferences.calorieStrategy||'flat',excluded:String(state.preferences.excludedIngredients||'').toLowerCase().split(',').map(x=>x.trim()).filter(Boolean),preferred:String(state.preferences.preferredIngredients||'').toLowerCase().split(',').map(x=>x.trim()).filter(Boolean)}}
+  function recipeAllowed(r){const p=nutritionPreferences(),hay=`${r.name} ${r.ingredients.join(' ')} ${(r.tags||[]).join(' ')}`.toLowerCase();if(p.maxPrep&&Number(r.time)>p.maxPrep)return false;if(p.excluded.some(x=>hay.includes(x)))return false;if(p.style==='vegetarian'&&!((r.tags||[]).some(t=>/veget/i.test(t))||/tofu|tempeh|huevo|yogur|queso|legumbre|garbanzo|lenteja/.test(hay)))return false;if(p.style==='vegan'&&!/tofu|tempeh|legumbre|garbanzo|lenteja|soja|avena|verdura/.test(hay)||p.style==='vegan'&&/pollo|pavo|ternera|cerdo|pescado|atún|salmón|huevo|yogur|queso|leche/.test(hay))return false;if(p.style==='pescatarian'&&/pollo|pavo|ternera|cerdo/.test(hay))return false;if(p.style==='lactosefree'&&/leche|yogur|queso|skyr|queso batido/.test(hay))return false;if(p.style==='glutenfree'&&/pan|pasta|wrap|trigo|avena/.test(hay))return false;if(p.style==='mediterranean'&&!/mediterr|pollo|pavo|pescado|merluza|bacalao|atún|arroz|legumbre|verdura|yogur/.test(hay))return false;if(p.style==='highprotein'&&r.p<25&&r.meal!=='Merienda')return false;if(p.budget==='low'&&/salmón|gambas|atún fresco|ternera/.test(hay))return false;return true}
   function dayCalorieTarget(dayIndex,days){const base=state.targets.kcal,strategy=state.preferences.calorieStrategy||'flat';if(strategy==='training'){const weekday=(new Date().getDay()+dayIndex)%7;return Math.round(base*(weekday>=1&&weekday<=4?1.05:.95))}if(strategy==='weekend'){const weekday=(new Date().getDay()+dayIndex)%7;return Math.round(base*(weekday===0||weekday===6?1.08:.968));return base}return base}
   function createNutritionPlan(count,days) {
-    const mealTypes = count === 4
-      ? ['Desayuno','Comida','Merienda','Cena']
-      : ['Desayuno','Merienda','Comida','Merienda','Cena'];
-    const weights = count === 4 ? [.24,.34,.14,.28] : [.20,.12,.30,.13,.25];
+    const configurations={
+      3:{meals:['Desayuno','Comida','Cena'],weights:[.25,.40,.35]},
+      4:{meals:['Desayuno','Comida','Merienda','Cena'],weights:[.24,.34,.14,.28]},
+      5:{meals:['Desayuno','Merienda','Comida','Merienda','Cena'],weights:[.20,.12,.30,.13,.25]},
+      6:{meals:['Desayuno','Merienda','Comida','Merienda','Cena','Merienda'],weights:[.18,.10,.28,.10,.24,.10]}
+    };
+    const config=configurations[count]||configurations[5],mealTypes=config.meals,weights=config.weights;
     const usedByMeal = {};
 
     function pickRecipe(meal,targetK,targetP,dayIndex,mealIndex) {
-      const pool = DATA.recipes.filter(r => r.meal === meal);
+      const allowed=DATA.recipes.filter(r=>r.meal===meal&&recipeAllowed(r));const pool=allowed.length?allowed:DATA.recipes.filter(r=>r.meal===meal);
       if (!pool.length) return null;
       usedByMeal[meal] ||= [];
       const recentlyUsed = new Set(usedByMeal[meal].slice(-Math.min(pool.length-1,8)));
       let candidates = pool.filter(r => !recentlyUsed.has(r.id));
       if (!candidates.length) candidates = pool;
       candidates.sort((a,b) => {
-        const scoreA = Math.abs(a.kcal-targetK)+Math.abs(a.p-targetP)*7;
-        const scoreB = Math.abs(b.kcal-targetK)+Math.abs(b.p-targetP)*7;
+        const pref=nutritionPreferences().preferred;const textA=`${a.name} ${a.ingredients.join(' ')}`.toLowerCase(),textB=`${b.name} ${b.ingredients.join(' ')}`.toLowerCase();const bonusA=pref.some(x=>textA.includes(x))?40:0,bonusB=pref.some(x=>textB.includes(x))?40:0;
+        const scoreA = Math.abs(a.kcal-targetK)+Math.abs(a.p-targetP)*7-bonusA;
+        const scoreB = Math.abs(b.kcal-targetK)+Math.abs(b.p-targetP)*7-bonusB;
         return scoreA-scoreB;
       });
       const best = candidates.slice(0,Math.min(4,candidates.length));
@@ -719,7 +760,10 @@
   function renderNutritionPlan(plan=state.nutritionPlan) {
     if (!plan?.planDays?.length) return;
     const allRecipes=[];
-    $('menuOutput').innerHTML = plan.planDays.map((day,dayIndex) => {
+    const isMonthly=plan.days>=28,totalWeeks=Math.ceil(plan.planDays.length/7),activeWeek=Math.max(0,Math.min(totalWeeks-1,Number(state.monthViewWeek)||0));
+    if($('monthlyPlanControls')){$('monthlyPlanControls').hidden=!isMonthly;if(isMonthly)$('monthWeekLabel').textContent=`Semana ${activeWeek+1} de ${totalWeeks}`;}
+    const visibleDays=isMonthly?plan.planDays.slice(activeWeek*7,activeWeek*7+7):plan.planDays;
+    $('menuOutput').innerHTML = visibleDays.map((day,visibleIndex) => {const dayIndex=isMonthly?activeWeek*7+visibleIndex:visibleIndex;
       const date=new Date(`${day.date}T12:00:00`);
       const label=plan.days>=28 ? `Día ${day.index} · ${date.toLocaleDateString('es-ES',{weekday:'long',day:'numeric',month:'short'})}` : date.toLocaleDateString('es-ES',{weekday:'long',day:'numeric'});
       const weekHeader=plan.days>=28 && dayIndex%7===0 ? `<div class="monthWeekHeader">Semana ${Math.floor(dayIndex/7)+1}</div>` : '';
@@ -737,12 +781,13 @@
     renderMonthlyInsights(plan);if ($('nutritionPlanStatus')) $('nutritionPlanStatus').innerHTML=`<strong>Plan guardado:</strong> ${plan.days} días · media ${avg} kcal/día · creado ${new Date(plan.createdAt).toLocaleDateString('es-ES')}`;
   }
 
+  function regenerateNutritionWeek(){if(!state.nutritionPlan?.planDays?.length)return;const start=(Number(state.monthViewWeek)||0)*7;for(let i=start;i<Math.min(start+7,state.nutritionPlan.planDays.length);i++){const fresh=createNutritionPlan(state.nutritionPlan.mealsPerDay,1).planDays[0];fresh.index=i+1;fresh.date=state.nutritionPlan.planDays[i].date;state.nutritionPlan.planDays[i]=fresh}saveState();renderNutritionPlan()}
   function regenerateNutritionDay(index){if(!state.nutritionPlan?.planDays?.[index])return;const fresh=createNutritionPlan(state.nutritionPlan.mealsPerDay,1).planDays[0];fresh.index=index+1;fresh.date=state.nutritionPlan.planDays[index].date;state.nutritionPlan.planDays[index]=fresh;saveState();renderNutritionPlan()}
   function renderMonthlyInsights(plan){const box=$('monthlyPlanInsights');if(!box)return;if(plan.days<28){box.hidden=true;return}const ids=plan.planDays.flatMap(d=>d.meals.map(m=>m.recipeId)),unique=new Set(ids).size,avgP=Math.round(plan.planDays.reduce((a,d)=>a+d.totals.p,0)/plan.days),maxDev=Math.max(...plan.planDays.map(d=>Math.abs(d.totals.kcal-(d.targetKcal||plan.target.kcal))));box.hidden=false;box.innerHTML=`<h3>Calidad del plan mensual</h3><div class="kpiGrid"><div><div class="stat">${unique}</div><div class="label">recetas distintas</div></div><div><div class="stat">${avgP} g</div><div class="label">proteína media</div></div><div><div class="stat">±${maxDev}</div><div class="label">máx. desviación kcal</div></div><div><div class="stat">${Math.round(unique/ids.length*100)}%</div><div class="label">variedad</div></div></div>`}
   function generateMenu() {
     const count=Number($('menuMeals').value);
     const days=Number($('menuDays').value);
-    state.nutritionPlan=createNutritionPlan(count,days);
+    state.nutritionPlan=createNutritionPlan(count,days);state.monthViewWeek=0;
     savePreferences();
     saveState();
     renderNutritionPlan();
@@ -954,8 +999,8 @@
       try {
         const data = JSON.parse(reader.result);
         if (!data || typeof data !== 'object' || Array.isArray(data)) throw new Error('Formato no válido');
-        const arrayKeys = ['workouts','meals','metrics','photos','recovery'];
-        const objectKeys = ['profile','settings','targets','routines','preferences'];
+        const arrayKeys = ['workouts','meals','metrics','photos','recovery','crossHistory'];
+        const objectKeys = ['profile','settings','targets','routines','preferences','nutritionPlan'];
         arrayKeys.forEach(key => { if (key in data && !Array.isArray(data[key])) throw new Error(`Campo ${key} no válido`); });
         objectKeys.forEach(key => { if (key in data && (!data[key] || typeof data[key] !== 'object' || Array.isArray(data[key]))) throw new Error(`Campo ${key} no válido`); });
         state = {...state,...data};
@@ -1041,6 +1086,10 @@
     $$('[data-go]').forEach(btn => btn.addEventListener('click', () => showPage(btn.dataset.go)));
     $$('[data-nutrition-tab]').forEach(btn => btn.addEventListener('click', () => showNutritionPanel(btn.dataset.nutritionTab)));
 
+    $('workoutNotes').addEventListener('input',saveWorkoutDraft);
+    $('monthPrevWeek')?.addEventListener('click',()=>{state.monthViewWeek=Math.max(0,(Number(state.monthViewWeek)||0)-1);saveState();renderNutritionPlan()});
+    $('monthNextWeek')?.addEventListener('click',()=>{const max=Math.max(0,Math.ceil((state.nutritionPlan?.days||0)/7)-1);state.monthViewWeek=Math.min(max,(Number(state.monthViewWeek)||0)+1);saveState();renderNutritionPlan()});
+    $('regenerateWeek')?.addEventListener('click',regenerateNutritionWeek);
     $('generatePlan').addEventListener('click', generatePlan);
     $('planMethod').addEventListener('change',()=>{renderPlanEvidence();savePreferences()});
     preferenceFields().forEach(id=>{const el=$(id);if(el)el.addEventListener('change',savePreferences)});
@@ -1110,7 +1159,7 @@
       refreshing = true;
       window.location.reload();
     });
-    navigator.serviceWorker.register('./sw.js?v=1.6.1', {updateViaCache:'none'}).then(registration => {
+    navigator.serviceWorker.register('./sw.js?v=1.6.4', {updateViaCache:'none'}).then(registration => {
       const banner = $('updateBanner');
       const updateButton = $('updateApp');
       const showUpdate = worker => {
@@ -1126,10 +1175,19 @@
           if (worker.state === 'installed' && navigator.serviceWorker.controller) showUpdate(worker);
         });
       });
-      registration.update().catch(() => {});
-      window.addEventListener('online', () => registration.update().catch(() => {}));
+      const checkForUpdate = () => {
+        fetch('./version.json?t=' + Date.now(), {cache:'no-store'})
+          .then(response => response.ok ? response.json() : null)
+          .then(info => {
+            if (info?.version && info.version !== '1.6.4') registration.update().catch(() => {});
+          })
+          .catch(() => {})
+          .finally(() => registration.update().catch(() => {}));
+      };
+      checkForUpdate();
+      window.addEventListener('online', checkForUpdate);
       document.addEventListener('visibilitychange', () => {
-        if (document.visibilityState === 'visible') registration.update().catch(() => {});
+        if (document.visibilityState === 'visible') checkForUpdate();
       });
     }).catch(() => {});
   }

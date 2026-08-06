@@ -7,16 +7,16 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="FitCoach">
-  <link rel="apple-touch-icon" href="icon-192.png">
-  <link rel="manifest" href="manifest.webmanifest">
-  <link rel="stylesheet" href="styles.css?v=1.6.1">
-  <title>FitCoach Stable 1.6.1</title>
+  <link rel="apple-touch-icon" href="icon-192.png?v=1.6.4">
+  <link rel="manifest" href="manifest.webmanifest?v=1.6.4">
+  <link rel="stylesheet" href="styles.css?v=2.0.0">
+  <title>FitCoach 2.0.0</title>
 </head>
 <body>
 <header>
   <div class="topbar">
     <div class="brand"><div class="logo">F</div><div>FitCoach</div></div>
-    <span class="version">Stable 1.6.1</span>
+    <span class="version">2.0.0</span>
   </div>
 </header>
 <div id="updateBanner" class="updateBanner" hidden>
@@ -56,11 +56,11 @@
     <div class="card">
       <div class="row">
         <div><label>Objetivo</label><select id="planGoal"><option value="recomp">Recomposición</option><option value="hypertrophy">Hipertrofia</option><option value="strength">Fuerza</option><option value="fatloss">Pérdida de grasa</option></select></div>
-        <div><label>Método</label><select id="planMethod"><option value="evidence">Hipertrofia equilibrada 4D</option><option value="upperlower">Upper / Lower 4D</option><option value="fullbody">Full Body 3D</option><option value="strength">Fuerza 4D</option><option value="powerbuilding">Powerbuilding 4D</option><option value="minimum">Dosis mínima efectiva 3D</option><option value="lowload">Bajo impacto / cargas moderadas</option><option value="mentzer">Heavy Duty inspirado en Mentzer</option><option value="ppl">Push / Pull / Legs</option><option value="phul">PHUL · fuerza e hipertrofia</option><option value="fivebyfive">Fuerza 5x5 adaptada</option><option value="home">Casa · peso corporal y bandas</option><option value="metabolic">Circuito de acondicionamiento</option><option value="specialization">Especialización muscular</option></select></div>
+        <div><label>Método</label><select id="planMethod"><option value="evidence">Hipertrofia equilibrada 4D</option><option value="upperlower">Upper / Lower 4D</option><option value="fullbody">Full Body 3D</option><option value="strength">Fuerza 4D</option><option value="powerbuilding">Powerbuilding 4D</option><option value="minimum">Dosis mínima efectiva 3D</option><option value="lowload">Bajo impacto / cargas moderadas</option><option value="mentzer">Heavy Duty inspirado en Mentzer</option><option value="ppl">Push / Pull / Legs</option><option value="phul">PHUL · fuerza e hipertrofia</option><option value="fivebyfive">Fuerza 5x5 adaptada</option><option value="home">Casa · peso corporal y bandas</option><option value="metabolic">Circuito de acondicionamiento</option><option value="specialization">Especialización muscular</option><option value="antagonist">Superseries antagonistas 4D</option><option value="hybrid3">Torso / Pierna / Full Body 3D</option></select></div>
       </div>
       <div class="row">
-        <div><label>Días</label><select id="planDays"><option value="3">3 días</option><option value="4" selected>4 días</option></select></div>
-        <div><label>Duración</label><select id="planMinutes"><option value="45">45 min</option><option value="60" selected>60 min</option></select></div>
+        <div><label>Días</label><select id="planDays"><option value="2">2 días</option><option value="3">3 días</option><option value="4" selected>4 días</option><option value="5">5 días</option><option value="6">6 días</option></select></div>
+        <div><label>Duración</label><select id="planMinutes"><option value="30">30 min</option><option value="45">45 min</option><option value="60" selected>60 min</option><option value="75">75 min</option></select></div>
       </div>
       <div class="row" style="margin-top:8px"><div><label>Experiencia</label><select id="trainingExperience"><option value="beginner">Principiante</option><option value="intermediate" selected>Intermedio</option><option value="advanced">Avanzado</option></select></div><div><label>Entorno</label><select id="trainingLocation"><option value="gym">Gimnasio completo</option><option value="machines">Máquinas y poleas</option><option value="home">Casa / poco material</option></select></div></div><button id="generatePlan" style="width:100%;margin-top:10px">Generar plan</button><div id="planEvidence" class="evidencePanel" style="margin-top:10px"></div>
     </div>
@@ -71,7 +71,7 @@
       <select id="trainingDay"></select>
       <button id="openLibrary" class="secondary">Biblioteca</button>
     </div>
-    <div id="workoutList" style="margin-top:10px"></div>
+    <div id="workoutDraftStatus" class="notice" style="margin-top:10px">Autoguardado activo: tus datos no se perderán si sales de la pantalla.</div><div id="workoutList" style="margin-top:10px"></div>
     <label>Notas</label><textarea id="workoutNotes" rows="3" placeholder="Sensaciones, dolor, rendimiento..."></textarea>
     <button id="saveWorkout" style="width:100%;margin-top:10px">Guardar entrenamiento</button>
 
@@ -114,12 +114,12 @@
       <h2>Menú exacto por porciones</h2><div class="card"><div class="row"><div><label>Calorías objetivo</label><input id="portionKcal" type="number" value="3014"></div><div><label>Proteína objetivo</label><input id="portionProtein" type="number" value="156"></div></div><div class="row"><div><label>Comidas</label><select id="portionMeals"><option value="4">4</option><option value="5" selected>5</option></select></div><div><label>Precisión</label><select id="portionTolerance"><option value="100">±100 kcal</option><option value="150" selected>±150 kcal</option><option value="250">±250 kcal</option></select></div></div><button id="generatePortionMenu" style="width:100%;margin-top:10px">Generar menú por porciones</button></div><div id="portionMenuOutput" style="margin-top:10px"></div><h2>Menú diario según objetivo</h2>
       <div class="card">
         <div class="row">
-          <div><label>Comidas</label><select id="menuMeals"><option value="4">4</option><option value="5" selected>5</option></select></div>
-          <div><label>Días</label><select id="menuDays"><option value="1">1 día</option><option value="3">3 días</option><option value="7" selected>7 días</option><option value="30">Plan mensual · 30 días</option></select></div>
+          <div><label>Comidas</label><select id="menuMeals"><option value="3">3</option><option value="4">4</option><option value="5" selected>5</option><option value="6">6</option></select></div>
+          <div><label>Días</label><select id="menuDays"><option value="1">1 día</option><option value="3">3 días</option><option value="7" selected>7 días</option><option value="14">2 semanas · 14 días</option><option value="30">Plan mensual · 30 días</option></select></div>
         </div>
         <button id="generateMenu" style="width:100%;margin-top:10px">Generar menú</button>
       </div>
-      <h2>Preferencias del plan</h2><div class="card"><div class="row"><div><label>Estilo</label><select id="dietStyle"><option value="omnivore">Omnívoro</option><option value="mediterranean">Mediterráneo</option><option value="vegetarian">Vegetariano</option><option value="highprotein">Alto en proteína</option></select></div><div><label>Presupuesto</label><select id="nutritionBudget"><option value="any">Indiferente</option><option value="low">Económico</option><option value="medium">Medio</option></select></div></div><div class="row"><div><label>Tiempo máximo</label><select id="nutritionMaxPrep"><option value="0">Sin límite</option><option value="15">15 min</option><option value="25">25 min</option><option value="40">40 min</option></select></div><div><label>Estrategia calórica</label><select id="calorieStrategy"><option value="flat">Igual cada día</option><option value="training">Más calorías en días de entrenamiento</option><option value="weekend">Flexible fin de semana</option></select></div></div><label>Excluir ingredientes (separados por coma)</label><input id="excludedIngredients" placeholder="Ej.: salmón, lactosa, cacahuete"><div class="small" style="margin-top:7px">Las preferencias se guardan y se aplican a planes semanales y mensuales.</div></div><div id="monthlyPlanInsights" class="card" style="margin-top:10px" hidden></div><div id="nutritionPlanStatus" class="notice" style="margin-top:10px">Genera un plan semanal o mensual. El último plan quedará guardado en el dispositivo.</div><div id="menuOutput" style="margin-top:10px"></div>
+      <h2>Preferencias del plan</h2><div class="card"><div class="row"><div><label>Estilo</label><select id="dietStyle"><option value="omnivore">Omnívoro</option><option value="mediterranean">Mediterráneo</option><option value="vegetarian">Vegetariano</option><option value="highprotein">Alto en proteína</option><option value="pescatarian">Pescetariano</option><option value="vegan">Vegano</option><option value="lactosefree">Sin lactosa</option><option value="glutenfree">Sin gluten</option></select></div><div><label>Presupuesto</label><select id="nutritionBudget"><option value="any">Indiferente</option><option value="low">Económico</option><option value="medium">Medio</option></select></div></div><div class="row"><div><label>Tiempo máximo</label><select id="nutritionMaxPrep"><option value="0">Sin límite</option><option value="15">15 min</option><option value="25">25 min</option><option value="40">40 min</option></select></div><div><label>Estrategia calórica</label><select id="calorieStrategy"><option value="flat">Igual cada día</option><option value="training">Más calorías en días de entrenamiento</option><option value="weekend">Flexible fin de semana</option></select></div></div><label>Excluir ingredientes (separados por coma)</label><input id="excludedIngredients" placeholder="Ej.: salmón, lactosa, cacahuete"><label>Ingredientes preferidos (separados por coma)</label><input id="preferredIngredients" placeholder="Ej.: pollo, arroz, yogur"><div class="small" style="margin-top:7px">Las preferencias se guardan y se aplican a planes semanales y mensuales.</div></div><div id="monthlyPlanInsights" class="card" style="margin-top:10px" hidden></div><div id="monthlyPlanControls" class="card" style="margin-top:10px" hidden><div class="row"><button id="monthPrevWeek" class="secondary">Semana anterior</button><button id="monthNextWeek" class="secondary">Semana siguiente</button></div><div id="monthWeekLabel" class="small" style="text-align:center;margin-top:8px"></div><button id="regenerateWeek" class="secondary" style="width:100%;margin-top:8px">Cambiar semana completa</button></div><div id="nutritionPlanStatus" class="notice" style="margin-top:10px">Genera un plan semanal o mensual. El último plan quedará guardado en el dispositivo.</div><div id="menuOutput" style="margin-top:10px"></div>
       <h2>Lista de compra</h2><div class="card" id="shoppingList"><div class="empty">Genera un menú.</div></div>
     </div>
 
@@ -235,8 +235,8 @@
   <div id="exerciseLibrary" class="libraryGrid" style="margin-top:10px"></div>
 </div></div>
 
-<script src="data.js?v=1.6.1"></script>
-<script src="cross.js?v=1.6.1"></script>
-<script src="app.js?v=1.6.1"></script>
-<div id="onboardingModal" class="modal"><div class="modalBox"><h2>Configura FitCoach</h2><label>Nombre</label><input id="onboardingName" value="Agustín"><label>Objetivo</label><select id="onboardingGoal"><option value="recomp">Recomposición</option><option value="hypertrophy">Hipertrofia</option><option value="strength">Fuerza</option><option value="fatloss">Pérdida de grasa</option></select><div class="row"><div><label>Días</label><select id="onboardingDays"><option value="3">3</option><option value="4" selected>4</option></select></div><div><label>Duración</label><select id="onboardingMinutes"><option value="45">45 min</option><option value="60" selected>60 min</option></select></div></div><button id="finishOnboarding" style="width:100%;margin-top:12px">Crear mi plan inicial</button></div></div><div id="menuRecipeModal" class="modal"><div class="modalBox"><div class="row"><h2 id="menuRecipeTitle" style="margin:0">Receta</h2><button id="closeMenuRecipe" class="secondary">Cerrar</button></div><div id="menuRecipeContent" style="margin-top:12px"></div></div></div><div id="legalModal" class="modal"><div class="modalBox"><div class="row"><h2 id="legalTitle" style="margin:0"></h2><button id="closeLegal" class="secondary">Cerrar</button></div><div id="legalContent" class="small" style="margin-top:12px;white-space:pre-line"></div></div></div></body>
+<script src="data.js?v=2.0.0"></script>
+<script src="cross.js?v=2.0.0"></script>
+<script src="app.js?v=2.0.0"></script>
+<div id="onboardingModal" class="modal"><div class="modalBox"><h2>Configura FitCoach</h2><label>Nombre</label><input id="onboardingName" value="Agustín"><label>Objetivo</label><select id="onboardingGoal"><option value="recomp">Recomposición</option><option value="hypertrophy">Hipertrofia</option><option value="strength">Fuerza</option><option value="fatloss">Pérdida de grasa</option></select><div class="row"><div><label>Días</label><select id="onboardingDays"><option value="3">3</option><option value="4" selected>4</option></select></div><div><label>Duración</label><select id="onboardingMinutes"><option value="30">30 min</option><option value="45">45 min</option><option value="60" selected>60 min</option><option value="75">75 min</option></select></div></div><button id="finishOnboarding" style="width:100%;margin-top:12px">Crear mi plan inicial</button></div></div><div id="menuRecipeModal" class="modal"><div class="modalBox"><div class="row"><h2 id="menuRecipeTitle" style="margin:0">Receta</h2><button id="closeMenuRecipe" class="secondary">Cerrar</button></div><div id="menuRecipeContent" style="margin-top:12px"></div></div></div><div id="legalModal" class="modal"><div class="modalBox"><div class="row"><h2 id="legalTitle" style="margin:0"></h2><button id="closeLegal" class="secondary">Cerrar</button></div><div id="legalContent" class="small" style="margin-top:12px;white-space:pre-line"></div></div></div></body>
 </html>

@@ -1,19 +1,30 @@
-const CACHE = 'fitcoach-stable-1-6-1-forced-update-v1';
+const CACHE = 'fitcoach-2-0-0-product-foundation-v1';
 const APP_SHELL = [
   './',
   './index.html',
-  './styles.css?v=1.6.1',
-  './data.js?v=1.6.1',
-  './cross.js?v=1.6.1',
-  './app.js?v=1.6.1',
-  './manifest.webmanifest?v=1.6.1',
-  './icon-192.png',
-  './icon-512.png'
+  './styles.css?v=2.0.0',
+  './data.js?v=2.0.0',
+  './cross.js?v=2.0.0',
+  './app.js?v=2.0.0',
+  './manifest.webmanifest?v=2.0.0',
+  './version.json',
+  './icon-192.png?v=2.0.0',
+  './icon-512.png?v=2.0.0'
 ];
 
 self.addEventListener('install', event => {
   self.skipWaiting();
-  event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(APP_SHELL)));
+  event.waitUntil(
+    caches.open(CACHE).then(cache =>
+      Promise.allSettled(APP_SHELL.map(asset =>
+        fetch(asset, {cache:'reload'})
+          .then(response => {
+            if (!response.ok) throw new Error(`No se pudo precargar ${asset}`);
+            return cache.put(asset, response);
+          })
+      ))
+    )
+  );
 });
 
 self.addEventListener('message', event => {
@@ -22,9 +33,10 @@ self.addEventListener('message', event => {
 
 self.addEventListener('activate', event => {
   event.waitUntil(
-    caches.keys()
-      .then(keys => Promise.all(keys.filter(key => key !== CACHE).map(key => caches.delete(key))))
-      .then(() => self.clients.claim())
+    Promise.all([
+      caches.keys().then(keys => Promise.all(keys.filter(key => key !== CACHE).map(key => caches.delete(key)))),
+      self.registration.navigationPreload ? self.registration.navigationPreload.enable() : Promise.resolve()
+    ]).then(() => self.clients.claim())
   );
 });
 
@@ -35,28 +47,27 @@ self.addEventListener('fetch', event => {
   if (url.origin !== self.location.origin) return;
 
   if (request.mode === 'navigate') {
-    event.respondWith(
-      fetch(request, {cache:'no-store'})
-        .then(response => {
-          if (response.ok) {
-            const clone = response.clone();
-            event.waitUntil(caches.open(CACHE).then(cache => cache.put('./index.html', clone)));
-          }
+    event.respondWith((async () => {
+      try {
+        const preload = await event.preloadResponse;
+        const response = preload || await fetch(request, {cache:'no-store'});
+        if (response?.ok) {
+          event.waitUntil(caches.open(CACHE).then(cache => cache.put('./index.html', response.clone())));
           return response;
-        })
-        .catch(() => caches.match('./index.html'))
-    );
+        }
+      } catch {}
+      return (await caches.match('./index.html')) || Response.error();
+    })());
     return;
   }
 
-  const isCore = /\.(?:js|css|webmanifest)$/.test(url.pathname);
+  const isCore = /\.(?:js|css|webmanifest|json)$/.test(url.pathname);
   if (isCore) {
     event.respondWith(
       fetch(request, {cache:'no-store'})
         .then(response => {
-          if (response.ok) {
-            const clone = response.clone();
-            event.waitUntil(caches.open(CACHE).then(cache => cache.put(request, clone)));
+          if (response.ok && response.type === 'basic') {
+            event.waitUntil(caches.open(CACHE).then(cache => cache.put(request, response.clone())));
           }
           return response;
         })
@@ -68,8 +79,7 @@ self.addEventListener('fetch', event => {
   event.respondWith(
     caches.match(request).then(cached => cached || fetch(request).then(response => {
       if (response.ok && response.type === 'basic') {
-        const clone = response.clone();
-        event.waitUntil(caches.open(CACHE).then(cache => cache.put(request, clone)));
+        event.waitUntil(caches.open(CACHE).then(cache => cache.put(request, response.clone())));
       }
       return response;
     }))

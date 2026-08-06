@@ -1,9 +1,10 @@
 {
   "name": "fitcoach-app",
-  "version": "1.6.1",
+  "version": "2.0.0",
   "private": true,
   "scripts": {
     "sync:web": "node scripts/sync-web.mjs",
+    "audit": "node scripts/audit.mjs",
     "cap:sync": "npm run sync:web && npx cap sync",
     "cap:add:ios": "npx cap add ios",
     "cap:open:ios": "npx cap open ios"

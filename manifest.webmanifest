@@ -1,11 +1,11 @@
 {
-  "name": "FitCoach Stable 1.6.1",
+  "name": "FitCoach 2.0.0",
   "short_name": "FitCoach",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#080E1A",
   "theme_color": "#080E1A",
-  "description": "Entrenamiento, nutrición, progreso y Crosstraining con actualización fiable en iPhone.",
+  "description": "Entrenamiento adaptativo, nutrición mensual, progreso y Crosstraining para iPhone.",
   "icons": [
     {
       "src": "icon-192.png",
