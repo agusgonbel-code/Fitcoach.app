@@ -116,3 +116,14 @@ nav button.active{color:var(--accent);background:rgba(47,211,116,.10)}
 .historyExercise{padding:8px 0;border-top:1px solid var(--line)}
 
 .volumeRow{padding:10px 0;border-bottom:1px solid var(--line)}.volumeRow:last-of-type{border-bottom:0}.volumeHead{display:flex;justify-content:space-between;gap:12px;font-size:12px;margin-bottom:6px}.volumeTrack{height:9px;background:#07111f;border-radius:999px;overflow:hidden;margin-bottom:5px}.volumeTrack>div{height:100%;border-radius:999px}.volume-ok{background:linear-gradient(90deg,#2fd374,#72eba1)}.volume-low{background:linear-gradient(90deg,#64748b,#94a3b8)}.volume-high{background:linear-gradient(90deg,#ffb648,#ff6b6b)}.volumeAdvice{margin-top:12px;padding:12px;border-radius:14px;background:rgba(120,104,255,.1);border:1px solid rgba(120,104,255,.22);font-size:12px;line-height:1.5}.volumeAdvice strong{display:block;margin-bottom:4px}
+
+
+.exerciseActions{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:8px 0;flex-wrap:wrap}.equivalentButton{padding:8px 10px}.equivalentGrid{display:grid;gap:8px}.equivalentOption{display:flex;flex-direction:column;align-items:flex-start;text-align:left;width:100%;gap:3px;padding:12px}.monthWeekHeader{font-size:1.05rem;font-weight:800;margin:18px 2px 8px;color:var(--accent)}.nutritionDayCard{margin-bottom:10px}
+
+
+/* Stable 1.4.0 · Premium recipe library */
+.recipeFilters{position:sticky;top:70px;z-index:4;backdrop-filter:blur(14px)}
+.secondaryPill{margin-left:6px;opacity:.8}
+.recipeMeta{display:flex;gap:10px;flex-wrap:wrap;margin:8px 0;color:var(--muted);font-size:.82rem}
+.recipeTags{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0 10px}
+.recipeTags span{font-size:.72rem;padding:4px 7px;border-radius:999px;background:rgba(54,211,153,.12);color:var(--accent)}

@@ -1,4 +1,4 @@
-const CACHE = 'fitcoach-stable-1-3-6-volume-fatigue-v1';
+const CACHE = 'fitcoach-stable-1-4-0-premium-recipes-v1';
 const APP_SHELL = ['./','./index.html','./styles.css','./data.js','./app.js','./manifest.webmanifest','./icon-192.png','./icon-512.png'];
 
 self.addEventListener('install', event => {

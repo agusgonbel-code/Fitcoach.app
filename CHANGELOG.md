@@ -34,3 +34,19 @@
 ### Corregido
 - Se evita almacenar respuestas fallidas o recursos de otros dominios.
 - Se evita que una copia JSON mal formada sustituya el estado interno.
+
+## 1.3.7
+- Añadidos ejercicios para pecho, espalda, hombros, brazos, piernas, glúteos y core.
+- Selector modal de equivalencias que conserva series y repeticiones objetivo.
+- Ampliada la biblioteca de recetas con nuevas opciones para todas las comidas.
+- Plan mensual de 30 días con recetas ajustadas, resumen diario y lista de compra.
+- El último plan nutricional generado queda guardado localmente.
+
+
+## 1.4.0
+- La biblioteca pasa de 40 a 200 recetas originales.
+- Añadidas recetas innovadoras inspiradas en tendencias fitness sin copiar contenido protegido.
+- Filtros de recetas por tipo de comida y tiempo máximo.
+- Nuevas etiquetas, cocina, dificultad, fibra y tiempo de preparación.
+- Los planes de 1, 3, 7 y 30 días usan la biblioteca ampliada y mantienen el ajuste de porciones.
+- Caché del service worker actualizada.

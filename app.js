@@ -30,6 +30,7 @@
     metrics: [],
     photos: [],
     recovery: [],
+    nutritionPlan: null,
     preferences:{planGoal:'recomp',planMethod:'evidence',planDays:'4',planMinutes:'60',priorityMuscle:'balanced',progressionMode:'double',calcEquation:'mifflin',calcSex:'m',calcAge:'46',calcHeight:'181',calcWeight:'81',calcFat:'22',calcActivity:'1.6',calcGoal:'recomp',menuMeals:'5',menuDays:'7',portionMeals:'5',portionTolerance:'150'}
   };
 
@@ -43,12 +44,14 @@
     metrics: Store.get('metrics', defaults.metrics),
     photos: Store.get('photos', defaults.photos),
     recovery: Store.get('recovery', defaults.recovery),
+    nutritionPlan: Store.get('nutritionPlan', defaults.nutritionPlan),
     preferences: Store.get('preferences', defaults.preferences)
   };
 
   let timerId = null;
   let timerLeft = 0;
   let pendingPhotos = [];
+  let equivalentContext = null;
 
 
   const planEvidenceMap={
@@ -343,6 +346,46 @@
     return 'Sugerencia: mantén la carga e intenta sumar 1 repetición total.';
   }
 
+  function equivalentExercises(name) {
+    const current = DATA.exercises.find(ex => ex.name === name);
+    if (!current) return [];
+    const samePattern = DATA.exercises.filter(ex => ex.name !== name && ex.muscle === current.muscle && ex.pattern === current.pattern);
+    const sameMuscle = DATA.exercises.filter(ex => ex.name !== name && ex.muscle === current.muscle && ex.pattern !== current.pattern);
+    const explicit = DATA.exercises.find(ex => ex.name === current.alt);
+    const combined = [explicit,...samePattern,...sameMuscle].filter(Boolean);
+    return [...new Map(combined.map(ex => [ex.name,ex])).values()].slice(0,12);
+  }
+
+  function openEquivalentSelector(exerciseIndex) {
+    const day = $('trainingDay').value;
+    const current = state.routines[day]?.[exerciseIndex];
+    if (!current) return;
+    equivalentContext = {day,exerciseIndex};
+    const options = equivalentExercises(current[0]);
+    $('equivalentTitle').textContent = `Equivalentes de ${current[0]}`;
+    $('equivalentList').innerHTML = options.length ? options.map(ex => `
+      <button class="equivalentOption" data-name="${ex.name}">
+        <strong>${ex.name}</strong>
+        <span class="small">${ex.muscle} · ${ex.pattern} · ${ex.equipment}</span>
+      </button>`).join('') : '<div class="empty">No hay equivalentes disponibles.</div>';
+    $$('.equivalentOption').forEach(btn => btn.addEventListener('click', () => selectEquivalentExercise(btn.dataset.name)));
+    $('equivalentModal').classList.add('open');
+  }
+
+  function selectEquivalentExercise(name) {
+    if (!equivalentContext) return;
+    const {day,exerciseIndex} = equivalentContext;
+    const current = state.routines[day]?.[exerciseIndex];
+    const selected = DATA.exercises.find(ex => ex.name === name);
+    if (!current || !selected) return;
+    const previousName = current[0];
+    state.routines[day][exerciseIndex] = [selected.name,current[1],current[2],previousName];
+    saveState();
+    $('equivalentModal').classList.remove('open');
+    equivalentContext = null;
+    renderWorkoutList();
+  }
+
   function renderWorkoutList() {
     const day = $('trainingDay').value;
     const exercises = state.routines[day] || [];
@@ -360,12 +403,14 @@
         </div>`;
       }
       const lastText = last ? `<div class="previousSession"><strong>Último registro · ${new Date(last.date).toLocaleDateString('es-ES')}</strong><div class="small">${last.exercise.sets.map(s => `${s.kg} kg × ${s.reps} · RIR ${s.rir}`).join(' | ')}</div><div class="small">${progressionSuggestion(last,reps)}</div></div>` : `<div class="small">Sin registros anteriores.</div>`;
+      const equivalentCount = equivalentExercises(name).length;
       return `<div class="card workoutCard">
         <div class="exerciseHead"><div><h3>${name}</h3><span class="pill">${sets} series</span><span class="pill">${reps}</span></div><button class="secondary restButton">Descanso</button></div>
-        <div class="small">Alternativa: ${alt}</div>${lastText}${rows}
+        <div class="exerciseActions"><div class="small">Alternativa rápida: ${alt}</div><button class="secondary equivalentButton" data-e="${ei}">Ver equivalentes (${equivalentCount})</button></div>${lastText}${rows}
       </div>`;
     }).join('') || `<div class="empty">No hay ejercicios para este día.</div>`;
     $$('.restButton').forEach(btn => btn.addEventListener('click', startTimer));
+    $$('.equivalentButton').forEach(btn => btn.addEventListener('click', () => openEquivalentSelector(Number(btn.dataset.e))));
   }
 
   function exerciseMuscle(name) {
@@ -581,86 +626,92 @@
     return candidates[0];
   }
 
-  function generateMenu() {
-    const count = Number($('menuMeals').value);
-    const days = Number($('menuDays').value);
-    const dayNames = ['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'];
+  function createNutritionPlan(count,days) {
     const mealTypes = count === 4
       ? ['Desayuno','Comida','Merienda','Cena']
       : ['Desayuno','Merienda','Comida','Merienda','Cena'];
     const weights = count === 4 ? [.24,.34,.14,.28] : [.20,.12,.30,.13,.25];
-    const globalUsed = new Set();
-    const allRecipes = [];
+    const usedByMeal = {};
 
-    function pickUniqueRecipe(meal,targetK,targetP) {
-      let pool = DATA.recipes.filter(r => r.meal === meal && !globalUsed.has(r.id));
-      if (!pool.length) pool = DATA.recipes.filter(r => r.meal === meal);
-      pool.sort((a,b) =>
-        (Math.abs(a.kcal-targetK)+Math.abs(a.p-targetP)*7) -
-        (Math.abs(b.kcal-targetK)+Math.abs(b.p-targetP)*7)
-      );
-      const top = pool.slice(0,Math.min(3,pool.length));
-      const selected = top[Math.floor(Math.random()*top.length)] || pool[0];
-      if (selected) globalUsed.add(selected.id);
+    function pickRecipe(meal,targetK,targetP,dayIndex,mealIndex) {
+      const pool = DATA.recipes.filter(r => r.meal === meal);
+      if (!pool.length) return null;
+      usedByMeal[meal] ||= [];
+      const recentlyUsed = new Set(usedByMeal[meal].slice(-Math.min(pool.length-1,8)));
+      let candidates = pool.filter(r => !recentlyUsed.has(r.id));
+      if (!candidates.length) candidates = pool;
+      candidates.sort((a,b) => {
+        const scoreA = Math.abs(a.kcal-targetK)+Math.abs(a.p-targetP)*7;
+        const scoreB = Math.abs(b.kcal-targetK)+Math.abs(b.p-targetP)*7;
+        return scoreA-scoreB;
+      });
+      const best = candidates.slice(0,Math.min(4,candidates.length));
+      const selected = best[(dayIndex+mealIndex*2)%best.length] || candidates[0];
+      usedByMeal[meal].push(selected.id);
       return selected;
     }
 
-    function fitDayPortions(recipes) {
+    function fitDay(recipes) {
       let fitted = recipes.map((r,i) => {
         const targetK = state.targets.kcal*weights[i];
         const targetP = state.targets.protein*weights[i];
-        const kcalScale = targetK/Math.max(1,r.kcal);
-        const proteinScale = targetP/Math.max(1,r.p);
-        const scale = Math.max(.55,Math.min(1.85,kcalScale*.78+proteinScale*.22));
-        return {...r,scale};
+        const scale = Math.max(.5,Math.min(2,(targetK/r.kcal)*.78+(targetP/r.p)*.22));
+        return {recipeId:r.id,meal:mealTypes[i],scale};
       });
-
-      for (let pass=0; pass<3; pass++) {
-        const total = fitted.reduce((sum,r)=>sum+r.kcal*r.scale,0);
-        const correction = state.targets.kcal/Math.max(1,total);
-        fitted = fitted.map(r=>({...r,scale:Math.max(.5,Math.min(2,r.scale*correction))}));
+      for (let pass=0;pass<4;pass++) {
+        const total = fitted.reduce((sum,item) => {
+          const r=DATA.recipes.find(x=>x.id===item.recipeId);
+          return sum+r.kcal*item.scale;
+        },0);
+        const correction=state.targets.kcal/Math.max(1,total);
+        fitted=fitted.map(item=>({...item,scale:Math.max(.5,Math.min(2,item.scale*correction))}));
       }
-
-      return fitted.map(r=>({
-        ...r,
-        kcal:Math.round(r.kcal*r.scale),
-        p:Math.round(r.p*r.scale),
-        c:Math.round(r.c*r.scale),
-        f:Math.round(r.f*r.scale),
-        scaledIngredients:r.ingredients.map(x=>scaleIngredient(x,r.scale))
-      }));
+      return fitted;
     }
 
-    $('menuOutput').innerHTML = Array.from({length:days},(_,dayIndex) => {
-      const base = mealTypes.map((meal,i) =>
-        pickUniqueRecipe(meal,state.targets.kcal*weights[i],state.targets.protein*weights[i])
-      ).filter(Boolean);
-      const selected = fitDayPortions(base);
-      allRecipes.push(...selected);
+    const startDate = new Date();
+    startDate.setHours(12,0,0,0);
+    const planDays = Array.from({length:days},(_,dayIndex) => {
+      const recipes = mealTypes.map((meal,i)=>pickRecipe(meal,state.targets.kcal*weights[i],state.targets.protein*weights[i],dayIndex,i)).filter(Boolean);
+      const meals = fitDay(recipes);
+      const totals = meals.reduce((sum,item)=>{
+        const r=DATA.recipes.find(x=>x.id===item.recipeId);
+        return {kcal:sum.kcal+Math.round(r.kcal*item.scale),p:sum.p+Math.round(r.p*item.scale),c:sum.c+Math.round(r.c*item.scale),f:sum.f+Math.round(r.f*item.scale)};
+      },{kcal:0,p:0,c:0,f:0});
+      const date=new Date(startDate);date.setDate(startDate.getDate()+dayIndex);
+      return {index:dayIndex+1,date:date.toISOString().slice(0,10),meals,totals};
+    });
+    return {id:Date.now(),createdAt:new Date().toISOString(),days,mealsPerDay:count,target:{...state.targets},planDays};
+  }
 
-      const sum = selected.reduce(
-        (a,r)=>({kcal:a.kcal+r.kcal,p:a.p+r.p,c:a.c+r.c,f:a.f+r.f}),
-        {kcal:0,p:0,c:0,f:0}
-      );
-      const deviation = sum.kcal-state.targets.kcal;
-      const deviationText = `${deviation>0?'+':''}${deviation} kcal`;
-
-      return `<div class="card" style="margin-bottom:10px">
-        <h3>${dayNames[dayIndex]}</h3>
-        ${selected.map((r,mealIndex)=>`
-          <div class="history">
-            <strong>${mealTypes[mealIndex]}: ${r.name}</strong> <span class="portionBadge">x${r.scale.toFixed(2)}</span>
-            <div class="small">${r.kcal} kcal · P ${r.p} · C ${r.c} · G ${r.f}</div>
-            <button class="secondary menuRecipe" data-id="${r.id}" data-scale="${r.scale.toFixed(4)}" style="margin-top:6px;padding:8px 10px">Ver receta ajustada</button>
-          </div>`).join('')}
-        <div class="kcal">Total ${sum.kcal} kcal · P ${sum.p} g</div>
-        <div class="small">Objetivo: ${state.targets.kcal} kcal · desviación ${deviationText} · ${state.targets.protein} g proteína</div>
-      </div>`;
+  function renderNutritionPlan(plan=state.nutritionPlan) {
+    if (!plan?.planDays?.length) return;
+    const allRecipes=[];
+    $('menuOutput').innerHTML = plan.planDays.map((day,dayIndex) => {
+      const date=new Date(`${day.date}T12:00:00`);
+      const label=plan.days>=28 ? `Día ${day.index} · ${date.toLocaleDateString('es-ES',{weekday:'long',day:'numeric',month:'short'})}` : date.toLocaleDateString('es-ES',{weekday:'long',day:'numeric'});
+      const weekHeader=plan.days>=28 && dayIndex%7===0 ? `<div class="monthWeekHeader">Semana ${Math.floor(dayIndex/7)+1}</div>` : '';
+      const mealsHtml=day.meals.map(item=>{
+        const r=DATA.recipes.find(x=>x.id===item.recipeId);if(!r)return '';
+        const adjusted={...r,scale:item.scale,scaledIngredients:r.ingredients.map(x=>scaleIngredient(x,item.scale))};allRecipes.push(adjusted);
+        return `<div class="history"><strong>${item.meal}: ${r.name}</strong> <span class="portionBadge">x${item.scale.toFixed(2)}</span><div class="small">${Math.round(r.kcal*item.scale)} kcal · P ${Math.round(r.p*item.scale)} · C ${Math.round(r.c*item.scale)} · G ${Math.round(r.f*item.scale)}</div><button class="secondary menuRecipe" data-id="${r.id}" data-scale="${item.scale.toFixed(4)}" style="margin-top:6px;padding:8px 10px">Ver receta ajustada</button></div>`;
+      }).join('');
+      const deviation=day.totals.kcal-plan.target.kcal;
+      return `${weekHeader}<div class="card nutritionDayCard"><h3>${label}</h3>${mealsHtml}<div class="kcal">Total ${day.totals.kcal} kcal · P ${day.totals.p} g · C ${day.totals.c} g · G ${day.totals.f} g</div><div class="small">Objetivo ${plan.target.kcal} kcal · desviación ${deviation>0?'+':''}${deviation} kcal</div></div>`;
     }).join('');
-
-    $$('.menuRecipe').forEach(btn => btn.addEventListener('click', () => showMenuRecipe(btn.dataset.id,btn.dataset.scale)));
-
+    $$('.menuRecipe').forEach(btn=>btn.addEventListener('click',()=>showMenuRecipe(btn.dataset.id,btn.dataset.scale)));
     renderShoppingList(allRecipes);
+    const avg=Math.round(plan.planDays.reduce((a,d)=>a+d.totals.kcal,0)/plan.planDays.length);
+    if ($('nutritionPlanStatus')) $('nutritionPlanStatus').innerHTML=`<strong>Plan guardado:</strong> ${plan.days} días · media ${avg} kcal/día · creado ${new Date(plan.createdAt).toLocaleDateString('es-ES')}`;
+  }
+
+  function generateMenu() {
+    const count=Number($('menuMeals').value);
+    const days=Number($('menuDays').value);
+    state.nutritionPlan=createNutritionPlan(count,days);
+    savePreferences();
+    saveState();
+    renderNutritionPlan();
   }
 
   function renderShoppingList(recipes) {
@@ -692,14 +743,22 @@
   }
 
   function renderRecipes() {
-    const q = $('recipeSearch').value.toLowerCase();
-    const list = DATA.recipes.filter(r => !q || JSON.stringify(r).toLowerCase().includes(q));
+    const q = $('recipeSearch').value.toLowerCase().trim();
+    const meal = $('recipeMealFilter')?.value || '';
+    const maxTime = Number($('recipeTimeFilter')?.value) || Infinity;
+    const list = DATA.recipes.filter(r => {
+      const matchesText = !q || JSON.stringify(r).toLowerCase().includes(q);
+      return matchesText && (!meal || r.meal === meal) && (!r.time || r.time <= maxTime);
+    });
+    if ($('recipeCount')) $('recipeCount').textContent = `${list.length} de ${DATA.recipes.length} recetas · originales y escalables por porción`;
     $('recipeList').innerHTML = list.map(r => `<div class="recipeCard">
-      <h3>${r.name}</h3><span class="pill">${r.meal}</span>
-      <div class="kcal">${r.kcal} kcal</div><div class="small">P ${r.p} g · C ${r.c} g · G ${r.f} g</div>
+      <h3>${r.name}</h3><span class="pill">${r.meal}</span>${r.cuisine?`<span class="pill secondaryPill">${r.cuisine}</span>`:''}
+      <div class="kcal">${r.kcal} kcal</div><div class="small">P ${r.p} g · C ${r.c} g · G ${r.f} g${r.fiber?` · Fibra ${r.fiber} g`:''}</div>
+      ${r.time?`<div class="recipeMeta"><span>⏱ ${r.time} min</span><span>${r.difficulty||'Fácil'}</span></div>`:''}
+      ${r.tags?.length?`<div class="recipeTags">${r.tags.map(t=>`<span>${t}</span>`).join('')}</div>`:''}
       <div class="recipeSteps"><strong>Ingredientes</strong><div class="small">${r.ingredients.join('<br>')}</div><strong style="display:block;margin-top:9px">Preparación</strong><ol>${r.steps.map(s => `<li>${s}</li>`).join('')}</ol></div>
       <button class="addRecipeMeal" data-id="${r.id}" style="width:100%">Añadir al diario</button>
-    </div>`).join('');
+    </div>`).join('') || '<div class="card empty">No hay recetas que coincidan con los filtros.</div>';
     $$('.addRecipeMeal').forEach(btn => btn.addEventListener('click', () => {
       const r = DATA.recipes.find(x => x.id === btn.dataset.id);
       state.meals.push({id:Date.now(),date:todayKey(),type:r.meal,name:r.name,kcal:r.kcal,p:r.p,c:r.c,f:r.f});
@@ -713,6 +772,7 @@
     renderMacroResult();
     renderTodayMeals();
     renderRecipes();
+    if (state.nutritionPlan) renderNutritionPlan();
   }
 
   function saveMetric() {
@@ -897,6 +957,7 @@
     $('saveWorkout').addEventListener('click', saveWorkout);
     $('openLibrary').addEventListener('click', openLibrary);
     $('closeLibrary').addEventListener('click', () => $('libraryModal').classList.remove('open'));
+    $('closeEquivalent').addEventListener('click', () => $('equivalentModal').classList.remove('open'));
     $('exerciseSearch').addEventListener('input', renderExerciseLibrary);
     $('muscleFilter').addEventListener('change', renderExerciseLibrary);
     $('timerAdd').addEventListener('click', () => {timerLeft += 30;updateTimer()});
@@ -906,6 +967,8 @@
     $('generateMenu').addEventListener('click', generateMenu);
     $('addMeal').addEventListener('click', addMeal);
     $('recipeSearch').addEventListener('input', renderRecipes);
+    $('recipeMealFilter').addEventListener('change', renderRecipes);
+    $('recipeTimeFilter').addEventListener('change', renderRecipes);
 
     $('saveMetric').addEventListener('click', saveMetric);
     $('saveRecovery').addEventListener('click', saveRecovery);

@@ -43,3 +43,20 @@ Commit: `FitCoach Stable 1.3.5 - Expanded Training & Persistent Exercise History
 - El análisis se actualiza al guardar entrenamientos y puede refrescarse manualmente.
 
 Commit: `FitCoach Stable 1.3.6 - Weekly Volume & Fatigue Control`
+
+## Stable 1.3.7
+- Biblioteca ampliada de ejercicios.
+- Selector de ejercicios equivalentes dentro de cada entrenamiento.
+- Más recetas completas y escalables.
+- Plan nutricional mensual de 30 días, persistente y equilibrado en calorías.
+
+
+## Stable 1.4.0
+- Biblioteca Premium ampliada a 200 recetas completas y originales.
+- 50 desayunos, 50 comidas, 50 meriendas y 50 cenas.
+- Nuevas recetas de tendencia fitness creadas específicamente para FitCoach.
+- Filtros por comida, tiempo de preparación, ingrediente, cocina y etiquetas.
+- Metadatos de fibra, tiempo, dificultad, cocina y estilo.
+- Compatibilidad total con menús diarios, semanales y mensuales y escalado de porciones.
+
+Commit sugerido: `FitCoach Stable 1.4.0 - Premium Recipe Library`
