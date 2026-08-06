@@ -10,13 +10,13 @@
   <link rel="apple-touch-icon" href="icon-192.png">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="stylesheet" href="styles.css">
-  <title>FitCoach Stable 1.4.0</title>
+  <title>FitCoach Stable 1.6.0</title>
 </head>
 <body>
 <header>
   <div class="topbar">
     <div class="brand"><div class="logo">F</div><div>FitCoach</div></div>
-    <span class="version">Stable 1.4.0</span>
+    <span class="version">Stable 1.6.0</span>
   </div>
 </header>
 
@@ -52,13 +52,13 @@
     <div class="card">
       <div class="row">
         <div><label>Objetivo</label><select id="planGoal"><option value="recomp">Recomposición</option><option value="hypertrophy">Hipertrofia</option><option value="strength">Fuerza</option><option value="fatloss">Pérdida de grasa</option></select></div>
-        <div><label>Método</label><select id="planMethod"><option value="evidence">Hipertrofia equilibrada 4D</option><option value="upperlower">Upper / Lower 4D</option><option value="fullbody">Full Body 3D</option><option value="strength">Fuerza 4D</option><option value="powerbuilding">Powerbuilding 4D</option><option value="minimum">Dosis mínima efectiva 3D</option><option value="lowload">Bajo impacto / cargas moderadas</option><option value="mentzer">Heavy Duty inspirado en Mentzer</option></select></div>
+        <div><label>Método</label><select id="planMethod"><option value="evidence">Hipertrofia equilibrada 4D</option><option value="upperlower">Upper / Lower 4D</option><option value="fullbody">Full Body 3D</option><option value="strength">Fuerza 4D</option><option value="powerbuilding">Powerbuilding 4D</option><option value="minimum">Dosis mínima efectiva 3D</option><option value="lowload">Bajo impacto / cargas moderadas</option><option value="mentzer">Heavy Duty inspirado en Mentzer</option><option value="ppl">Push / Pull / Legs</option><option value="phul">PHUL · fuerza e hipertrofia</option><option value="fivebyfive">Fuerza 5x5 adaptada</option><option value="home">Casa · peso corporal y bandas</option><option value="metabolic">Circuito de acondicionamiento</option><option value="specialization">Especialización muscular</option></select></div>
       </div>
       <div class="row">
         <div><label>Días</label><select id="planDays"><option value="3">3 días</option><option value="4" selected>4 días</option></select></div>
         <div><label>Duración</label><select id="planMinutes"><option value="45">45 min</option><option value="60" selected>60 min</option></select></div>
       </div>
-      <button id="generatePlan" style="width:100%;margin-top:10px">Generar plan</button><div id="planEvidence" class="evidencePanel" style="margin-top:10px"></div>
+      <div class="row" style="margin-top:8px"><div><label>Experiencia</label><select id="trainingExperience"><option value="beginner">Principiante</option><option value="intermediate" selected>Intermedio</option><option value="advanced">Avanzado</option></select></div><div><label>Entorno</label><select id="trainingLocation"><option value="gym">Gimnasio completo</option><option value="machines">Máquinas y poleas</option><option value="home">Casa / poco material</option></select></div></div><button id="generatePlan" style="width:100%;margin-top:10px">Generar plan</button><div id="planEvidence" class="evidencePanel" style="margin-top:10px"></div>
     </div>
 
     <h2>Constructor rápido</h2><div class="card"><div class="row"><div><label>Prioridad muscular</label><select id="priorityMuscle"><option value="balanced">Equilibrado</option><option value="shoulders">Hombros</option><option value="back">Espalda</option><option value="legs">Piernas</option></select></div><div><label>Progresión</label><select id="progressionMode"><option value="double">Doble progresión</option><option value="load">Subida de carga</option><option value="reps">Subida de repeticiones</option></select></div></div><button id="applyPriority" style="width:100%;margin-top:10px">Aplicar prioridad al plan</button></div><h2>Progresión sugerida</h2><div class="card"><button id="analyzeProgression" style="width:100%">Analizar últimos entrenamientos</button><div id="progressionOutput" style="margin-top:10px"></div></div>
@@ -115,7 +115,7 @@
         </div>
         <button id="generateMenu" style="width:100%;margin-top:10px">Generar menú</button>
       </div>
-      <div id="nutritionPlanStatus" class="notice" style="margin-top:10px">Genera un plan semanal o mensual. El último plan quedará guardado en el dispositivo.</div><div id="menuOutput" style="margin-top:10px"></div>
+      <h2>Preferencias del plan</h2><div class="card"><div class="row"><div><label>Estilo</label><select id="dietStyle"><option value="omnivore">Omnívoro</option><option value="mediterranean">Mediterráneo</option><option value="vegetarian">Vegetariano</option><option value="highprotein">Alto en proteína</option></select></div><div><label>Presupuesto</label><select id="nutritionBudget"><option value="any">Indiferente</option><option value="low">Económico</option><option value="medium">Medio</option></select></div></div><div class="row"><div><label>Tiempo máximo</label><select id="nutritionMaxPrep"><option value="0">Sin límite</option><option value="15">15 min</option><option value="25">25 min</option><option value="40">40 min</option></select></div><div><label>Estrategia calórica</label><select id="calorieStrategy"><option value="flat">Igual cada día</option><option value="training">Más calorías en días de entrenamiento</option><option value="weekend">Flexible fin de semana</option></select></div></div><label>Excluir ingredientes (separados por coma)</label><input id="excludedIngredients" placeholder="Ej.: salmón, lactosa, cacahuete"><div class="small" style="margin-top:7px">Las preferencias se guardan y se aplican a planes semanales y mensuales.</div></div><div id="monthlyPlanInsights" class="card" style="margin-top:10px" hidden></div><div id="nutritionPlanStatus" class="notice" style="margin-top:10px">Genera un plan semanal o mensual. El último plan quedará guardado en el dispositivo.</div><div id="menuOutput" style="margin-top:10px"></div>
       <h2>Lista de compra</h2><div class="card" id="shoppingList"><div class="empty">Genera un menú.</div></div>
     </div>
 
@@ -132,7 +132,7 @@
     </div>
 
     <div id="nutrition-recipes" class="nutritionPanel" hidden>
-      <h2>Biblioteca Premium · 200 recetas</h2>
+      <h2>Biblioteca Premium · 300 recetas</h2>
       <div class="card recipeFilters">
         <input id="recipeSearch" placeholder="Buscar receta, ingrediente o estilo...">
         <div class="row" style="margin-top:8px">
@@ -176,6 +176,21 @@
     <h2>Informe mensual</h2><div class="card" id="monthlyReport"></div><h2>Historial corporal</h2><div class="card" id="metricHistory"></div>
   </section>
 
+
+  <section id="crosstraining" class="page">
+    <div class="hero crossHero"><div class="eyebrow">Crosstraining sin material olímpico</div><h1>WOD Studio</h1><p>Biblioteca de WODs y generador adaptado al material disponible, nivel y tiempo.</p></div>
+    <div class="card">
+      <div class="row"><div><label>Formato</label><select id="crossFormat"><option value="">Todos</option><option>AMRAP</option><option>EMOM</option><option>For Time</option><option>Chipper</option><option>Tabata</option><option>Intervals</option></select></div><div><label>Nivel</label><select id="crossLevel"><option value="">Todos</option><option>Principiante</option><option>Intermedio</option><option>Avanzado</option></select></div></div>
+      <div class="row"><div><label>Material principal</label><select id="crossEquipment"><option value="">Todo sin barra olímpica</option><option value="peso corporal">Solo peso corporal</option><option value="mancuerna">Mancuernas</option><option value="kettlebell">Kettlebell</option><option value="cajón">Cajón</option><option value="barra de dominadas">Dominadas</option><option value="anillas/TRX">Anillas / TRX</option><option value="comba">Comba</option><option value="remo">Remo</option><option value="air bike">Air bike</option><option value="carrera">Carrera</option></select></div><div><label>Duración máxima</label><select id="crossDuration"><option value="0">Cualquiera</option><option value="15">15 min</option><option value="20">20 min</option><option value="30">30 min</option><option value="45">45 min</option></select></div></div>
+      <input id="crossSearch" placeholder="Buscar WOD o movimiento...">
+      <div class="row" style="margin-top:10px"><button id="crossRandom" style="width:100%">Generar WOD compatible</button><button id="crossReset" class="secondary">Limpiar</button></div>
+      <div id="crossCount" class="small" style="margin-top:8px"></div>
+    </div>
+    <div class="notice">No incluye barra olímpica, discos, snatch ni clean & jerk con barra. Las variantes con mancuernas o kettlebell son opcionales y filtrables.</div>
+    <div id="crossWodList" class="crossGrid" style="margin-top:10px"></div>
+    <h2>Historial de Crosstraining</h2><div id="crossHistory" class="card"></div>
+  </section>
+
   <section id="settings" class="page">
     <h2>Perfil</h2>
     <div class="card">
@@ -200,6 +215,7 @@
   <button data-page="training"><span class="navIcon">🏋️</span>Entreno</button>
   <button data-page="nutrition"><span class="navIcon">🥗</span>Nutrición</button>
   <button data-page="progress"><span class="navIcon">📈</span>Progreso</button>
+  <button data-page="crosstraining"><span class="navIcon">⚡</span>Cross</button>
   <button data-page="settings"><span class="navIcon">⚙️</span>Ajustes</button>
 </nav>
 
@@ -207,7 +223,7 @@
 <div id="equivalentModal" class="modal"><div class="modalBox">
   <div class="modalHead"><h2 id="equivalentTitle">Ejercicios equivalentes</h2><button id="closeEquivalent" class="secondary">Cerrar</button></div>
   <div class="notice">Selecciona una alternativa. Se mantendrán las series y el rango de repeticiones del ejercicio sustituido.</div>
-  <div id="equivalentList" class="equivalentGrid" style="margin-top:10px"></div>
+  <div class="row"><input id="equivalentSearch" placeholder="Buscar equivalente..."><select id="equivalentEquipment"><option value="">Todo el material</option></select></div><div id="equivalentCurrent" class="notice" style="margin-top:8px"></div><div id="equivalentList" class="equivalentGrid" style="margin-top:10px"></div>
 </div></div>
 <div id="libraryModal" class="modal"><div class="modalBox">
   <div class="row"><h2 style="margin:0">Biblioteca</h2><button id="closeLibrary" class="secondary">Cerrar</button></div>
@@ -216,6 +232,7 @@
 </div></div>
 
 <script src="data.js"></script>
+<script src="cross.js"></script>
 <script src="app.js"></script>
 <div id="onboardingModal" class="modal"><div class="modalBox"><h2>Configura FitCoach</h2><label>Nombre</label><input id="onboardingName" value="Agustín"><label>Objetivo</label><select id="onboardingGoal"><option value="recomp">Recomposición</option><option value="hypertrophy">Hipertrofia</option><option value="strength">Fuerza</option><option value="fatloss">Pérdida de grasa</option></select><div class="row"><div><label>Días</label><select id="onboardingDays"><option value="3">3</option><option value="4" selected>4</option></select></div><div><label>Duración</label><select id="onboardingMinutes"><option value="45">45 min</option><option value="60" selected>60 min</option></select></div></div><button id="finishOnboarding" style="width:100%;margin-top:12px">Crear mi plan inicial</button></div></div><div id="menuRecipeModal" class="modal"><div class="modalBox"><div class="row"><h2 id="menuRecipeTitle" style="margin:0">Receta</h2><button id="closeMenuRecipe" class="secondary">Cerrar</button></div><div id="menuRecipeContent" style="margin-top:12px"></div></div></div><div id="legalModal" class="modal"><div class="modalBox"><div class="row"><h2 id="legalTitle" style="margin:0"></h2><button id="closeLegal" class="secondary">Cerrar</button></div><div id="legalContent" class="small" style="margin-top:12px;white-space:pre-line"></div></div></div></body>
 </html>

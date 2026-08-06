@@ -89,7 +89,7 @@ canvas{width:100%;height:205px;background:#0a1425;border-radius:13px}
 body.light canvas{background:#f7f9fc}
 nav{
   position:fixed;left:0;right:0;bottom:0;z-index:80;
-  display:grid;grid-template-columns:repeat(5,1fr);gap:3px;
+  display:grid;grid-template-columns:repeat(6,1fr);gap:3px;
   padding:7px 6px calc(7px + env(safe-area-inset-bottom));
   background:rgba(7,13,24,.92);backdrop-filter:blur(22px);border-top:1px solid rgba(255,255,255,.06)
 }
@@ -127,3 +127,9 @@ nav button.active{color:var(--accent);background:rgba(47,211,116,.10)}
 .recipeMeta{display:flex;gap:10px;flex-wrap:wrap;margin:8px 0;color:var(--muted);font-size:.82rem}
 .recipeTags{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0 10px}
 .recipeTags span{font-size:.72rem;padding:4px 7px;border-radius:999px;background:rgba(54,211,153,.12);color:var(--accent)}
+
+.dayPlanHead{display:flex;align-items:center;justify-content:space-between;gap:10px}.dayPlanHead h3{margin:0}.equivalentOption{display:flex;flex-direction:column;align-items:flex-start;text-align:left;gap:5px;width:100%}.equivalentGrid{display:grid;gap:8px}.nutritionDayCard{scroll-margin-top:80px}.recipeFilters select,.recipeFilters input{min-width:0}@media(max-width:560px){.dayPlanHead{align-items:flex-start}.dayPlanHead button{width:auto;white-space:nowrap}}
+
+
+/* Stable 1.6.0 · Crosstraining Studio */
+.crossHero{background:linear-gradient(135deg,rgba(255,182,72,.16),rgba(120,104,255,.12))}.crossGrid{display:grid;gap:10px}.crossWod h3{margin:7px 0 0}.crossHead{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.crossMoves{padding-left:22px;margin:12px 0;line-height:1.65}.crossMoves strong{display:inline-block;min-width:54px;color:var(--accent)}@media(min-width:760px){.crossGrid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:420px){nav button{font-size:9px}.navIcon{font-size:16px}}

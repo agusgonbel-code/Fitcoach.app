@@ -60,3 +60,19 @@ Commit: `FitCoach Stable 1.3.6 - Weekly Volume & Fatigue Control`
 - Compatibilidad total con menús diarios, semanales y mensuales y escalado de porciones.
 
 Commit sugerido: `FitCoach Stable 1.4.0 - Premium Recipe Library`
+
+
+## Stable 1.5.0 · Benchmark Suite
+- Selector de ejercicios equivalentes con búsqueda, material e historial previo.
+- 14 metodologías y entornos de entrenamiento.
+- 300 recetas originales.
+- Preferencias nutricionales persistentes y plan mensual regenerable por día.
+- Indicadores de variedad, proteína media y desviación calórica.
+
+
+## Stable 1.6.0 · Crosstraining Studio
+- Apartado exclusivo de Crosstraining sin barra olímpica ni discos.
+- 125 WODs: peso corporal, mancuernas, kettlebell, cajón, dominadas, TRX/anillas, carrera y ergómetros.
+- Filtros por formato, nivel, material y duración.
+- Generador aleatorio compatible y registro persistente de resultados.
+- Formatos AMRAP, EMOM, For Time, Chipper, Tabata e intervalos.

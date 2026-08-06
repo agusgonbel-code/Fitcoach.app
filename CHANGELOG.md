@@ -1,3 +1,12 @@
+# Changelog
+
+## 1.6.0
+- Nuevo WOD Studio exclusivo para Crosstraining.
+- Biblioteca amplia sin material olímpico.
+- Escalados por nivel, filtros de equipo y duración.
+- Generación aleatoria y guardado de resultados/notas.
+- Navegación y caché actualizadas.
+
 ## 1.3.6 - 2026-08-05
 - Añadido control semanal de series por grupo muscular.
 - Rangos de referencia distintos para hipertrofia, fuerza, Full Body, dosis mínima y Heavy Duty.
@@ -20,7 +29,6 @@
 - Recetas y lista de compra muestran cantidades ajustadas.
 - Se muestra la desviación calórica diaria respecto al objetivo.
 
-# Changelog
 
 ## 1.3.3 - 2026-08-04
 ### Añadido
@@ -50,3 +58,9 @@
 - Nuevas etiquetas, cocina, dificultad, fibra y tiempo de preparación.
 - Los planes de 1, 3, 7 y 30 días usan la biblioteca ampliada y mantienen el ajuste de porciones.
 - Caché del service worker actualizada.
+
+## 1.5.0
+- Selector de equivalentes reforzado.
+- Nuevos métodos: PPL, PHUL, 5x5 adaptado, casa, circuito y especialización.
+- Preferencias de dieta, presupuesto, tiempo, exclusiones y estrategia calórica.
+- 300 recetas y mejor plan mensual con regeneración por día y métricas de calidad.

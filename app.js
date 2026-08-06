@@ -2,6 +2,7 @@
   'use strict';
 
   const DATA = window.FITCOACH_DATA;
+  const CROSS_WODS = window.FITCOACH_CROSS_WODS || [];
   const DAYS = ['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
   const $ = id => document.getElementById(id);
   const $$ = sel => [...document.querySelectorAll(sel)];
@@ -31,7 +32,8 @@
     photos: [],
     recovery: [],
     nutritionPlan: null,
-    preferences:{planGoal:'recomp',planMethod:'evidence',planDays:'4',planMinutes:'60',priorityMuscle:'balanced',progressionMode:'double',calcEquation:'mifflin',calcSex:'m',calcAge:'46',calcHeight:'181',calcWeight:'81',calcFat:'22',calcActivity:'1.6',calcGoal:'recomp',menuMeals:'5',menuDays:'7',portionMeals:'5',portionTolerance:'150'}
+    crossHistory: [],
+    preferences:{planGoal:'recomp',planMethod:'evidence',planDays:'4',planMinutes:'60',priorityMuscle:'balanced',progressionMode:'double',calcEquation:'mifflin',calcSex:'m',calcAge:'46',calcHeight:'181',calcWeight:'81',calcFat:'22',calcActivity:'1.6',calcGoal:'recomp',menuMeals:'5',menuDays:'7',portionMeals:'5',portionTolerance:'150',trainingExperience:'intermediate',trainingLocation:'gym',dietStyle:'omnivore',nutritionBudget:'any',nutritionMaxPrep:'0',calorieStrategy:'flat',excludedIngredients:''}
   };
 
   let state = {
@@ -45,6 +47,7 @@
     photos: Store.get('photos', defaults.photos),
     recovery: Store.get('recovery', defaults.recovery),
     nutritionPlan: Store.get('nutritionPlan', defaults.nutritionPlan),
+    crossHistory: Store.get('crossHistory', defaults.crossHistory),
     preferences: Store.get('preferences', defaults.preferences)
   };
 
@@ -62,7 +65,13 @@
     powerbuilding:{title:'Powerbuilding',text:'Combina movimientos principales pesados con accesorios de hipertrofia.',tags:['fuerza + hipertrofia','4 días','doble progresión']},
     minimum:{title:'Dosis mínima efectiva',text:'Tres sesiones breves y pocos ejercicios prioritarios. Añade volumen solo cuando el progreso se estanque.',tags:['3 días','45 minutos','volumen bajo']},
     lowload:{title:'Bajo impacto / cargas moderadas',text:'Máquinas, poleas y 10-20 repeticiones para reducir cargas articulares externas manteniendo esfuerzo suficiente.',tags:['10-20 repeticiones','máquinas','2-3 RIR']},
-    mentzer:{title:'Heavy Duty inspirado en Mentzer',text:'Muy bajo volumen y esfuerzo alto. No se presenta como superior y evita exigir fallo absoluto en ejercicios complejos.',tags:['bajo volumen','0-2 RIR','fatiga vigilada']}
+    mentzer:{title:'Heavy Duty inspirado en Mentzer',text:'Muy bajo volumen y esfuerzo alto. No se presenta como superior y evita exigir fallo absoluto en ejercicios complejos.',tags:['bajo volumen','0-2 RIR','fatiga vigilada']},
+    ppl:{title:'Push / Pull / Legs',text:'Organiza el trabajo por patrones de empuje, tracción y pierna. Se adapta a 3 o más días sin exigir seis sesiones.',tags:['3-6 días','volumen distribuido','flexible']},
+    phul:{title:'PHUL adaptado',text:'Alterna sesiones orientadas a fuerza con sesiones de hipertrofia, manteniendo volumen recuperable.',tags:['4 días','fuerza + hipertrofia','periodización ondulante']},
+    fivebyfive:{title:'5x5 adaptado',text:'Prioriza práctica de patrones básicos con cinco series moderadas. Los accesorios y la carga se ajustan para controlar la fatiga.',tags:['fuerza','5x5','técnica']},
+    home:{title:'Entrenamiento en casa',text:'Rutina con peso corporal, bandas y mancuernas opcionales, usando progresiones de repeticiones y dificultad.',tags:['casa','poco material','progresión por variantes']},
+    metabolic:{title:'Circuito de acondicionamiento',text:'Circuitos de cuerpo completo con cargas moderadas. Complementa la fuerza, no la sustituye como única estrategia universal.',tags:['circuitos','condición física','RIR 2-4']},
+    specialization:{title:'Especialización muscular',text:'Añade volumen prudente al grupo prioritario y reduce trabajo accesorio en otros grupos para mantener la recuperación.',tags:['prioridad muscular','bloques 4-6 semanas','fatiga controlada']}
   };
   function createUpperLowerRoutine(){
     return {
@@ -102,8 +111,26 @@
       Jueves:[['Hip thrust',4,'4-6','Puente de glúteo'],['Sentadilla goblet',4,'6-10','Prensa de piernas'],['Curl femoral sentado',3,'8-12','Curl femoral tumbado'],['Zancada atrás',3,'8-12','Step-up'],['Abducción de cadera en máquina',3,'12-20','Caminata lateral con banda'],['Gemelo sentado',4,'10-20','Gemelo de pie']]
     };
   }
+  function createPPLRoutine(){return {
+    Lunes:[['Press banca con mancuernas',3,'6-10','Press en máquina'],['Press militar sentado',3,'8-12','Press de hombros en máquina'],['Press inclinado en máquina',3,'8-12','Press inclinado con mancuernas'],['Elevación lateral en polea',3,'12-20','Elevaciones laterales'],['Extensión de tríceps en polea',3,'10-15','Fondos asistidos']],
+    Miércoles:[['Jalón al pecho',3,'6-10','Dominada asistida'],['Remo con apoyo de pecho',3,'8-12','Remo en máquina'],['Pullover en polea',2,'10-15','Jalón al pecho'],['Face pull',3,'12-20','Pájaros en máquina'],['Curl con barra EZ',3,'8-12','Curl en polea']],
+    Viernes:[['Prensa de piernas',4,'6-10','Sentadilla goblet'],['Peso muerto rumano',3,'6-10','Curl femoral'],['Hip thrust',3,'8-12','Puente de glúteo'],['Extensión de cuádriceps',3,'10-15','Step-up bajo'],['Curl femoral sentado',3,'10-15','Curl femoral tumbado'],['Gemelo sentado',4,'12-20','Gemelo de pie']]
+  }}
+  function createPHULRoutine(){const r=createUpperLowerRoutine();Object.values(r).forEach((day,i)=>day.forEach((e,j)=>{if(i<2&&j<3){e[1]=4;e[2]='4-7'}else if(i>=2){e[2]=j<2?'6-10':'10-15'}}));return r}
+  function createFiveByFiveRoutine(){return {
+    Lunes:[['Prensa de piernas',5,'5','Hack squat'],['Press banca con mancuernas',5,'5','Press en máquina'],['Remo con apoyo de pecho',5,'5','Remo en máquina'],['Dead bug',3,'8-12','Plancha']],
+    Miércoles:[['Peso muerto rumano',4,'5','Curl femoral'],['Press militar sentado',5,'5','Press de hombros en máquina'],['Jalón al pecho',4,'6-8','Dominada asistida'],['Gemelo de pie',3,'10-15','Gemelo en prensa']],
+    Viernes:[['Prensa de piernas',5,'5','Sentadilla goblet'],['Press inclinado con mancuernas',4,'6','Press inclinado en máquina'],['Remo en polea',5,'5','Remo unilateral con mancuerna'],['Curl con barra EZ',2,'8-12','Curl en polea']]
+  }}
+  function createHomeRoutine(){return {
+    Lunes:[['Flexiones',4,'8-20','Press suelo con mancuernas'],['Remo con banda',4,'10-20','Remo unilateral con mancuerna'],['Sentadilla búlgara',3,'8-15','Zancada atrás'],['Elevaciones laterales',3,'12-25','Elevación lateral con banda'],['Plancha',3,'30-60 s','Dead bug']],
+    Miércoles:[['Sentadilla goblet',4,'10-20','Sentadilla al aire'],['Peso muerto rumano con mancuernas',4,'8-15','Buenos días con banda'],['Press militar con mancuernas',3,'8-15','Pike push-up'],['Curl con banda',3,'12-20','Curl martillo'],['Extensión de tríceps con banda',3,'12-20','Flexión cerrada']],
+    Viernes:[['Step-up',3,'10-15','Zancada atrás'],['Puente de glúteo',4,'12-25','Hip thrust'],['Flexiones inclinadas',4,'10-25','Flexiones'],['Remo unilateral con mancuerna',4,'8-15','Remo con banda'],['Dead bug',3,'10-16','Plancha']]
+  }}
+  function createMetabolicRoutine(){const r=createFullBodyRoutine();Object.values(r).forEach(day=>day.forEach(e=>{e[1]=3;e[2]='10-15'}));return r}
+  function createSpecializationRoutine(){const r=createUpperLowerRoutine(),priority=state.preferences?.priorityMuscle||'balanced';const map={shoulders:'Hombros',back:'Espalda',legs:'Cuádriceps'};const muscle=map[priority];if(muscle)Object.values(r).forEach(day=>day.forEach(e=>{if(exerciseMuscle(e[0])===muscle)e[1]=Math.min(5,e[1]+1)}));return r}
   function renderPlanEvidence(){const i=planEvidenceMap[$('planMethod').value]||planEvidenceMap.evidence;$('planEvidence').innerHTML=`<strong>${i.title}</strong>${i.text}<div class="planEvidenceTags">${i.tags.map(t=>`<span>${t}</span>`).join('')}</div>`}
-  function preferenceFields(){return ['planGoal','planMethod','planDays','planMinutes','priorityMuscle','progressionMode','calcEquation','calcSex','calcAge','calcHeight','calcWeight','calcFat','calcActivity','calcGoal','menuMeals','menuDays','portionMeals','portionTolerance']}
+  function preferenceFields(){return ['planGoal','planMethod','planDays','planMinutes','priorityMuscle','progressionMode','calcEquation','calcSex','calcAge','calcHeight','calcWeight','calcFat','calcActivity','calcGoal','menuMeals','menuDays','portionMeals','portionTolerance','trainingExperience','trainingLocation','dietStyle','nutritionBudget','nutritionMaxPrep','calorieStrategy','excludedIngredients']}
   function savePreferences(){preferenceFields().forEach(id=>{const el=$(id);if(el)state.preferences[id]=el.value});Store.set('preferences',state.preferences);if($('preferenceStatus'))$('preferenceStatus').textContent='Preferencias guardadas automáticamente.'}
   function restorePreferences(){preferenceFields().forEach(id=>{const el=$(id),v=state.preferences?.[id];if(el&&v!==undefined)el.value=String(v)});renderPlanEvidence()}
   function showMenuRecipe(id,scale=1){const r=DATA.recipes.find(x=>x.id===id);if(!r)return;const factor=Math.max(.5,Math.min(2,Number(scale)||1)),portion={kcal:Math.round(r.kcal*factor),p:Math.round(r.p*factor),c:Math.round(r.c*factor),f:Math.round(r.f*factor),ingredients:r.ingredients.map(x=>scaleIngredient(x,factor))};$('menuRecipeTitle').textContent=r.name;$('menuRecipeContent').innerHTML=`<span class="pill">${r.meal}</span>${Math.abs(factor-1)>.02?`<span class="portionBadge">Porción x${factor.toFixed(2)}</span>`:''}<div class="recipeModalMacros"><div><strong>${portion.kcal}</strong><span class="small">kcal</span></div><div><strong>${portion.p} g</strong><span class="small">proteína</span></div><div><strong>${portion.c} g</strong><span class="small">carbos</span></div><div><strong>${portion.f} g</strong><span class="small">grasas</span></div></div><h3>Ingredientes ajustados</h3><div class="small">${portion.ingredients.join('<br>')}</div><h3 style="margin-top:12px">Preparación</h3><ol>${r.steps.map(s=>`<li>${s}</li>`).join('')}</ol><button id="addModalRecipe" style="width:100%;margin-top:10px">Añadir al diario</button>`;$('menuRecipeModal').classList.add('open');$('addModalRecipe').addEventListener('click',()=>{state.meals.push({id:Date.now(),date:todayKey(),type:r.meal,name:r.name,kcal:portion.kcal,p:portion.p,c:portion.c,f:portion.f});saveState();renderHome();$('menuRecipeModal').classList.remove('open');alert('Receta añadida al diario.')},{once:true})}
@@ -220,6 +247,7 @@
     if (id === 'nutrition') renderNutrition();
     if (id === 'progress') renderProgress();
     if (id === 'settings') renderSettings();
+    if (id === 'crosstraining') renderCrossTraining();
     window.scrollTo({top:0,behavior:'smooth'});
   }
 
@@ -309,7 +337,7 @@
   function generatePlan() {
     const method = $('planMethod').value;
     const goal = $('planGoal').value;
-    let routine;if(method==='mentzer')routine=createMentzerRoutine();else if(method==='upperlower')routine=createUpperLowerRoutine();else if(method==='fullbody')routine=createFullBodyRoutine();else if(method==='minimum')routine=createMinimumRoutine();else if(method==='lowload')routine=createLowLoadRoutine();else if(method==='powerbuilding')routine=createPowerbuildingRoutine();else if(method==='strength'||goal==='strength')routine=createStrengthRoutine();else routine=createEvidenceRoutine();
+    let routine;if(method==='mentzer')routine=createMentzerRoutine();else if(method==='upperlower')routine=createUpperLowerRoutine();else if(method==='fullbody')routine=createFullBodyRoutine();else if(method==='minimum')routine=createMinimumRoutine();else if(method==='lowload')routine=createLowLoadRoutine();else if(method==='powerbuilding')routine=createPowerbuildingRoutine();else if(method==='ppl')routine=createPPLRoutine();else if(method==='phul')routine=createPHULRoutine();else if(method==='fivebyfive')routine=createFiveByFiveRoutine();else if(method==='home')routine=createHomeRoutine();else if(method==='metabolic')routine=createMetabolicRoutine();else if(method==='specialization')routine=createSpecializationRoutine();else if(method==='strength'||goal==='strength')routine=createStrengthRoutine();else routine=createEvidenceRoutine();
     const days = Number($('planDays').value);
     const keys = Object.keys(routine).slice(0,days);
     state.routines = Object.fromEntries(keys.map(k => [k,routine[k]]));
@@ -356,20 +384,21 @@
     return [...new Map(combined.map(ex => [ex.name,ex])).values()].slice(0,12);
   }
 
+  function renderEquivalentOptions(){
+    if(!equivalentContext)return;
+    const {day,exerciseIndex}=equivalentContext,current=state.routines[day]?.[exerciseIndex];if(!current)return;
+    const query=($('equivalentSearch')?.value||'').toLowerCase(),equipment=$('equivalentEquipment')?.value||'';
+    const options=equivalentExercises(current[0]).filter(ex=>(!query||`${ex.name} ${ex.muscle} ${ex.pattern}`.toLowerCase().includes(query))&&(!equipment||ex.equipment===equipment));
+    $('equivalentList').innerHTML=options.length?options.map(ex=>{const last=lastExercise(ex.name);return `<button class="equivalentOption" data-name="${ex.name}"><strong>${ex.name}</strong><span class="small">${ex.muscle} · ${ex.pattern} · ${ex.equipment}</span><span class="small">${last?`Última vez: ${new Date(last.workout.date).toLocaleDateString('es-ES')}`:'Sin registros previos'}</span></button>`}).join(''):'<div class="empty">No hay equivalentes con estos filtros.</div>';
+    $$('.equivalentOption').forEach(btn=>btn.addEventListener('click',()=>selectEquivalentExercise(btn.dataset.name)));
+  }
   function openEquivalentSelector(exerciseIndex) {
-    const day = $('trainingDay').value;
-    const current = state.routines[day]?.[exerciseIndex];
-    if (!current) return;
-    equivalentContext = {day,exerciseIndex};
-    const options = equivalentExercises(current[0]);
-    $('equivalentTitle').textContent = `Equivalentes de ${current[0]}`;
-    $('equivalentList').innerHTML = options.length ? options.map(ex => `
-      <button class="equivalentOption" data-name="${ex.name}">
-        <strong>${ex.name}</strong>
-        <span class="small">${ex.muscle} · ${ex.pattern} · ${ex.equipment}</span>
-      </button>`).join('') : '<div class="empty">No hay equivalentes disponibles.</div>';
-    $$('.equivalentOption').forEach(btn => btn.addEventListener('click', () => selectEquivalentExercise(btn.dataset.name)));
-    $('equivalentModal').classList.add('open');
+    const day=$('trainingDay').value,current=state.routines[day]?.[exerciseIndex];if(!current)return;
+    equivalentContext={day,exerciseIndex};const currentData=DATA.exercises.find(ex=>ex.name===current[0]);
+    $('equivalentTitle').textContent=`Sustituir ${current[0]}`;
+    $('equivalentCurrent').innerHTML=`<strong>Ejercicio actual:</strong> ${current[0]}<div class="small">Se conservarán series y repeticiones. El historial del nuevo ejercicio aparecerá en futuras sesiones.</div>`;
+    $('equivalentSearch').value='';const equipments=[...new Set(equivalentExercises(current[0]).map(ex=>ex.equipment))].sort();$('equivalentEquipment').innerHTML='<option value="">Todo el material</option>'+equipments.map(x=>`<option>${x}</option>`).join('');
+    renderEquivalentOptions();$('equivalentModal').classList.add('open');
   }
 
   function selectEquivalentExercise(name) {
@@ -626,6 +655,9 @@
     return candidates[0];
   }
 
+  function nutritionPreferences(){return {style:state.preferences.dietStyle||'omnivore',budget:state.preferences.nutritionBudget||'any',maxPrep:Number(state.preferences.nutritionMaxPrep)||0,strategy:state.preferences.calorieStrategy||'flat',excluded:String(state.preferences.excludedIngredients||'').toLowerCase().split(',').map(x=>x.trim()).filter(Boolean)}}
+  function recipeAllowed(r){const p=nutritionPreferences(),hay=`${r.name} ${r.ingredients.join(' ')} ${(r.tags||[]).join(' ')}`.toLowerCase();if(p.maxPrep&&Number(r.time)>p.maxPrep)return false;if(p.excluded.some(x=>hay.includes(x)))return false;if(p.style==='vegetarian'&&!((r.tags||[]).some(t=>/veget/i.test(t))||/tofu|tempeh|huevo|yogur|queso|legumbre|garbanzo|lenteja/.test(hay)))return false;if(p.style==='mediterranean'&&!/mediterr|pollo|pavo|pescado|merluza|bacalao|atún|arroz|legumbre|verdura|yogur/.test(hay))return false;if(p.style==='highprotein'&&r.p<25&&r.meal!=='Merienda')return false;if(p.budget==='low'&&/salmón|gambas|atún fresco|ternera/.test(hay))return false;return true}
+  function dayCalorieTarget(dayIndex,days){const base=state.targets.kcal,strategy=state.preferences.calorieStrategy||'flat';if(strategy==='training'){const weekday=(new Date().getDay()+dayIndex)%7;return Math.round(base*(weekday>=1&&weekday<=4?1.05:.95))}if(strategy==='weekend'){const weekday=(new Date().getDay()+dayIndex)%7;return Math.round(base*(weekday===0||weekday===6?1.08:.968));return base}return base}
   function createNutritionPlan(count,days) {
     const mealTypes = count === 4
       ? ['Desayuno','Comida','Merienda','Cena']
@@ -653,7 +685,7 @@
 
     function fitDay(recipes) {
       let fitted = recipes.map((r,i) => {
-        const targetK = state.targets.kcal*weights[i];
+        const targetK = currentDayTarget*weights[i];
         const targetP = state.targets.protein*weights[i];
         const scale = Math.max(.5,Math.min(2,(targetK/r.kcal)*.78+(targetP/r.p)*.22));
         return {recipeId:r.id,meal:mealTypes[i],scale};
@@ -663,7 +695,7 @@
           const r=DATA.recipes.find(x=>x.id===item.recipeId);
           return sum+r.kcal*item.scale;
         },0);
-        const correction=state.targets.kcal/Math.max(1,total);
+        const correction=currentDayTarget/Math.max(1,total);
         fitted=fitted.map(item=>({...item,scale:Math.max(.5,Math.min(2,item.scale*correction))}));
       }
       return fitted;
@@ -672,14 +704,14 @@
     const startDate = new Date();
     startDate.setHours(12,0,0,0);
     const planDays = Array.from({length:days},(_,dayIndex) => {
-      const recipes = mealTypes.map((meal,i)=>pickRecipe(meal,state.targets.kcal*weights[i],state.targets.protein*weights[i],dayIndex,i)).filter(Boolean);
+      const currentDayTarget=dayCalorieTarget(dayIndex,days);const recipes = mealTypes.map((meal,i)=>pickRecipe(meal,currentDayTarget*weights[i],state.targets.protein*weights[i],dayIndex,i)).filter(Boolean);
       const meals = fitDay(recipes);
       const totals = meals.reduce((sum,item)=>{
         const r=DATA.recipes.find(x=>x.id===item.recipeId);
         return {kcal:sum.kcal+Math.round(r.kcal*item.scale),p:sum.p+Math.round(r.p*item.scale),c:sum.c+Math.round(r.c*item.scale),f:sum.f+Math.round(r.f*item.scale)};
       },{kcal:0,p:0,c:0,f:0});
       const date=new Date(startDate);date.setDate(startDate.getDate()+dayIndex);
-      return {index:dayIndex+1,date:date.toISOString().slice(0,10),meals,totals};
+      return {index:dayIndex+1,date:date.toISOString().slice(0,10),targetKcal:currentDayTarget,meals,totals};
     });
     return {id:Date.now(),createdAt:new Date().toISOString(),days,mealsPerDay:count,target:{...state.targets},planDays};
   }
@@ -697,14 +729,16 @@
         return `<div class="history"><strong>${item.meal}: ${r.name}</strong> <span class="portionBadge">x${item.scale.toFixed(2)}</span><div class="small">${Math.round(r.kcal*item.scale)} kcal · P ${Math.round(r.p*item.scale)} · C ${Math.round(r.c*item.scale)} · G ${Math.round(r.f*item.scale)}</div><button class="secondary menuRecipe" data-id="${r.id}" data-scale="${item.scale.toFixed(4)}" style="margin-top:6px;padding:8px 10px">Ver receta ajustada</button></div>`;
       }).join('');
       const deviation=day.totals.kcal-plan.target.kcal;
-      return `${weekHeader}<div class="card nutritionDayCard"><h3>${label}</h3>${mealsHtml}<div class="kcal">Total ${day.totals.kcal} kcal · P ${day.totals.p} g · C ${day.totals.c} g · G ${day.totals.f} g</div><div class="small">Objetivo ${plan.target.kcal} kcal · desviación ${deviation>0?'+':''}${deviation} kcal</div></div>`;
+      return `${weekHeader}<div class="card nutritionDayCard"><div class="dayPlanHead"><h3>${label}</h3><button class="secondary regenerateDay" data-day="${dayIndex}">Cambiar día</button></div>${mealsHtml}<div class="kcal">Total ${day.totals.kcal} kcal · P ${day.totals.p} g · C ${day.totals.c} g · G ${day.totals.f} g</div><div class="small">Objetivo ${day.targetKcal||plan.target.kcal} kcal · desviación ${day.totals.kcal-(day.targetKcal||plan.target.kcal)>0?'+':''}${day.totals.kcal-(day.targetKcal||plan.target.kcal)} kcal</div></div>`;
     }).join('');
-    $$('.menuRecipe').forEach(btn=>btn.addEventListener('click',()=>showMenuRecipe(btn.dataset.id,btn.dataset.scale)));
+    $$('.menuRecipe').forEach(btn=>btn.addEventListener('click',()=>showMenuRecipe(btn.dataset.id,btn.dataset.scale)));$$('.regenerateDay').forEach(btn=>btn.addEventListener('click',()=>regenerateNutritionDay(Number(btn.dataset.day))));
     renderShoppingList(allRecipes);
     const avg=Math.round(plan.planDays.reduce((a,d)=>a+d.totals.kcal,0)/plan.planDays.length);
-    if ($('nutritionPlanStatus')) $('nutritionPlanStatus').innerHTML=`<strong>Plan guardado:</strong> ${plan.days} días · media ${avg} kcal/día · creado ${new Date(plan.createdAt).toLocaleDateString('es-ES')}`;
+    renderMonthlyInsights(plan);if ($('nutritionPlanStatus')) $('nutritionPlanStatus').innerHTML=`<strong>Plan guardado:</strong> ${plan.days} días · media ${avg} kcal/día · creado ${new Date(plan.createdAt).toLocaleDateString('es-ES')}`;
   }
 
+  function regenerateNutritionDay(index){if(!state.nutritionPlan?.planDays?.[index])return;const fresh=createNutritionPlan(state.nutritionPlan.mealsPerDay,1).planDays[0];fresh.index=index+1;fresh.date=state.nutritionPlan.planDays[index].date;state.nutritionPlan.planDays[index]=fresh;saveState();renderNutritionPlan()}
+  function renderMonthlyInsights(plan){const box=$('monthlyPlanInsights');if(!box)return;if(plan.days<28){box.hidden=true;return}const ids=plan.planDays.flatMap(d=>d.meals.map(m=>m.recipeId)),unique=new Set(ids).size,avgP=Math.round(plan.planDays.reduce((a,d)=>a+d.totals.p,0)/plan.days),maxDev=Math.max(...plan.planDays.map(d=>Math.abs(d.totals.kcal-(d.targetKcal||plan.target.kcal))));box.hidden=false;box.innerHTML=`<h3>Calidad del plan mensual</h3><div class="kpiGrid"><div><div class="stat">${unique}</div><div class="label">recetas distintas</div></div><div><div class="stat">${avgP} g</div><div class="label">proteína media</div></div><div><div class="stat">±${maxDev}</div><div class="label">máx. desviación kcal</div></div><div><div class="stat">${Math.round(unique/ids.length*100)}%</div><div class="label">variedad</div></div></div>`}
   function generateMenu() {
     const count=Number($('menuMeals').value);
     const days=Number($('menuDays').value);
@@ -944,6 +978,64 @@
     renderAll();
   }
 
+
+  function crossFilteredWods() {
+    const q = ($('crossSearch')?.value || '').trim().toLowerCase();
+    const format = $('crossFormat')?.value || '';
+    const level = $('crossLevel')?.value || '';
+    const equipment = $('crossEquipment')?.value || '';
+    const maxDuration = Number($('crossDuration')?.value || 0);
+    return CROSS_WODS.filter(w => {
+      const haystack = [w.name,w.format,w.level,w.description,...w.equipment,...w.movements.map(m=>m.movement)].join(' ').toLowerCase();
+      return (!q || haystack.includes(q)) && (!format || w.format === format) && (!level || w.level === level) && (!equipment || w.equipment.includes(equipment)) && (!maxDuration || w.duration <= maxDuration);
+    });
+  }
+
+  function crossWodCard(w) {
+    return `<article class="card crossWod" data-cross-id="${w.id}">
+      <div class="crossHead"><div><span class="pill">${w.format}</span><h3>${w.name}</h3></div><strong>${w.duration} min</strong></div>
+      <div class="recipeTags">${w.equipment.map(e=>`<span>${e}</span>`).join('')}</div>
+      <div class="small">${w.level} · ${w.description}</div>
+      <ol class="crossMoves">${w.movements.map(m=>`<li><strong>${m.dose}</strong> ${m.movement}</li>`).join('')}</ol>
+      <div class="row"><button class="crossStart" data-cross-id="${w.id}">Iniciar / registrar</button><button class="secondary crossCopy" data-cross-id="${w.id}">Copiar</button></div>
+    </article>`;
+  }
+
+  function renderCrossTraining() {
+    if (!$('crossWodList')) return;
+    const items = crossFilteredWods();
+    $('crossCount').textContent = `${items.length} WODs compatibles de ${CROSS_WODS.length} disponibles.`;
+    $('crossWodList').innerHTML = items.slice(0,120).map(crossWodCard).join('') || '<div class="card empty">No hay WODs con estos filtros. Prueba a ampliar material, nivel o duración.</div>';
+    const history = [...state.crossHistory].reverse();
+    $('crossHistory').innerHTML = history.length ? history.slice(0,20).map(h=>`<details class="workoutHistoryItem"><summary><strong>${h.name}</strong><span class="small">${h.date} · ${h.result}</span></summary><div class="small" style="margin-top:8px">${h.notes || 'Sin notas'} · ${h.format}</div></details>`).join('') : '<div class="empty">Todavía no has registrado WODs.</div>';
+  }
+
+  function startCrossWod(id) {
+    const w = CROSS_WODS.find(x=>x.id===id); if(!w) return;
+    const result = prompt(`Resultado de ${w.name}\nEjemplos: 5+12 rondas/reps, 18:42, 180 repeticiones`, 'Completado');
+    if (result === null) return;
+    const notes = prompt('Notas, escalado o sensaciones:', '') || '';
+    state.crossHistory.push({id:Date.now(),wodId:w.id,name:w.name,format:w.format,date:todayKey(),result:result.trim()||'Completado',notes});
+    saveState(); renderCrossTraining(); renderHome();
+    alert('WOD guardado. Podrás consultarlo en el historial.');
+  }
+
+  async function copyCrossWod(id) {
+    const w=CROSS_WODS.find(x=>x.id===id); if(!w) return;
+    const text=`${w.name} · ${w.format} · ${w.description}\n${w.movements.map(m=>`${m.dose} ${m.movement}`).join('\n')}\nMaterial: ${w.equipment.join(', ')}`;
+    try { await navigator.clipboard.writeText(text); alert('WOD copiado.'); }
+    catch { prompt('Copia el WOD:', text); }
+  }
+
+  function randomCrossWod() {
+    const items=crossFilteredWods();
+    if(!items.length){alert('No hay WODs compatibles con estos filtros.');return;}
+    const w=items[Math.floor(Math.random()*items.length)];
+    $('crossWodList').innerHTML=crossWodCard(w);
+    $('crossCount').textContent=`WOD aleatorio compatible · ${items.length} opciones posibles.`;
+    window.scrollTo({top:$('crossWodList').offsetTop-90,behavior:'smooth'});
+  }
+
   function bindEvents() {
     $$('nav button').forEach(btn => btn.addEventListener('click', () => showPage(btn.dataset.page)));
     $$('[data-go]').forEach(btn => btn.addEventListener('click', () => showPage(btn.dataset.go)));
@@ -957,7 +1049,7 @@
     $('saveWorkout').addEventListener('click', saveWorkout);
     $('openLibrary').addEventListener('click', openLibrary);
     $('closeLibrary').addEventListener('click', () => $('libraryModal').classList.remove('open'));
-    $('closeEquivalent').addEventListener('click', () => $('equivalentModal').classList.remove('open'));
+    $('closeEquivalent').addEventListener('click', () => $('equivalentModal').classList.remove('open'));$('equivalentSearch').addEventListener('input',renderEquivalentOptions);$('equivalentEquipment').addEventListener('change',renderEquivalentOptions);
     $('exerciseSearch').addEventListener('input', renderExerciseLibrary);
     $('muscleFilter').addEventListener('change', renderExerciseLibrary);
     $('timerAdd').addEventListener('click', () => {timerLeft += 30;updateTimer()});
@@ -994,6 +1086,10 @@
     $('refreshWeeklyVolume').addEventListener('click', renderWeeklyVolume);
     $('generatePortionMenu').addEventListener('click', generatePortionMenu);
     $('saveProgressPrefs').addEventListener('click',()=>{state.settings.weeklySessionGoal=+$('weeklySessionGoal').value;state.settings.stepGoal=+$('stepGoal').value||8000;saveState();renderHome();alert('Preferencias guardadas.')});
+    ['crossSearch','crossFormat','crossLevel','crossEquipment','crossDuration'].forEach(id=>$(id)?.addEventListener(id==='crossSearch'?'input':'change',renderCrossTraining));
+    $('crossRandom')?.addEventListener('click',randomCrossWod);
+    $('crossReset')?.addEventListener('click',()=>{['crossSearch','crossFormat','crossLevel','crossEquipment','crossDuration'].forEach(id=>{const el=$(id);if(el)el.value=id==='crossDuration'?'0':''});renderCrossTraining()});
+    $('crossWodList')?.addEventListener('click',e=>{const start=e.target.closest('.crossStart'),copy=e.target.closest('.crossCopy');if(start)startCrossWod(start.dataset.crossId);if(copy)copyCrossWod(copy.dataset.crossId)});
   }
 
   function renderAll() {
@@ -1003,6 +1099,7 @@
     renderNutrition();
     renderProgress();
     renderSettings();
+    renderCrossTraining();
   }
 
   function registerServiceWorker() {

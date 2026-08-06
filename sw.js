@@ -1,5 +1,5 @@
-const CACHE = 'fitcoach-stable-1-4-0-premium-recipes-v1';
-const APP_SHELL = ['./','./index.html','./styles.css','./data.js','./app.js','./manifest.webmanifest','./icon-192.png','./icon-512.png'];
+const CACHE = 'fitcoach-stable-1-6-0-crosstraining-v1';
+const APP_SHELL = ['./','./index.html','./styles.css','./data.js','./cross.js','./app.js','./manifest.webmanifest','./icon-192.png','./icon-512.png'];
 
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(APP_SHELL)));
