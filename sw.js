@@ -1,15 +1,14 @@
-const CACHE = 'fitcoach-2-0-2-runtime-stability-v1';
+const CACHE = 'fitcoach-2-2-0-training-methods-audit-v1';
 const APP_SHELL = [
   './',
   './index.html',
-  './styles.css?v=2.0.2',
-  './data.js?v=2.0.2',
-  './cross.js?v=2.0.2',
-  './app.js?v=2.0.2',
-  './manifest.webmanifest?v=2.0.2',
+  './styles.css?v=2.2.0',
+  './data.js?v=2.2.0',
+  './app.js?v=2.2.0',
+  './manifest.webmanifest?v=2.2.0',
   './version.json',
-  './icon-192.png?v=2.0.2',
-  './icon-512.png?v=2.0.2'
+  './icon-192.png?v=2.2.0',
+  './icon-512.png?v=2.2.0'
 ];
 
 self.addEventListener('install', event => {

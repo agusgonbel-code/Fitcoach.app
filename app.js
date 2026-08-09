@@ -1,14 +1,13 @@
 (() => {
   'use strict';
 
-  const APP_VERSION = '2.0.2';
+  const APP_VERSION = '2.2.0';
 
   const RAW_DATA = window.FITCOACH_DATA || {};
   const DATA = {
     exercises: Array.isArray(RAW_DATA.exercises) ? RAW_DATA.exercises.filter(Boolean) : [],
     recipes: Array.isArray(RAW_DATA.recipes) ? RAW_DATA.recipes.filter(Boolean) : []
   };
-  const CROSS_WODS = window.FITCOACH_CROSS_WODS || [];
   const DAYS = ['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
   const $ = id => document.getElementById(id);
   const $$ = sel => [...document.querySelectorAll(sel)];
@@ -44,7 +43,6 @@
     photos: [],
     recovery: [],
     nutritionPlan: null,
-    crossHistory: [],
     workoutDraft: null,
     monthViewWeek: 0,
     preferences:{planGoal:'recomp',planMethod:'evidence',planDays:'4',planMinutes:'60',priorityMuscle:'balanced',progressionMode:'double',calcEquation:'mifflin',calcSex:'m',calcAge:'46',calcHeight:'181',calcWeight:'81',calcFat:'22',calcActivity:'1.6',calcGoal:'recomp',menuMeals:'5',menuDays:'7',portionMeals:'5',portionTolerance:'150',trainingExperience:'intermediate',trainingLocation:'gym',dietStyle:'omnivore',nutritionBudget:'any',nutritionMaxPrep:'0',calorieStrategy:'flat',excludedIngredients:'',preferredIngredients:''}
@@ -61,7 +59,6 @@
     photos: Store.get('photos', defaults.photos),
     recovery: Store.get('recovery', defaults.recovery),
     nutritionPlan: Store.get('nutritionPlan', defaults.nutritionPlan),
-    crossHistory: Store.get('crossHistory', defaults.crossHistory),
     workoutDraft: Store.get('workoutDraft', defaults.workoutDraft),
     monthViewWeek: Store.get('monthViewWeek', defaults.monthViewWeek),
     preferences: Store.get('preferences', defaults.preferences)
@@ -89,7 +86,11 @@
     fivebyfive:{title:'5x5 adaptado',text:'Prioriza práctica de patrones básicos con cinco series moderadas. Los accesorios y la carga se ajustan para controlar la fatiga.',tags:['fuerza','5x5','técnica']},
     home:{title:'Entrenamiento en casa',text:'Rutina con peso corporal, bandas y mancuernas opcionales, usando progresiones de repeticiones y dificultad.',tags:['casa','poco material','progresión por variantes']},
     metabolic:{title:'Circuito de acondicionamiento',text:'Circuitos de cuerpo completo con cargas moderadas. Complementa la fuerza, no la sustituye como única estrategia universal.',tags:['circuitos','condición física','RIR 2-4']},
-    specialization:{title:'Especialización muscular',text:'Añade volumen prudente al grupo prioritario y reduce trabajo accesorio en otros grupos para mantener la recuperación.',tags:['prioridad muscular','bloques 4-6 semanas','fatiga controlada']}
+    specialization:{title:'Especialización muscular',text:'Añade volumen prudente al grupo prioritario y reduce trabajo accesorio en otros grupos para mantener la recuperación.',tags:['prioridad muscular','bloques 4-6 semanas','fatiga controlada']},
+    phat:{title:'PHAT adaptado',text:'Combina dos días de tensión alta con sesiones de hipertrofia. El volumen se mantiene moderado y no se exige fallo en los básicos.',tags:['5 días','potencia + hipertrofia','RIR 1-3']},
+    arnold:{title:'Arnold Split adaptado',text:'Agrupa pecho/espalda, hombros/brazos y piernas para dar frecuencia alta sin depender de volúmenes extremos.',tags:['3-6 días','antagonistas','hipertrofia']},
+    dup:{title:'DUP · periodización ondulante',text:'Alterna énfasis de fuerza, volumen y repeticiones moderadas dentro de la semana para distribuir la fatiga.',tags:['3-4 días','ondulación diaria','autorregulación']},
+    ppl6:{title:'Push / Pull / Legs 6D',text:'Dos vueltas semanales de empuje, tracción y pierna con volumen por sesión contenido. Requiere buena recuperación.',tags:['6 días','frecuencia 2','volumen distribuido']}
   };
   function createUpperLowerRoutine(){
     return {
@@ -155,6 +156,22 @@
     Viernes:[['Peso muerto rumano',4,'6-10','Curl femoral'],['Prensa de piernas',4,'8-12','Hack squat'],['Zancada atrás',3,'8-12','Step-up'],['Abducción de cadera en máquina',3,'15-25','Caminata lateral con banda'],['Crunch en polea',3,'10-15','Reverse crunch']]
   }}
   function createHybridThreeRoutine(){const u=createUpperLowerRoutine(),f=createFullBodyRoutine();return {Lunes:u.Lunes,Miércoles:u.Martes,Viernes:f.Viernes||Object.values(f)[2]}}
+
+  function createPHATRoutine(){const p=createPowerbuildingRoutine(),h=createUpperLowerRoutine();return {Lunes:p.Lunes,Martes:p.Martes,Miércoles:h.Lunes,Jueves:h.Martes,Viernes:createFullBodyRoutine().Viernes};}
+  function createArnoldRoutine(){return {
+    Lunes:[['Press banca con mancuernas',3,'6-10','Press en máquina'],['Remo con apoyo de pecho',3,'8-12','Remo en polea'],['Press inclinado con mancuernas',3,'8-12','Press inclinado en máquina'],['Jalón al pecho',3,'8-12','Dominada asistida'],['Aperturas en polea',2,'12-15','Pec deck'],['Pullover en polea',2,'10-15','Pullover en máquina']],
+    Martes:[['Press militar sentado',3,'6-10','Press de hombros en máquina'],['Elevaciones laterales',4,'12-20','Elevación lateral en polea'],['Pájaros en máquina',3,'12-20','Face pull'],['Curl con barra EZ',3,'8-12','Curl en polea'],['Curl martillo',2,'10-15','Curl con cuerda'],['Extensión de tríceps en polea',3,'10-15','Fondos asistidos']],
+    Miércoles:[['Prensa de piernas',4,'6-10','Hack squat'],['Peso muerto rumano',3,'6-10','Curl femoral'],['Zancada atrás',3,'8-12','Step-up'],['Curl femoral sentado',3,'10-15','Curl femoral tumbado'],['Gemelo sentado',4,'12-20','Gemelo de pie'],['Crunch en polea',3,'10-15','Reverse crunch']],
+    Jueves:[['Press inclinado en máquina',3,'8-12','Press inclinado con mancuernas'],['Remo en polea',3,'8-12','Remo unilateral'],['Press en máquina',3,'10-15','Press banca con mancuernas'],['Jalón al pecho',3,'10-15','Dominada asistida'],['Pec deck',2,'12-20','Aperturas en polea'],['Pullover en máquina',2,'12-20','Pullover en polea']],
+    Viernes:[['Press de hombros en máquina',3,'8-12','Press militar sentado'],['Elevación lateral en polea',4,'12-20','Elevaciones laterales'],['Face pull',3,'12-20','Pájaros en máquina'],['Curl en polea',3,'10-15','Curl con barra EZ'],['Tríceps por encima de la cabeza',3,'10-15','Press francés'],['Curl martillo',2,'12-15','Curl con cuerda']],
+    Sábado:[['Hip thrust',4,'6-10','Puente de glúteo'],['Prensa de piernas',3,'10-15','Sentadilla goblet'],['Curl femoral sentado',3,'10-15','Curl femoral tumbado'],['Extensión de cuádriceps',3,'12-20','Step-up bajo'],['Abducción de cadera en máquina',3,'15-25','Caminata lateral con banda'],['Gemelo de pie',4,'12-20','Gemelo en prensa']]
+  };}
+  function createDUPRoutine(){return {
+    Lunes:[['Press banca con mancuernas',4,'4-6','Press en máquina'],['Remo con apoyo de pecho',4,'5-8','Remo en máquina'],['Prensa de piernas',4,'4-6','Hack squat'],['Curl femoral sentado',3,'8-12','Curl femoral tumbado'],['Dead bug',3,'8-12','Plancha']],
+    Miércoles:[['Press inclinado con mancuernas',3,'8-12','Press inclinado en máquina'],['Jalón al pecho',3,'8-12','Dominada asistida'],['Hip thrust',3,'8-12','Puente de glúteo'],['Zancada atrás',3,'10-15','Step-up'],['Elevaciones laterales',3,'12-20','Elevación lateral en polea'],['Curl con barra EZ',2,'10-15','Curl en polea']],
+    Viernes:[['Press de hombros en máquina',3,'10-15','Press militar sentado'],['Remo en polea',3,'10-15','Remo unilateral'],['Prensa de piernas',3,'10-15','Sentadilla goblet'],['Peso muerto rumano',3,'8-12','Curl femoral'],['Pájaros en máquina',3,'15-20','Face pull'],['Extensión de tríceps en polea',2,'12-20','Fondos asistidos']]
+  };}
+  function createPPL6Routine(){const base=createPPLRoutine();return {Lunes:base.Lunes,Martes:base.Miércoles,Miércoles:base.Viernes,Jueves:base.Lunes.map(e=>[...e]),Viernes:base.Miércoles.map(e=>[...e]),Sábado:base.Viernes.map(e=>[...e])};}
   function renderPlanEvidence(){const i=planEvidenceMap[$('planMethod').value]||planEvidenceMap.evidence;$('planEvidence').innerHTML=`<strong>${i.title}</strong>${i.text}<div class="planEvidenceTags">${i.tags.map(t=>`<span>${t}</span>`).join('')}</div>`}
   function preferenceFields(){return ['planGoal','planMethod','planDays','planMinutes','priorityMuscle','progressionMode','calcEquation','calcSex','calcAge','calcHeight','calcWeight','calcFat','calcActivity','calcGoal','menuMeals','menuDays','portionMeals','portionTolerance','trainingExperience','trainingLocation','dietStyle','nutritionBudget','nutritionMaxPrep','calorieStrategy','excludedIngredients','preferredIngredients']}
   function savePreferences(){preferenceFields().forEach(id=>{const el=$(id);if(el)state.preferences[id]=el.value});Store.set('preferences',state.preferences);if($('preferenceStatus'))$('preferenceStatus').textContent='Preferencias guardadas automáticamente.'}
@@ -288,7 +305,6 @@
     if (id === 'nutrition') renderNutrition();
     if (id === 'progress') renderProgress();
     if (id === 'settings') renderSettings();
-    if (id === 'crosstraining') renderCrossTraining();
     window.scrollTo({top:0,behavior:'smooth'});
   }
 
@@ -378,7 +394,7 @@
   function generatePlan() {
     const method = $('planMethod').value;
     const goal = $('planGoal').value;
-    let routine;if(method==='mentzer')routine=createMentzerRoutine();else if(method==='upperlower')routine=createUpperLowerRoutine();else if(method==='fullbody')routine=createFullBodyRoutine();else if(method==='minimum')routine=createMinimumRoutine();else if(method==='lowload')routine=createLowLoadRoutine();else if(method==='powerbuilding')routine=createPowerbuildingRoutine();else if(method==='ppl')routine=createPPLRoutine();else if(method==='phul')routine=createPHULRoutine();else if(method==='fivebyfive')routine=createFiveByFiveRoutine();else if(method==='home')routine=createHomeRoutine();else if(method==='metabolic')routine=createMetabolicRoutine();else if(method==='specialization')routine=createSpecializationRoutine();else if(method==='antagonist')routine=createAntagonistRoutine();else if(method==='hybrid3')routine=createHybridThreeRoutine();else if(method==='strength'||goal==='strength')routine=createStrengthRoutine();else routine=createEvidenceRoutine();
+    let routine;if(method==='mentzer')routine=createMentzerRoutine();else if(method==='upperlower')routine=createUpperLowerRoutine();else if(method==='fullbody')routine=createFullBodyRoutine();else if(method==='minimum')routine=createMinimumRoutine();else if(method==='lowload')routine=createLowLoadRoutine();else if(method==='powerbuilding')routine=createPowerbuildingRoutine();else if(method==='ppl')routine=createPPLRoutine();else if(method==='phul')routine=createPHULRoutine();else if(method==='fivebyfive')routine=createFiveByFiveRoutine();else if(method==='home')routine=createHomeRoutine();else if(method==='metabolic')routine=createMetabolicRoutine();else if(method==='specialization')routine=createSpecializationRoutine();else if(method==='antagonist')routine=createAntagonistRoutine();else if(method==='hybrid3')routine=createHybridThreeRoutine();else if(method==='phat')routine=createPHATRoutine();else if(method==='arnold')routine=createArnoldRoutine();else if(method==='dup')routine=createDUPRoutine();else if(method==='ppl6')routine=createPPL6Routine();else if(method==='strength'||goal==='strength')routine=createStrengthRoutine();else routine=createEvidenceRoutine();
     const days = Number($('planDays').value);
     const keys = Object.keys(routine).slice(0,days);
     state.routines = Object.fromEntries(keys.map(k => [k,routine[k]]));
@@ -845,6 +861,7 @@
   }
 
   function renderRecipes() {
+    if ($('recipeLibraryStats')) $('recipeLibraryStats').textContent = `${DATA.recipes.length} recetas disponibles · filtra por tipo, tiempo o ingrediente.`;
     const q = $('recipeSearch').value.toLowerCase().trim();
     const meal = $('recipeMealFilter')?.value || '';
     const maxTime = Number($('recipeTimeFilter')?.value) || Infinity;
@@ -1041,7 +1058,7 @@
       try {
         const data = JSON.parse(reader.result);
         if (!data || typeof data !== 'object' || Array.isArray(data)) throw new Error('Formato no válido');
-        const arrayKeys = ['workouts','meals','metrics','photos','recovery','crossHistory'];
+        const arrayKeys = ['workouts','meals','metrics','photos','recovery'];
         const objectKeys = ['profile','settings','targets','routines','preferences','nutritionPlan'];
         arrayKeys.forEach(key => { if (key in data && !Array.isArray(data[key])) throw new Error(`Campo ${key} no válido`); });
         objectKeys.forEach(key => { if (key in data && (!data[key] || typeof data[key] !== 'object' || Array.isArray(data[key]))) throw new Error(`Campo ${key} no válido`); });
@@ -1065,63 +1082,6 @@
     renderAll();
   }
 
-
-  function crossFilteredWods() {
-    const q = ($('crossSearch')?.value || '').trim().toLowerCase();
-    const format = $('crossFormat')?.value || '';
-    const level = $('crossLevel')?.value || '';
-    const equipment = $('crossEquipment')?.value || '';
-    const maxDuration = Number($('crossDuration')?.value || 0);
-    return CROSS_WODS.filter(w => {
-      const haystack = [w.name,w.format,w.level,w.description,...w.equipment,...w.movements.map(m=>m.movement)].join(' ').toLowerCase();
-      return (!q || haystack.includes(q)) && (!format || w.format === format) && (!level || w.level === level) && (!equipment || w.equipment.includes(equipment)) && (!maxDuration || w.duration <= maxDuration);
-    });
-  }
-
-  function crossWodCard(w) {
-    return `<article class="card crossWod" data-cross-id="${w.id}">
-      <div class="crossHead"><div><span class="pill">${w.format}</span><h3>${w.name}</h3></div><strong>${w.duration} min</strong></div>
-      <div class="recipeTags">${w.equipment.map(e=>`<span>${e}</span>`).join('')}</div>
-      <div class="small">${w.level} · ${w.description}</div>
-      <ol class="crossMoves">${w.movements.map(m=>`<li><strong>${m.dose}</strong> ${m.movement}</li>`).join('')}</ol>
-      <div class="row"><button class="crossStart" data-cross-id="${w.id}">Iniciar / registrar</button><button class="secondary crossCopy" data-cross-id="${w.id}">Copiar</button></div>
-    </article>`;
-  }
-
-  function renderCrossTraining() {
-    if (!$('crossWodList')) return;
-    const items = crossFilteredWods();
-    $('crossCount').textContent = `${items.length} WODs compatibles de ${CROSS_WODS.length} disponibles.`;
-    $('crossWodList').innerHTML = items.slice(0,120).map(crossWodCard).join('') || '<div class="card empty">No hay WODs con estos filtros. Prueba a ampliar material, nivel o duración.</div>';
-    const history = [...state.crossHistory].reverse();
-    $('crossHistory').innerHTML = history.length ? history.slice(0,20).map(h=>`<details class="workoutHistoryItem"><summary><strong>${h.name}</strong><span class="small">${h.date} · ${h.result}</span></summary><div class="small" style="margin-top:8px">${h.notes || 'Sin notas'} · ${h.format}</div></details>`).join('') : '<div class="empty">Todavía no has registrado WODs.</div>';
-  }
-
-  function startCrossWod(id) {
-    const w = CROSS_WODS.find(x=>x.id===id); if(!w) return;
-    const result = prompt(`Resultado de ${w.name}\nEjemplos: 5+12 rondas/reps, 18:42, 180 repeticiones`, 'Completado');
-    if (result === null) return;
-    const notes = prompt('Notas, escalado o sensaciones:', '') || '';
-    state.crossHistory.push({id:Date.now(),wodId:w.id,name:w.name,format:w.format,date:todayKey(),result:result.trim()||'Completado',notes});
-    saveState(); renderCrossTraining(); renderHome();
-    alert('WOD guardado. Podrás consultarlo en el historial.');
-  }
-
-  async function copyCrossWod(id) {
-    const w=CROSS_WODS.find(x=>x.id===id); if(!w) return;
-    const text=`${w.name} · ${w.format} · ${w.description}\n${w.movements.map(m=>`${m.dose} ${m.movement}`).join('\n')}\nMaterial: ${w.equipment.join(', ')}`;
-    try { await navigator.clipboard.writeText(text); alert('WOD copiado.'); }
-    catch { prompt('Copia el WOD:', text); }
-  }
-
-  function randomCrossWod() {
-    const items=crossFilteredWods();
-    if(!items.length){alert('No hay WODs compatibles con estos filtros.');return;}
-    const w=items[Math.floor(Math.random()*items.length)];
-    $('crossWodList').innerHTML=crossWodCard(w);
-    $('crossCount').textContent=`WOD aleatorio compatible · ${items.length} opciones posibles.`;
-    window.scrollTo({top:$('crossWodList').offsetTop-90,behavior:'smooth'});
-  }
 
   function bindEvents() {
     $$('nav button').forEach(btn => btn.addEventListener('click', () => showPage(btn.dataset.page)));
@@ -1177,10 +1137,6 @@
     $('refreshWeeklyVolume').addEventListener('click', renderWeeklyVolume);
     $('generatePortionMenu').addEventListener('click', generatePortionMenu);
     $('saveProgressPrefs').addEventListener('click',()=>{state.settings.weeklySessionGoal=+$('weeklySessionGoal').value;state.settings.stepGoal=+$('stepGoal').value||8000;saveState();renderHome();alert('Preferencias guardadas.')});
-    ['crossSearch','crossFormat','crossLevel','crossEquipment','crossDuration'].forEach(id=>$(id)?.addEventListener(id==='crossSearch'?'input':'change',renderCrossTraining));
-    $('crossRandom')?.addEventListener('click',randomCrossWod);
-    $('crossReset')?.addEventListener('click',()=>{['crossSearch','crossFormat','crossLevel','crossEquipment','crossDuration'].forEach(id=>{const el=$(id);if(el)el.value=id==='crossDuration'?'0':''});renderCrossTraining()});
-    $('crossWodList')?.addEventListener('click',e=>{const start=e.target.closest('.crossStart'),copy=e.target.closest('.crossCopy');if(start)startCrossWod(start.dataset.crossId);if(copy)copyCrossWod(copy.dataset.crossId)});
   }
 
   function safeRun(name, task) {
@@ -1201,7 +1157,6 @@
     safeRun('nutrición', renderNutrition);
     safeRun('progreso', renderProgress);
     safeRun('ajustes', renderSettings);
-    safeRun('Crosstraining', renderCrossTraining);
   }
 
   function registerServiceWorker() {

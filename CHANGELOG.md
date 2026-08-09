@@ -26,3 +26,15 @@
 - Navegación semanal del menú mensual y regeneración semanal.
 - Importación ampliada para historial de Crosstraining y plan nutricional.
 - Versión y caché unificadas como 2.0.0.
+
+## 2.1.0
+- Crosstraining extraído a una app independiente.
+- +42 ejercicios estructurados.
+- +100 recetas originales.
+- Limpieza de navegación, caché y recursos.
+
+## 2.2.0
+- Auditoría reparada tras extraer Crosstraining (ya no exige cross.js).
+- Nuevos métodos PHAT adaptado, Arnold Split adaptado, DUP y PPL 6 días.
+- Planes avanzados compatibles con historial, RIR, equivalencias y autoguardado existentes.
+- Versionado y caché actualizados.

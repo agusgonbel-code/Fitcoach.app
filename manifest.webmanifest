@@ -1,5 +1,5 @@
 {
-  "name": "FitCoach 2.0.2",
+  "name": "FitCoach 2.2.0",
   "short_name": "FitCoach",
   "start_url": "./",
   "display": "standalone",
@@ -17,5 +17,6 @@
       "sizes": "512x512",
       "type": "image/png"
     }
-  ]
+  ],
+  "version": "2.2.0"
 }

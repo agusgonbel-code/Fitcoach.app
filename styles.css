@@ -132,7 +132,7 @@ nav button.active{color:var(--accent);background:rgba(47,211,116,.10)}
 
 
 /* Stable 1.6.0 · Crosstraining Studio */
-.crossHero{background:linear-gradient(135deg,rgba(255,182,72,.16),rgba(120,104,255,.12))}.crossGrid{display:grid;gap:10px}.crossWod h3{margin:7px 0 0}.crossHead{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.crossMoves{padding-left:22px;margin:12px 0;line-height:1.65}.crossMoves strong{display:inline-block;min-width:54px;color:var(--accent)}@media(min-width:760px){.crossGrid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:420px){nav button{font-size:9px}.navIcon{font-size:16px}}
+@media(max-width:420px){nav button{font-size:9px}.navIcon{font-size:16px}}
 
 
 /* FitCoach 2.0 */
@@ -146,3 +146,5 @@ nav button.active{color:var(--accent);background:rgba(47,211,116,.10)}
 .runtimeStatus{position:sticky;top:64px;z-index:45;margin:8px 12px;padding:10px 12px;border-radius:12px;font-size:.9rem;box-shadow:0 8px 24px rgba(0,0,0,.25)}
 .runtimeError{background:#4a1820;color:#ffe7eb;border:1px solid #a83b4c}
 .runtimeWarning{background:#463814;color:#fff5cc;border:1px solid #a8872a}
+
+.featureNotice{border-left:4px solid var(--accent);margin-bottom:14px}

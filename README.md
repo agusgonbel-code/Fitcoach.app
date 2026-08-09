@@ -1,5 +1,5 @@
-# FitCoach 2.0.2
+# FitCoach 2.2.0
 
-Revisión centrada en estabilidad real de ejecución y persistencia en Safari/iPhone. Incluye arranque tolerante, diagnóstico visible y compresión de fotografías.
+Entrenamiento, nutrición y progreso. Incluye 20 métodos de entrenamiento, equivalencias, historial persistente, menús de hasta 30 días y biblioteca ampliada.
 
-Ejecuta `npm run audit` para validar la estructura.
+Ejecuta `npm run audit` antes de publicar.

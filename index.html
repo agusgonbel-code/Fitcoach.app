@@ -7,16 +7,16 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="FitCoach">
-  <link rel="apple-touch-icon" href="icon-192.png?v=2.0.2">
-  <link rel="manifest" href="manifest.webmanifest?v=2.0.2">
-  <link rel="stylesheet" href="styles.css?v=2.0.2">
-  <title>FitCoach 2.0.2</title>
+  <link rel="apple-touch-icon" href="icon-192.png?v=2.2.0">
+  <link rel="manifest" href="manifest.webmanifest?v=2.2.0">
+  <link rel="stylesheet" href="styles.css?v=2.2.0">
+  <title>FitCoach 2.2.0</title>
 </head>
 <body>
 <header>
   <div class="topbar">
     <div class="brand"><div class="logo">F</div><div>FitCoach</div></div>
-    <span class="version">2.0.2</span>
+    <span class="version">2.2.0</span>
   </div>
 </header>
 <div id="updateBanner" class="updateBanner" hidden>
@@ -53,11 +53,12 @@
       <button id="timerAdd">+30 s</button><button id="timerStop" class="secondary">Parar</button>
     </div>
 
+    <div class="card featureNotice"><strong>FitCoach 2.2</strong><div class="small">Nuevos métodos avanzados, auditoría reforzada y planes de 2 a 6 días con progresión e historial persistentes.</div></div>
     <h2>Plan de entrenamiento</h2>
     <div class="card">
       <div class="row">
         <div><label>Objetivo</label><select id="planGoal"><option value="recomp">Recomposición</option><option value="hypertrophy">Hipertrofia</option><option value="strength">Fuerza</option><option value="fatloss">Pérdida de grasa</option></select></div>
-        <div><label>Método</label><select id="planMethod"><option value="evidence">Hipertrofia equilibrada 4D</option><option value="upperlower">Upper / Lower 4D</option><option value="fullbody">Full Body 3D</option><option value="strength">Fuerza 4D</option><option value="powerbuilding">Powerbuilding 4D</option><option value="minimum">Dosis mínima efectiva 3D</option><option value="lowload">Bajo impacto / cargas moderadas</option><option value="mentzer">Heavy Duty inspirado en Mentzer</option><option value="ppl">Push / Pull / Legs</option><option value="phul">PHUL · fuerza e hipertrofia</option><option value="fivebyfive">Fuerza 5x5 adaptada</option><option value="home">Casa · peso corporal y bandas</option><option value="metabolic">Circuito de acondicionamiento</option><option value="specialization">Especialización muscular</option><option value="antagonist">Superseries antagonistas 4D</option><option value="hybrid3">Torso / Pierna / Full Body 3D</option></select></div>
+        <div><label>Método</label><select id="planMethod"><option value="evidence">Hipertrofia equilibrada 4D</option><option value="upperlower">Upper / Lower 4D</option><option value="fullbody">Full Body 3D</option><option value="strength">Fuerza 4D</option><option value="powerbuilding">Powerbuilding 4D</option><option value="minimum">Dosis mínima efectiva 3D</option><option value="lowload">Bajo impacto / cargas moderadas</option><option value="mentzer">Heavy Duty inspirado en Mentzer</option><option value="ppl">Push / Pull / Legs</option><option value="phul">PHUL · fuerza e hipertrofia</option><option value="fivebyfive">Fuerza 5x5 adaptada</option><option value="home">Casa · peso corporal y bandas</option><option value="metabolic">Circuito de acondicionamiento</option><option value="specialization">Especialización muscular</option><option value="antagonist">Superseries antagonistas 4D</option><option value="hybrid3">Torso / Pierna / Full Body 3D</option><option value="phat">PHAT adaptado · potencia + hipertrofia</option><option value="arnold">Arnold Split adaptado</option><option value="dup">DUP · periodización ondulante</option><option value="ppl6">Push / Pull / Legs 6D</option></select></div>
       </div>
       <div class="row">
         <div><label>Días</label><select id="planDays"><option value="2">2 días</option><option value="3">3 días</option><option value="4" selected>4 días</option><option value="5">5 días</option><option value="6">6 días</option></select></div>
@@ -180,22 +181,6 @@
 
     <h2>Informe mensual</h2><div class="card" id="monthlyReport"></div><h2>Historial corporal</h2><div class="card" id="metricHistory"></div>
   </section>
-
-
-  <section id="crosstraining" class="page">
-    <div class="hero crossHero"><div class="eyebrow">Crosstraining sin material olímpico</div><h1>WOD Studio</h1><p>Biblioteca de WODs y generador adaptado al material disponible, nivel y tiempo.</p></div>
-    <div class="card">
-      <div class="row"><div><label>Formato</label><select id="crossFormat"><option value="">Todos</option><option>AMRAP</option><option>EMOM</option><option>For Time</option><option>Chipper</option><option>Tabata</option><option>Intervals</option></select></div><div><label>Nivel</label><select id="crossLevel"><option value="">Todos</option><option>Principiante</option><option>Intermedio</option><option>Avanzado</option></select></div></div>
-      <div class="row"><div><label>Material principal</label><select id="crossEquipment"><option value="">Todo sin barra olímpica</option><option value="peso corporal">Solo peso corporal</option><option value="mancuerna">Mancuernas</option><option value="kettlebell">Kettlebell</option><option value="cajón">Cajón</option><option value="barra de dominadas">Dominadas</option><option value="anillas/TRX">Anillas / TRX</option><option value="comba">Comba</option><option value="remo">Remo</option><option value="air bike">Air bike</option><option value="carrera">Carrera</option></select></div><div><label>Duración máxima</label><select id="crossDuration"><option value="0">Cualquiera</option><option value="15">15 min</option><option value="20">20 min</option><option value="30">30 min</option><option value="45">45 min</option></select></div></div>
-      <input id="crossSearch" placeholder="Buscar WOD o movimiento...">
-      <div class="row" style="margin-top:10px"><button id="crossRandom" style="width:100%">Generar WOD compatible</button><button id="crossReset" class="secondary">Limpiar</button></div>
-      <div id="crossCount" class="small" style="margin-top:8px"></div>
-    </div>
-    <div class="notice">No incluye barra olímpica, discos, snatch ni clean & jerk con barra. Las variantes con mancuernas o kettlebell son opcionales y filtrables.</div>
-    <div id="crossWodList" class="crossGrid" style="margin-top:10px"></div>
-    <h2>Historial de Crosstraining</h2><div id="crossHistory" class="card"></div>
-  </section>
-
   <section id="settings" class="page">
     <h2>Perfil</h2>
     <div class="card">
@@ -220,7 +205,6 @@
   <button data-page="training"><span class="navIcon">🏋️</span>Entreno</button>
   <button data-page="nutrition"><span class="navIcon">🥗</span>Nutrición</button>
   <button data-page="progress"><span class="navIcon">📈</span>Progreso</button>
-  <button data-page="crosstraining"><span class="navIcon">⚡</span>Cross</button>
   <button data-page="settings"><span class="navIcon">⚙️</span>Ajustes</button>
 </nav>
 
@@ -236,8 +220,7 @@
   <div id="exerciseLibrary" class="libraryGrid" style="margin-top:10px"></div>
 </div></div>
 
-<div id="onboardingModal" class="modal"><div class="modalBox"><h2>Configura FitCoach</h2><label>Nombre</label><input id="onboardingName" value="Agustín"><label>Objetivo</label><select id="onboardingGoal"><option value="recomp">Recomposición</option><option value="hypertrophy">Hipertrofia</option><option value="strength">Fuerza</option><option value="fatloss">Pérdida de grasa</option></select><div class="row"><div><label>Días</label><select id="onboardingDays"><option value="3">3</option><option value="4" selected>4</option></select></div><div><label>Duración</label><select id="onboardingMinutes"><option value="30">30 min</option><option value="45">45 min</option><option value="60" selected>60 min</option><option value="75">75 min</option></select></div></div><button id="finishOnboarding" style="width:100%;margin-top:12px">Crear mi plan inicial</button></div></div><div id="menuRecipeModal" class="modal"><div class="modalBox"><div class="row"><h2 id="menuRecipeTitle" style="margin:0">Receta</h2><button id="closeMenuRecipe" class="secondary">Cerrar</button></div><div id="menuRecipeContent" style="margin-top:12px"></div></div></div><div id="legalModal" class="modal"><div class="modalBox"><div class="row"><h2 id="legalTitle" style="margin:0"></h2><button id="closeLegal" class="secondary">Cerrar</button></div><div id="legalContent" class="small" style="margin-top:12px;white-space:pre-line"></div></div></div><script src="data.js?v=2.0.2"></script>
-<script src="cross.js?v=2.0.2"></script>
-<script src="app.js?v=2.0.2"></script>
+<div id="onboardingModal" class="modal"><div class="modalBox"><h2>Configura FitCoach</h2><label>Nombre</label><input id="onboardingName" value="Agustín"><label>Objetivo</label><select id="onboardingGoal"><option value="recomp">Recomposición</option><option value="hypertrophy">Hipertrofia</option><option value="strength">Fuerza</option><option value="fatloss">Pérdida de grasa</option></select><div class="row"><div><label>Días</label><select id="onboardingDays"><option value="3">3</option><option value="4" selected>4</option></select></div><div><label>Duración</label><select id="onboardingMinutes"><option value="30">30 min</option><option value="45">45 min</option><option value="60" selected>60 min</option><option value="75">75 min</option></select></div></div><button id="finishOnboarding" style="width:100%;margin-top:12px">Crear mi plan inicial</button></div></div><div id="menuRecipeModal" class="modal"><div class="modalBox"><div class="row"><h2 id="menuRecipeTitle" style="margin:0">Receta</h2><button id="closeMenuRecipe" class="secondary">Cerrar</button></div><div id="menuRecipeContent" style="margin-top:12px"></div></div></div><div id="legalModal" class="modal"><div class="modalBox"><div class="row"><h2 id="legalTitle" style="margin:0"></h2><button id="closeLegal" class="secondary">Cerrar</button></div><div id="legalContent" class="small" style="margin-top:12px;white-space:pre-line"></div></div></div><script src="data.js?v=2.2.0"></script>
+<script src="app.js?v=2.2.0"></script>
 </body>
 </html>
