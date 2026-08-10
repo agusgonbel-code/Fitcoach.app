@@ -1,0 +1,6 @@
+{
+  "version": "3.0.0",
+  "entry": "definitive.html",
+  "planner": "fitcoach-definitive.js",
+  "mode": "no-service-worker-loader"
+}
