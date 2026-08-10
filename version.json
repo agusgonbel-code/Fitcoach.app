@@ -1,5 +1,5 @@
 {
-  "version": "2.3.2",
-  "cache": "fitcoach-runtime-2-3-2-hotpatch-20260810",
-  "repair": "repair-2.3.2.html"
+  "version": "2.3.3",
+  "mode": "stable-no-service-worker",
+  "entry": "stable.html"
 }

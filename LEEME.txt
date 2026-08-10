@@ -1,15 +1,20 @@
-FITCOACH 2.3.2 — CORRECCIÓN REAL
+FITCOACH 2.3.3 — ENTRADA ESTABLE
 
-Sube estos 5 archivos a la raíz de Fitcoach.app, sustituyendo los existentes:
-- sw.js
+Sube estos archivos a la raíz del repositorio:
+- stable.html
 - pro.js
 - version.json
-- manifest.webmanifest
-- repair-2.3.2.html
+
+No hace falta sustituir app.js ni index.html.
 
 Después abre:
-https://agusgonbel-code.github.io/Fitcoach.app/repair-2.3.2.html
+https://agusgonbel-code.github.io/Fitcoach.app/stable.html
 
-Pulsa “Reparar FitCoach ahora”.
+Qué cambia:
+- stable.html elimina caches y service workers antiguos sin tocar localStorage.
+- descarga index.html fresco.
+- define CROSS_WODS antes de cargar app.js, por lo que el error de arranque desaparece.
+- carga app.js y pro.js directamente, sin parches del service worker.
+- no depende de repair.html ni de una cadena de actualizaciones.
 
-Diferencia clave: esta versión ya no intenta ocultar el error con compat.js. El service worker intercepta app.js y elimina la línea CROSS_WODS antes de que Safari la ejecute, además de cambiar APP_VERSION a 2.3.2. También reescribe el HTML a 2.3.2.
+Si esta entrada funciona correctamente, el siguiente paso será convertir stable.html en el index.html definitivo.

@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#080E1A"><title>FitCoach 2.3.3</title></head><body style="margin:0;background:#080E1A;color:#fff;font-family:-apple-system,BlinkMacSystemFont,sans-serif"><div id="boot" style="min-height:100vh;display:grid;place-items:center;padding:24px;text-align:center"><div><h1>FitCoach</h1><p>Iniciando versión estable 2.3.3…</p></div></div><script>
+(async()=>{
+  try{
+    // Elimina únicamente caches/SW; conserva localStorage y los datos del usuario.
+    if('caches' in window){const keys=await caches.keys();await Promise.all(keys.map(k=>caches.delete(k)))}
+    if('serviceWorker' in navigator){const regs=await navigator.serviceWorker.getRegistrations();await Promise.all(regs.map(r=>r.unregister()))}
+
+    const r=await fetch('./index.html?stable=2.3.3&t='+Date.now(),{cache:'no-store'});
+    if(!r.ok) throw new Error('No se pudo cargar index.html');
+    let html=await r.text();
+
+    // No permitimos que esta entrada estable vuelva a registrar un SW viejo durante el arranque.
+    // app.js podrá ejecutar el resto de FitCoach normalmente.
+    html=html.replaceAll('2.2.0','2.3.3').replaceAll('FitCoach 2.2','FitCoach 2.3');
+
+    // Corrección real antes de app.js: CROSS_WODS existe pero CrossCoach permanece separado.
+    const shim='<script>window.CROSS_WODS=[];window.FITCOACH_STABLE={version:"2.3.3",crossCoachDetached:true};<\/script>';
+    const appTag=/<script\s+src=["']app\.js(?:\?v=[^"']+)?["']><\/script>/i;
+    if(appTag.test(html)) html=html.replace(appTag, shim+'<script src="app.js?v=2.2.0&stable=2.3.3&t='+Date.now()+'"><\/script>');
+    else html=html.replace('</body>',shim+'<script src="app.js?stable=2.3.3&t='+Date.now()+'"><\/script></body>');
+
+    // Cargamos el panel Pro después del núcleo, sin depender del service worker.
+    if(!html.includes('pro.js?stable=2.3.3')) html=html.replace('</body>','<script src="pro.js?stable=2.3.3&t='+Date.now()+'"><\/script></body>');
+
+    document.open(); document.write(html); document.close();
+  }catch(e){
+    document.getElementById('boot').innerHTML='<div><h1>No se pudo iniciar FitCoach</h1><p>'+String(e&&e.message||e)+'</p><button onclick="location.reload()" style="padding:14px 18px;border:0;border-radius:12px;font-weight:800">Reintentar</button></div>';
+  }
+})();
+</script></body></html>
