@@ -1,0 +1,29 @@
+FITCOACH 2.3.1 — RECUPERACIÓN DIRECTA
+
+POR QUÉ ESTE PAQUETE SÍ FUNCIONA
+La app actual falla antes de ejecutar registerServiceWorker(), porque app.js intenta leer CROSS_WODS durante init().
+Por eso subir solo un nuevo sw.js no basta: la aplicación puede no llegar a registrar/actualizar ese service worker.
+
+Este paquete rompe ese círculo:
+1. repair.html funciona de forma independiente a app.js.
+2. Borra únicamente Cache Storage y registros antiguos de Service Worker; NO borra localStorage.
+3. Registra el sw.js nuevo.
+4. El nuevo sw.js modifica el HTML en vuelo y garantiza que compat.js se ejecute antes de la inicialización de app.js.
+5. compat.js define CROSS_WODS como array vacío porque Crosstraining ya está separado.
+6. pro.js carga el panel Coach 360.
+
+ARCHIVOS A SUBIR A LA RAÍZ DEL REPOSITORIO
+- repair.html
+- sw.js (sustituir el existente)
+- compat.js (sustituir/crear)
+- pro.js (sustituir/crear)
+- version.json (sustituir)
+- manifest.webmanifest (sustituir)
+
+DESPUÉS
+Abre una sola vez:
+https://agusgonbel-code.github.io/Fitcoach.app/repair.html
+
+Pulsa “Reparar y abrir FitCoach”.
+
+No necesitas ejecutar Node, npm ni GitHub Actions.

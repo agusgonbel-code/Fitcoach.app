@@ -1,11 +1,11 @@
 {
-  "name": "FitCoach 2.2.0",
+  "name": "FitCoach",
   "short_name": "FitCoach",
-  "start_url": "./",
+  "start_url": "./?fc=2.3.1",
   "display": "standalone",
   "background_color": "#080E1A",
   "theme_color": "#080E1A",
-  "description": "Entrenamiento adaptativo, nutrición mensual, progreso y Crosstraining para iPhone.",
+  "description": "Entrenamiento adaptativo, nutrición y progreso.",
   "icons": [
     {
       "src": "icon-192.png",
@@ -18,5 +18,5 @@
       "type": "image/png"
     }
   ],
-  "version": "2.2.0"
+  "version": "2.3.1"
 }

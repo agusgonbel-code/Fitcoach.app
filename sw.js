@@ -1,108 +1,116 @@
-const CACHE = 'fitcoach-2-2-0-pro-pack-20260809';
-const APP_SHELL = [
+const CACHE = 'fitcoach-runtime-2-3-1-force-refresh-20260810';
+const CORE = [
   './',
   './index.html',
   './styles.css?v=2.2.0',
   './data.js?v=2.2.0',
   './app.js?v=2.2.0',
-  './compat.js',
-  './pro.js',
-  './manifest.webmanifest?v=2.2.0',
-  './version.json',
-  './icon-192.png?v=2.2.0',
-  './icon-512.png?v=2.2.0'
+  './compat.js?v=2.3.1',
+  './pro.js?v=2.3.1',
+  './manifest.webmanifest',
+  './version.json'
 ];
 
-const ENHANCEMENTS = '<script src="./compat.js"></script><script src="./pro.js"></script>';
-
-async function enhanceHtml(response) {
-  if (!response || !response.ok) return response;
-  try {
-    const html = await response.text();
-    if (html.includes('src="./pro.js"') || html.includes("src='./pro.js'")) {
-      return new Response(html, {status:response.status,statusText:response.statusText,headers:response.headers});
-    }
-    const enhanced = html.replace('</body>', `${ENHANCEMENTS}</body>`);
-    const headers = new Headers(response.headers);
-    headers.set('content-type','text/html; charset=utf-8');
-    headers.delete('content-length');
-    return new Response(enhanced,{status:response.status,statusText:response.statusText,headers});
-  } catch {
-    return response;
+function patchedHtml(text) {
+  let html = text;
+  if (!html.includes('compat.js?v=2.3.1')) {
+    html = html.replace(
+      /<script\s+src=["']app\.js\?v=[^"']+["']><\/script>/i,
+      '<script src="compat.js?v=2.3.1"></script><script src="app.js?v=2.2.0"></script><script src="pro.js?v=2.3.1"></script>'
+    );
   }
+  // Fallback for an index without a versioned app.js tag.
+  if (!html.includes('compat.js?v=2.3.1')) {
+    html = html.replace(
+      /<script\s+src=["']app\.js["']><\/script>/i,
+      '<script src="compat.js?v=2.3.1"></script><script src="app.js"></script><script src="pro.js?v=2.3.1"></script>'
+    );
+  }
+  // Last resort: inject before </body>. app.js currently defers init until DOMContentLoaded,
+  // so compat still executes before init.
+  if (!html.includes('compat.js?v=2.3.1')) {
+    html = html.replace(
+      '</body>',
+      '<script src="compat.js?v=2.3.1"></script><script src="pro.js?v=2.3.1"></script></body>'
+    );
+  }
+  return html;
+}
+
+async function patchResponse(response) {
+  if (!response || !response.ok) return response;
+  const text = await response.text();
+  const headers = new Headers(response.headers);
+  headers.set('content-type','text/html; charset=utf-8');
+  headers.delete('content-length');
+  headers.set('cache-control','no-store, max-age=0');
+  return new Response(patchedHtml(text), {
+    status: response.status,
+    statusText: response.statusText,
+    headers
+  });
 }
 
 self.addEventListener('install', event => {
   self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE).then(cache =>
-      Promise.allSettled(APP_SHELL.map(asset =>
-        fetch(asset,{cache:'reload'}).then(response => {
-          if (!response.ok) throw new Error(`No se pudo precargar ${asset}`);
-          return cache.put(asset,response);
-        })
+      Promise.allSettled(CORE.map(url =>
+        fetch(url,{cache:'reload'}).then(r => r.ok ? cache.put(url,r) : Promise.reject())
       ))
     )
   );
 });
 
-self.addEventListener('message', event => {
-  if (event.data?.type === 'SKIP_WAITING') self.skipWaiting();
-});
-
 self.addEventListener('activate', event => {
   event.waitUntil(
-    Promise.all([
-      caches.keys().then(keys => Promise.all(keys.filter(key => key !== CACHE).map(key => caches.delete(key)))),
-      self.registration.navigationPreload ? self.registration.navigationPreload.enable() : Promise.resolve()
-    ]).then(() => self.clients.claim())
+    caches.keys()
+      .then(keys => Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k))))
+      .then(()=>self.clients.claim())
   );
 });
 
-self.addEventListener('fetch', event => {
-  const request = event.request;
-  if (request.method !== 'GET') return;
-  const url = new URL(request.url);
-  if (url.origin !== self.location.origin) return;
+self.addEventListener('message', event => {
+  if (event.data?.type === 'SKIP_WAITING') self.skipWaiting();
+  if (event.data?.type === 'CLEAR_OLD_CACHES') {
+    event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))));
+  }
+});
 
-  if (request.mode === 'navigate') {
-    event.respondWith((async () => {
+self.addEventListener('fetch', event => {
+  const req=event.request;
+  if(req.method!=='GET') return;
+  const url=new URL(req.url);
+  if(url.origin!==self.location.origin) return;
+
+  if(req.mode==='navigate'){
+    event.respondWith((async()=>{
       try {
-        const preload = await event.preloadResponse;
-        const response = preload || await fetch(request,{cache:'no-store'});
-        if (response?.ok) {
-          const cacheCopy = response.clone();
-          event.waitUntil(caches.open(CACHE).then(cache => cache.put('./index.html',cacheCopy)));
-          return enhanceHtml(response);
+        // Never trust an old HTML shell when online.
+        const fresh=await fetch(req,{cache:'no-store',headers:{'cache-control':'no-cache'}});
+        if(fresh?.ok){
+          const clone=fresh.clone();
+          event.waitUntil(caches.open(CACHE).then(c=>c.put('./index.html',clone)));
+          return patchResponse(fresh);
         }
       } catch {}
-      const fallback = await caches.match('./index.html');
-      return fallback ? enhanceHtml(fallback) : Response.error();
+      const fallback=await caches.match('./index.html') || await caches.match('./');
+      return fallback ? patchResponse(fallback) : Response.error();
     })());
     return;
   }
 
-  const isCore = /\.(?:js|css|webmanifest|json)$/.test(url.pathname);
-  if (isCore) {
+  if(/\.(?:js|css|webmanifest|json)$/.test(url.pathname)){
     event.respondWith(
-      fetch(request,{cache:'no-store'})
-        .then(response => {
-          if (response.ok && response.type === 'basic') {
-            event.waitUntil(caches.open(CACHE).then(cache => cache.put(request,response.clone())));
-          }
-          return response;
+      fetch(req,{cache:'no-store'})
+        .then(r=>{
+          if(r.ok) event.waitUntil(caches.open(CACHE).then(c=>c.put(req,r.clone())));
+          return r;
         })
-        .catch(() => caches.match(request))
+        .catch(()=>caches.match(req))
     );
     return;
   }
 
-  event.respondWith(
-    caches.match(request).then(cached => cached || fetch(request).then(response => {
-      if (response.ok && response.type === 'basic') {
-        event.waitUntil(caches.open(CACHE).then(cache => cache.put(request,response.clone())));
-      }
-      return response;
-    }))
-  );
+  event.respondWith(caches.match(req).then(c=>c||fetch(req)));
 });

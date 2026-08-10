@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#080E1A">
+<title>Reparar FitCoach</title>
+<style>
+body{margin:0;background:#080e1a;color:#f7f9fc;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display",sans-serif;min-height:100vh;display:grid;place-items:center;padding:20px}
+.card{max-width:520px;width:100%;background:#101a2d;border:1px solid #273550;border-radius:24px;padding:22px;box-sizing:border-box}
+h1{margin-top:0}.muted{color:#91a0b8;line-height:1.5}.ok{color:#8bf0b1}.err{color:#ff9ca8}
+button{width:100%;border:0;border-radius:14px;padding:14px;font:inherit;font-weight:900;background:#2fd374;color:#06130b;margin-top:12px}
+pre{white-space:pre-wrap;background:#07111f;padding:12px;border-radius:14px;font-size:12px;min-height:80px}
+</style>
+</head>
+<body>
+<div class="card">
+<h1>FitCoach · reparación 2.3.1</h1>
+<p class="muted">Esta página elimina cachés antiguas, instala el service worker corregido y abre FitCoach con el runtime reparado. No borra entrenamientos, comidas, métricas ni preferencias.</p>
+<pre id="log">Preparado.</pre>
+<button id="go">Reparar y abrir FitCoach</button>
+</div>
+<script>
+const log = m => document.getElementById('log').textContent += '\n' + m;
+document.getElementById('go').onclick = async () => {
+  const btn=document.getElementById('go'); btn.disabled=true;
+  try {
+    log('1/5 Eliminando cachés antiguas...');
+    const keys=await caches.keys();
+    await Promise.all(keys.map(k=>caches.delete(k)));
+
+    log('2/5 Eliminando registros antiguos del service worker...');
+    const regs=await navigator.serviceWorker.getRegistrations();
+    await Promise.all(regs.map(r=>r.unregister()));
+
+    log('3/5 Instalando runtime 2.3.1...');
+    const reg=await navigator.serviceWorker.register('./sw.js?repair=2.3.1-'+Date.now(),{updateViaCache:'none'});
+    await reg.update();
+
+    log('4/5 Esperando activación...');
+    let worker=reg.installing||reg.waiting||reg.active;
+    if(worker && worker.state!=='activated'){
+      await new Promise((resolve,reject)=>{
+        const timeout=setTimeout(()=>reject(new Error('Tiempo de activación agotado')),12000);
+        worker.addEventListener('statechange',()=>{
+          if(worker.state==='activated'){clearTimeout(timeout);resolve();}
+        });
+      });
+    }
+    if(reg.active) reg.active.postMessage({type:'CLEAR_OLD_CACHES'});
+
+    log('5/5 Runtime activo. Abriendo FitCoach...');
+    document.getElementById('log').classList.add('ok');
+    setTimeout(()=>location.replace('./?fc=2.3.1&t='+Date.now()),700);
+  } catch(e) {
+    log('ERROR: '+(e?.message||e));
+    document.getElementById('log').classList.add('err');
+    btn.disabled=false;
+  }
+};
+</script>
+</body>
+</html>
