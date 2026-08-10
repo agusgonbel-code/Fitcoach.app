@@ -1,5 +1,6 @@
 {
-  "version": "2.3.3",
-  "mode": "stable-no-service-worker",
-  "entry": "stable.html"
+  "version": "3.1.0",
+  "entry": "index.html",
+  "architecture": "single-core",
+  "crossCoachDetached": true
 }

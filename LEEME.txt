@@ -1,16 +1,26 @@
-FITCOACH 3.0 DEFINITIVE
+FITCOACH 3.1 CLEAN
 
-SUBE A LA RAÍZ DEL REPOSITORIO:
-- definitive.html
-- fitcoach-definitive.js
-- fitcoach-definitive.css
-- version-3.0.json
+ESTA ES UNA SUSTITUCIÓN REAL DEL NÚCLEO, NO UNA CAPA.
 
-NO borres app.js, index.html, data.js ni tus archivos actuales.
+Sustituye en la raíz del repositorio:
+- index.html
+- app.js
+- styles.css
+- manifest.webmanifest
+- version.json
+- sw.js
 
-PRUEBA EN:
-https://agusgonbel-code.github.io/Fitcoach.app/definitive.html
+Conserva data.js e iconos.
 
-La nueva pantalla “Planificar” aparece como botón flotante. Desde ahí se elige objetivo, método, días, duración, prioridades, duración del mesociclo y progresión. Al activar un plan se sincroniza con las rutinas actuales de FitCoach y se recarga la app.
+Después abre la URL normal de GitHub Pages.
 
-Incluye Weider y otros 12 métodos.
+Incluye:
+- pantalla Plan separada de Entrenar
+- Weider y 12 métodos adicionales
+- prioridades musculares
+- bloques de 4 a 12 semanas con fecha fin
+- seguimiento por semana
+- últimos pesos/repeticiones por ejercicio
+- RIR, alternativas y progresión
+- progreso, e1RM, adherencia, nutrición y backup
+- sin CROSS_WODS ni dependencia de CrossCoach
