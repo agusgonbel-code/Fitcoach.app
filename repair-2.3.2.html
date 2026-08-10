@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#080E1A">
+<title>FitCoach 2.3.2 · Reparación definitiva</title>
+<style>
+body{margin:0;background:#080e1a;color:#f7f9fc;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display",sans-serif;min-height:100vh;display:grid;place-items:center;padding:20px}.card{max-width:560px;width:100%;background:#101a2d;border:1px solid #273550;border-radius:24px;padding:22px;box-sizing:border-box}h1{margin:0 0 8px}.muted{color:#91a0b8;line-height:1.5}button{width:100%;border:0;border-radius:14px;padding:14px;font:inherit;font-weight:900;background:#2fd374;color:#06130b;margin-top:12px}pre{white-space:pre-wrap;background:#07111f;padding:12px;border-radius:14px;font-size:12px;min-height:100px}.ok{color:#8bf0b1}.err{color:#ff9ca8}
+</style>
+</head><body><div class="card"><h1>FitCoach 2.3.2</h1><p class="muted">Reparación del core: elimina el fallo residual de Crosstraining, fuerza el código nuevo y evita que Safari reutilice el app.js anterior. No borra tus datos.</p><pre id="log">Preparado.</pre><button id="go">Reparar FitCoach ahora</button></div>
+<script>
+const box=document.getElementById('log'),btn=document.getElementById('go');
+const log=m=>box.textContent+='\n'+m;
+async function waitForController(timeout=12000){
+  if(navigator.serviceWorker.controller) return;
+  await new Promise((resolve,reject)=>{
+    const t=setTimeout(()=>reject(new Error('El service worker no tomó el control a tiempo')),timeout);
+    navigator.serviceWorker.addEventListener('controllerchange',()=>{clearTimeout(t);resolve()},{once:true});
+  });
+}
+btn.onclick=async()=>{
+  btn.disabled=true; box.className='';
+  try{
+    log('1/6 Limpiando Cache Storage...');
+    if('caches' in window){const keys=await caches.keys();await Promise.all(keys.map(k=>caches.delete(k)))}
+    log('2/6 Eliminando service workers antiguos...');
+    const regs=await navigator.serviceWorker.getRegistrations();
+    await Promise.all(regs.map(r=>r.unregister()));
+    log('3/6 Registrando runtime 2.3.2...');
+    const reg=await navigator.serviceWorker.register('./sw.js?v=2.3.2&ts='+Date.now(),{updateViaCache:'none'});
+    await reg.update();
+    log('4/6 Esperando activación...');
+    let worker=reg.installing||reg.waiting||reg.active;
+    if(worker && worker.state!=='activated'){
+      await new Promise((resolve,reject)=>{
+        const t=setTimeout(()=>reject(new Error('Activación agotó el tiempo')),12000);
+        worker.addEventListener('statechange',()=>{if(worker.state==='activated'){clearTimeout(t);resolve()}});
+      });
+    }
+    log('5/6 Confirmando control del navegador...');
+    if(!navigator.serviceWorker.controller) location.reload();
+    await waitForController().catch(()=>{});
+    log('6/6 Abriendo FitCoach limpio...');
+    box.className='ok';
+    setTimeout(()=>location.replace('./?v=2.3.2&fresh='+Date.now()),800);
+  }catch(e){box.className='err';log('ERROR: '+(e?.message||e));btn.disabled=false}
+};
+</script></body></html>

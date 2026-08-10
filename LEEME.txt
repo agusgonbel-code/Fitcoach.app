@@ -1,0 +1,15 @@
+FITCOACH 2.3.2 — CORRECCIÓN REAL
+
+Sube estos 5 archivos a la raíz de Fitcoach.app, sustituyendo los existentes:
+- sw.js
+- pro.js
+- version.json
+- manifest.webmanifest
+- repair-2.3.2.html
+
+Después abre:
+https://agusgonbel-code.github.io/Fitcoach.app/repair-2.3.2.html
+
+Pulsa “Reparar FitCoach ahora”.
+
+Diferencia clave: esta versión ya no intenta ocultar el error con compat.js. El service worker intercepta app.js y elimina la línea CROSS_WODS antes de que Safari la ejecute, además de cambiar APP_VERSION a 2.3.2. También reescribe el HTML a 2.3.2.
