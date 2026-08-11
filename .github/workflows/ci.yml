@@ -21,9 +21,13 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+          cache: npm
+      - run: npm ci --ignore-scripts
       - run: npm run audit
       - run: npm run sync:web
       - run: npm run audit
+      - name: Verify Capacitor toolchain
+        run: test "$(npx --no-install cap --version)" = "8.5.0"
       - name: Verify generated bundle
         run: |
           cmp --silent index.html www/index.html
