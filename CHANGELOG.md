@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.3.0 — Herramientas de publicación fiables
+- Restaurados los scripts `npm run audit` y `npm run sync:web`.
+- La auditoría comprueba versión, caché, recursos web y configuración de Capacitor.
+- La sincronización de `www` es atómica y evita publicar paquetes incompletos.
+- README y metadatos npm alineados con la versión visible 3.3.0.
+
 ## 2.0.2 — Runtime Stability
 - Arranque tolerante: un fallo en un módulo ya no bloquea toda la aplicación.
 - Avisos visibles para errores de carga y almacenamiento.

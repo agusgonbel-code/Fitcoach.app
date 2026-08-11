@@ -1,0 +1,51 @@
+import { cp, mkdir, rename, rm } from 'node:fs/promises';
+import path from 'node:path';
+import process from 'node:process';
+import { spawnSync } from 'node:child_process';
+
+const root = path.resolve(import.meta.dirname, '..');
+const destination = path.join(root, 'www');
+const staging = path.join(root, '.www-staging');
+const backup = path.join(root, '.www-backup');
+const webFiles = [
+  'index.html',
+  'styles.css',
+  'data.js',
+  'nutrition-data.js',
+  'exercise-equivalents.js',
+  'app.js',
+  'manifest.webmanifest',
+  'version.json',
+  'sw.js',
+  'icon-192.png',
+  'icon-512.png'
+];
+
+const audit = spawnSync(process.execPath, [path.join(root, 'scripts/audit.mjs')], {
+  cwd: root,
+  encoding: 'utf8'
+});
+process.stdout.write(audit.stdout);
+process.stderr.write(audit.stderr);
+if (audit.status !== 0) process.exit(audit.status ?? 1);
+
+await rm(staging, { recursive: true, force: true });
+await rm(backup, { recursive: true, force: true });
+await mkdir(staging, { recursive: true });
+
+try {
+  for (const file of webFiles) {
+    await cp(path.join(root, file), path.join(staging, file));
+  }
+  await rename(destination, backup).catch(error => {
+    if (error.code !== 'ENOENT') throw error;
+  });
+  await rename(staging, destination);
+  await rm(backup, { recursive: true, force: true });
+} catch (error) {
+  await rm(staging, { recursive: true, force: true });
+  await rename(backup, destination).catch(() => {});
+  throw error;
+}
+
+console.log(`www sincronizado: ${webFiles.length} recursos.`);
