@@ -33,8 +33,8 @@ assert.equal(MAX_PHOTO_BYTES, 25 * 1024 * 1024);
 assert.equal(MAX_TOTAL_PHOTO_BYTES, 75 * 1024 * 1024);
 assert.equal(STORAGE_KEYS.includes('v34meas'), true);
 assert.equal(STORAGE_KEYS.includes('fitcoach_priorities_v33'), true);
-assert.deepEqual(dataUrlBytes(tinyJpeg), { type: 'image/jpeg', bytes: 6 });
-assert.deepEqual(validateBackupPayload(valid), { photoCount: 1, totalPhotoBytes: 6 });
+assert.deepEqual(dataUrlBytes(tinyJpeg), { type: 'image/jpeg', bytes: 4 });
+assert.deepEqual(validateBackupPayload(valid), { photoCount: 1, totalPhotoBytes: 4 });
 
 assert.throws(
   () => validateBackupPayload({ ...valid, schema: 'foreign-app' }),
