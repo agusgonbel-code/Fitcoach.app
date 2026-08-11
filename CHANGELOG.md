@@ -1,5 +1,13 @@
 # Changelog
 
+## 3.4.2 — iPhone Photo Storage Safety
+- Fotos de progreso validadas y comprimidas antes de guardarse en IndexedDB.
+- Compatibilidad controlada con JPG, PNG, WebP y HEIC/HEIF.
+- Límite de entrada de 25 MB y de almacenamiento de 5 MB por foto comprimida.
+- Limpieza de Object URLs en galería y comparación para evitar fugas de memoria.
+- Pruebas automáticas de formatos, límites y dimensiones.
+- README y paquete publicable alineados con 3.4.2.
+
 ## 2.0.2 — Runtime Stability
 - Arranque tolerante: un fallo en un módulo ya no bloquea toda la aplicación.
 - Avisos visibles para errores de carga y almacenamiento.
