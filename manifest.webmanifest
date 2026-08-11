@@ -1,10 +1,9 @@
 {
-  "name": "FitCoach 3.1",
+  "name": "FitCoach 3.3 Pro Complete",
   "short_name": "FitCoach",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#07111f",
   "theme_color": "#07111f",
-  "description": "Planificación, entrenamiento, nutrición y progreso en una sola app.",
-  "version": "3.1.0"
+  "version": "3.3.0"
 }
