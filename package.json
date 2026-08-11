@@ -11,7 +11,8 @@
     "cap:sync": "npm run sync:web && cap sync",
     "cap:add:ios": "cap add ios",
     "cap:open:ios": "cap open ios",
-    "ios:prepare": "npm run sync:web && cap sync ios"
+    "ios:prepare": "npm run sync:web && cap sync ios",
+    "test": "node --test tests/*.test.mjs"
   },
   "dependencies": {
     "@capacitor/core": "8.5.0",
