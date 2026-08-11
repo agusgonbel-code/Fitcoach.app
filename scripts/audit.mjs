@@ -16,6 +16,7 @@ const version = versionJson.version;
 
 check(/^\d+\.\d+\.\d+$/.test(version), 'version.json debe usar versión semántica.');
 check(packageJson.version === version, 'package.json no coincide con version.json.');
+check(packageJson.engines?.node === '>=22.0.0', 'package.json debe exigir Node >=22.0.0 para Capacitor 8.');
 check(manifest.version === version, 'manifest.webmanifest no coincide con version.json.');
 check(capacitor.webDir === 'www', 'Capacitor debe usar www como webDir.');
 check(/^([a-zA-Z][\w]*)(\.[a-zA-Z][\w]*)+$/.test(capacitor.appId), 'Capacitor debe usar un appId válido.');
