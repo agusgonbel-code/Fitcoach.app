@@ -1,0 +1,47 @@
+name: FitCoach CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: fitcoach-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate-web:
+    name: Validate web bundle
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Audit source
+        run: npm run audit
+
+      - name: Build Capacitor web directory
+        run: npm run sync:web
+
+      - name: Audit generated bundle
+        run: npm run audit
+
+      - name: Verify generated bundle
+        shell: bash
+        run: |
+          cmp --silent index.html www/index.html
+          cmp --silent app.js www/app.js
+          test -f www/manifest.webmanifest
+          test -f www/sw.js
+          test -f www/version.json
