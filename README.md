@@ -1,5 +1,24 @@
-# FitCoach 2.2.0
+# FitCoach 3.4.2
 
-Entrenamiento, nutrición y progreso. Incluye 20 métodos de entrenamiento, equivalencias, historial persistente, menús de hasta 30 días y biblioteca ampliada.
+Aplicación de entrenamiento, nutrición y progreso con historial persistente, planificación por objetivos, progresión mediante RIR, menús de 30 días y comparación local de fotografías.
 
-Ejecuta `npm run audit` antes de publicar.
+## Verificación
+
+Requiere Node.js 22 o posterior.
+
+```bash
+npm ci
+npm test
+npm run audit
+npm run sync:web
+```
+
+## Preparación para iPhone
+
+```bash
+npm run cap:add:ios
+npm run ios:prepare
+npm run cap:open:ios
+```
+
+La generación y firma final requieren macOS, Xcode y una cuenta de Apple Developer. Las fotografías de progreso se validan, comprimen y guardan localmente en el dispositivo.
