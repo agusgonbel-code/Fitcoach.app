@@ -2,6 +2,9 @@
   "name": "fitcoach-app",
   "version": "3.4.2",
   "private": true,
+  "engines": {
+    "node": ">=22.0.0"
+  },
   "scripts": {
     "sync:web": "node scripts/sync-web.mjs",
     "audit": "node scripts/audit.mjs",
