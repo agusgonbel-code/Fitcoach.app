@@ -10,7 +10,7 @@ const backup = path.join(root, '.www-backup');
 const webFiles = [
   'index.html', 'styles.css', 'enhance-v34.css', 'data.js',
   'nutrition-data.js', 'exercise-equivalents.js', 'app.js',
-  'nutrition-data-gen-v34.js', 'nutrition-ui-v34.js', 'progress-v34.js',
+  'nutrition-data-gen-v34.js', 'nutrition-ui-v34.js', 'photo-storage-v34.js', 'progress-v34.js',
   'manifest.webmanifest', 'version.json', 'sw.js',
   'icon-192.png', 'icon-512.png'
 ];
