@@ -53,7 +53,8 @@
     if (typeof dataUrl !== 'string') fail('Una fotografía no contiene datos válidos.');
     const match = /^data:(image\/(?:jpeg|png|webp|heic|heif));base64,([A-Za-z0-9+/]+={0,2})$/.exec(dataUrl);
     if (!match) fail('Una fotografía usa un formato de copia no permitido.');
-    return { type: match[1], bytes: Math.floor(match[2].length * 3 / 4) };
+    const padding = match[2].endsWith('==') ? 2 : match[2].endsWith('=') ? 1 : 0;
+    return { type: match[1], bytes: Math.floor(match[2].length * 3 / 4) - padding };
   }
 
   function validateBackupPayload(payload) {
