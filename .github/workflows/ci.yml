@@ -23,6 +23,7 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci --ignore-scripts
+      - run: npm test
       - run: npm run audit
       - run: npm run sync:web
       - run: npm run audit
@@ -33,4 +34,5 @@ jobs:
           cmp --silent index.html www/index.html
           cmp --silent app.js www/app.js
           test -f www/nutrition-ui-v34.js
+          test -f www/photo-storage-v34.js
           test -f www/progress-v34.js
