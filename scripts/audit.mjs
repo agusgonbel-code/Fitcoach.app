@@ -8,6 +8,7 @@ const failures = [];
 const check = (condition, message) => { if (!condition) failures.push(message); };
 
 const packageJson = JSON.parse(await read('package.json'));
+const packageLock = JSON.parse(await read('package-lock.json'));
 const versionJson = JSON.parse(await read('version.json'));
 const manifest = JSON.parse(await read('manifest.webmanifest'));
 const capacitor = JSON.parse(await read('capacitor.config.json'));
@@ -17,6 +18,21 @@ check(/^\d+\.\d+\.\d+$/.test(version), 'version.json debe usar versión semánti
 check(packageJson.version === version, 'package.json no coincide con version.json.');
 check(manifest.version === version, 'manifest.webmanifest no coincide con version.json.');
 check(capacitor.webDir === 'www', 'Capacitor debe usar www como webDir.');
+check(/^([a-zA-Z][\w]*)(\.[a-zA-Z][\w]*)+$/.test(capacitor.appId), 'Capacitor debe usar un appId válido.');
+check(typeof capacitor.appName === 'string' && capacitor.appName.trim(), 'Capacitor debe declarar appName.');
+
+const capacitorPackages = [
+  ['dependencies', '@capacitor/core'],
+  ['dependencies', '@capacitor/ios'],
+  ['devDependencies', '@capacitor/cli']
+];
+const capacitorVersion = packageJson.dependencies?.['@capacitor/core'];
+check(/^\d+\.\d+\.\d+$/.test(capacitorVersion ?? ''), '@capacitor/core debe fijar una versión exacta.');
+for (const [group, name] of capacitorPackages) {
+  check(packageJson[group]?.[name] === capacitorVersion, `${name} no coincide con @capacitor/core.`);
+  check(packageLock.packages?.['']?.[group]?.[name] === capacitorVersion, `package-lock no fija ${name}.`);
+  check(packageLock.packages?.[`node_modules/${name}`]?.version === capacitorVersion, `package-lock no resuelve ${name} ${capacitorVersion}.`);
+}
 
 const webFiles = [
   'index.html', 'styles.css', 'enhance-v34.css', 'data.js',
@@ -53,5 +69,5 @@ if (failures.length) {
   failures.forEach(message => console.error(`- ${message}`));
   process.exitCode = 1;
 } else {
-  console.log(`FitCoach ${version}: auditoría correcta (${webFiles.length} recursos).`);
+  console.log(`FitCoach ${version}: auditoría correcta (${webFiles.length} recursos, Capacitor ${capacitorVersion}).`);
 }
