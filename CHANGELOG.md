@@ -7,6 +7,8 @@
 - Limpieza de Object URLs en galería y comparación para evitar fugas de memoria.
 - Pruebas automáticas de formatos, límites y dimensiones.
 - README y paquete publicable alineados con 3.4.2.
+- Copia de seguridad versionada con perfil, planes, entrenamientos, nutrición, medidas y fotos de IndexedDB.
+- Restauración validada con límites de tamaño, claves permitidas y reversión al estado anterior ante fallo.
 
 ## 2.0.2 — Runtime Stability
 - Arranque tolerante: un fallo en un módulo ya no bloquea toda la aplicación.
