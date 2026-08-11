@@ -38,7 +38,7 @@ for (const [group, name] of capacitorPackages) {
 const webFiles = [
   'index.html', 'styles.css', 'enhance-v34.css', 'data.js',
   'nutrition-data.js', 'exercise-equivalents.js', 'app.js',
-  'nutrition-data-gen-v34.js', 'nutrition-ui-v34.js', 'progress-v34.js',
+  'nutrition-data-gen-v34.js', 'nutrition-ui-v34.js', 'photo-storage-v34.js', 'progress-v34.js',
   'manifest.webmanifest', 'version.json', 'sw.js',
   'icon-192.png', 'icon-512.png'
 ];
@@ -48,11 +48,12 @@ for (const file of webFiles) {
   catch { failures.push(`Falta el recurso publicable ${file}.`); }
 }
 
-const [index, app, serviceWorker] = await Promise.all([
-  read('index.html'), read('app.js'), read('sw.js')
+const [index, app, serviceWorker, readme] = await Promise.all([
+  read('index.html'), read('app.js'), read('sw.js'), read('README.md')
 ]);
 
 check(index.includes(`<span>${version}</span>`), 'La cabecera no muestra la versión actual.');
+check(readme.includes(`# FitCoach ${version}`), 'README no coincide con la versión actual.');
 check(app.includes(`./sw.js?v=${version}`), 'app.js registra otra versión del service worker.');
 check(serviceWorker.includes(`fitcoach-${version.replaceAll('.', '-')}`), 'La caché no coincide con la versión.');
 for (const asset of webFiles.filter(file => file !== 'sw.js' && /\.(?:css|js)$/.test(file))) {
