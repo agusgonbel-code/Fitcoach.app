@@ -38,7 +38,7 @@ const [index, app, serviceWorker] = await Promise.all([
 check(index.includes(`<span>${version}</span>`), 'La cabecera no muestra la versión actual.');
 check(app.includes(`./sw.js?v=${version}`), 'app.js registra otra versión del service worker.');
 check(serviceWorker.includes(`fitcoach-${version.replaceAll('.', '-')}`), 'La caché no coincide con la versión.');
-for (const asset of webFiles.filter(file => /\.(?:css|js)$/.test(file))) {
+for (const asset of webFiles.filter(file => file !== 'sw.js' && /\.(?:css|js)$/.test(file))) {
   check(index.includes(`${asset}?v=${version}`), `index.html no referencia ${asset} con v=${version}.`);
 }
 for (const match of index.matchAll(/[?&]v=(\d+\.\d+\.\d+)/g)) {
