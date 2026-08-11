@@ -1,9 +1,9 @@
 {
-  "name": "FitCoach 3.3 Pro Complete",
+  "name": "FitCoach 3.4 Pro",
   "short_name": "FitCoach",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#07111f",
   "theme_color": "#07111f",
-  "version": "3.3.0"
+  "version": "3.4.2"
 }

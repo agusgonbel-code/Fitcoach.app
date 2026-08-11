@@ -1,9 +1,10 @@
 {
-  "version": "3.3.0",
+  "version": "3.4.2",
   "recipes": 102,
   "monthlyMenuDays": 30,
   "macroCalculator": true,
   "equivalentMeals": true,
   "exerciseEquivalents": true,
-  "serviceWorker": true
+  "serviceWorker": true,
+  "nutritionProgressModules": true
 }

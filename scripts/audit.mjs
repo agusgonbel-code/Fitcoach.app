@@ -1,0 +1,75 @@
+import { access, readFile } from 'node:fs/promises';
+import path from 'node:path';
+import process from 'node:process';
+
+const root = path.resolve(import.meta.dirname, '..');
+const read = file => readFile(path.join(root, file), 'utf8');
+const failures = [];
+const check = (condition, message) => { if (!condition) failures.push(message); };
+
+const packageJson = JSON.parse(await read('package.json'));
+const packageLock = JSON.parse(await read('package-lock.json'));
+const versionJson = JSON.parse(await read('version.json'));
+const manifest = JSON.parse(await read('manifest.webmanifest'));
+const capacitor = JSON.parse(await read('capacitor.config.json'));
+const version = versionJson.version;
+
+check(/^\d+\.\d+\.\d+$/.test(version), 'version.json debe usar versión semántica.');
+check(packageJson.version === version, 'package.json no coincide con version.json.');
+check(packageJson.engines?.node === '>=22.0.0', 'package.json debe exigir Node >=22.0.0 para Capacitor 8.');
+check(manifest.version === version, 'manifest.webmanifest no coincide con version.json.');
+check(capacitor.webDir === 'www', 'Capacitor debe usar www como webDir.');
+check(/^([a-zA-Z][\w]*)(\.[a-zA-Z][\w]*)+$/.test(capacitor.appId), 'Capacitor debe usar un appId válido.');
+check(typeof capacitor.appName === 'string' && capacitor.appName.trim(), 'Capacitor debe declarar appName.');
+
+const capacitorPackages = [
+  ['dependencies', '@capacitor/core'],
+  ['dependencies', '@capacitor/ios'],
+  ['devDependencies', '@capacitor/cli']
+];
+const capacitorVersion = packageJson.dependencies?.['@capacitor/core'];
+check(/^\d+\.\d+\.\d+$/.test(capacitorVersion ?? ''), '@capacitor/core debe fijar una versión exacta.');
+for (const [group, name] of capacitorPackages) {
+  check(packageJson[group]?.[name] === capacitorVersion, `${name} no coincide con @capacitor/core.`);
+  check(packageLock.packages?.['']?.[group]?.[name] === capacitorVersion, `package-lock no fija ${name}.`);
+  check(packageLock.packages?.[`node_modules/${name}`]?.version === capacitorVersion, `package-lock no resuelve ${name} ${capacitorVersion}.`);
+}
+
+const webFiles = [
+  'index.html', 'styles.css', 'enhance-v34.css', 'daily-coach-v34.css', 'data.js',
+  'nutrition-data.js', 'exercise-equivalents.js', 'app.js',
+  'nutrition-data-gen-v34.js', 'nutrition-ui-v34.js', 'photo-storage-v34.js', 'progress-v34.js', 'backup-v34.js', 'daily-coach-v34.js',
+  'manifest.webmanifest', 'version.json', 'sw.js',
+  'icon-192.png', 'icon-512.png'
+];
+
+for (const file of webFiles) {
+  try { await access(path.join(root, file)); }
+  catch { failures.push(`Falta el recurso publicable ${file}.`); }
+}
+
+const [index, app, serviceWorker, readme] = await Promise.all([
+  read('index.html'), read('app.js'), read('sw.js'), read('README.md')
+]);
+
+check(index.includes(`<span>${version}</span>`), 'La cabecera no muestra la versión actual.');
+check(readme.includes(`# FitCoach ${version}`), 'README no coincide con la versión actual.');
+check(app.includes(`./sw.js?v=${version}`), 'app.js registra otra versión del service worker.');
+check(serviceWorker.includes(`fitcoach-${version.replaceAll('.', '-')}`), 'La caché no coincide con la versión.');
+for (const asset of webFiles.filter(file => file !== 'sw.js' && /\.(?:css|js)$/.test(file))) {
+  check(index.includes(`${asset}?v=${version}`), `index.html no referencia ${asset} con v=${version}.`);
+}
+for (const match of index.matchAll(/[?&]v=(\d+\.\d+\.\d+)/g)) {
+  check(match[1] === version, `index.html conserva un recurso v=${match[1]}.`);
+}
+for (const match of serviceWorker.matchAll(/[?&]v=(\d+\.\d+\.\d+)/g)) {
+  check(match[1] === version, `sw.js conserva un recurso v=${match[1]}.`);
+}
+
+if (failures.length) {
+  console.error('Auditoría fallida:');
+  failures.forEach(message => console.error(`- ${message}`));
+  process.exitCode = 1;
+} else {
+  console.log(`FitCoach ${version}: auditoría correcta (${webFiles.length} recursos, Capacitor ${capacitorVersion}).`);
+}

@@ -1,12 +1,24 @@
 {
   "name": "fitcoach-app",
-  "version": "2.2.0",
+  "version": "3.4.2",
   "private": true,
+  "engines": {
+    "node": ">=22.0.0"
+  },
   "scripts": {
     "sync:web": "node scripts/sync-web.mjs",
     "audit": "node scripts/audit.mjs",
-    "cap:sync": "npm run sync:web && npx cap sync",
-    "cap:add:ios": "npx cap add ios",
-    "cap:open:ios": "npx cap open ios"
+    "cap:sync": "npm run sync:web && cap sync",
+    "cap:add:ios": "cap add ios",
+    "cap:open:ios": "cap open ios",
+    "ios:prepare": "npm run sync:web && cap sync ios",
+    "test": "node --test tests/*.test.mjs"
+  },
+  "dependencies": {
+    "@capacitor/core": "8.5.0",
+    "@capacitor/ios": "8.5.0"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "8.5.0"
   }
 }

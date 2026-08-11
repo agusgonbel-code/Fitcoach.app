@@ -1,0 +1,41 @@
+name: FitCoach CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: fitcoach-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate-web:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - run: npm test
+      - run: npm run audit
+      - run: npm run sync:web
+      - run: npm run audit
+      - name: Verify Capacitor toolchain
+        run: test "$(npx --no-install cap --version)" = "8.5.0"
+      - name: Verify generated bundle
+        run: |
+          cmp --silent index.html www/index.html
+          cmp --silent app.js www/app.js
+          test -f www/nutrition-ui-v34.js
+          test -f www/photo-storage-v34.js
+          test -f www/progress-v34.js
+          test -f www/backup-v34.js
+          test -f www/daily-coach-v34.js
+          test -f www/daily-coach-v34.css
