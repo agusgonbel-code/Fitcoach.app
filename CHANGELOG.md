@@ -9,6 +9,9 @@
 - README y paquete publicable alineados con 3.4.2.
 - Copia de seguridad versionada con perfil, planes, entrenamientos, nutrición, medidas y fotos de IndexedDB.
 - Restauración validada con límites de tamaño, claves permitidas y reversión al estado anterior ante fallo.
+- Nuevo panel Daily Coach con sesión de hoy, progreso semanal, macros pendientes y tendencia de peso.
+- Entrenamiento guiado con precarga del último registro, validación de series y conservación de RIR 0.
+- Navegación y jerarquía visual renovadas para iPhone.
 
 ## 2.0.2 — Runtime Stability
 - Arranque tolerante: un fallo en un módulo ya no bloquea toda la aplicación.
