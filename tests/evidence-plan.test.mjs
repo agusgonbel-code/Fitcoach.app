@@ -38,3 +38,10 @@ test('incluye progresión y respaldo científico', () => {
 test('recarga la aplicación tras activar para sincronizar el estado interno', () => {
   assert.match(source, /localStorage\.setItem\('fitcoach_active_plan_v33'[\s\S]*location\.reload\(\)/);
 });
+
+
+test('el observador se limita al entrenamiento y no observa todo body', () => {
+  assert.doesNotMatch(source, /observe\(document\.body/);
+  assert.match(source, /observe\(workoutRoot/);
+  assert.match(source, /guide\.textContent !== guideText/);
+});
