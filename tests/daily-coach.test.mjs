@@ -31,10 +31,15 @@ const model = dashboardModel({
   today: new Date('2026-08-11T18:00:00.000Z'),
   profile: { name: 'Agustín' },
   targets: { kcal: 3000, protein: 160 },
-  plan: { days: 4, method: 'upperlower', routine: { Martes: [{ name: 'Prensa' }, { name: 'Curl femoral' }] } },
+  plan: { days: 4, method: 'upperlower', routine: {
+    Lunes: [{ name: 'Press banca' }],
+    Martes: [{ name: 'Prensa' }, { name: 'Curl femoral' }],
+    Miércoles: [{ name: 'Remo' }],
+    Jueves: [{ name: 'Peso muerto rumano' }]
+  } },
   workouts: [
-    { date: '2026-08-10T18:00:00.000Z' },
-    { date: '2026-08-11T10:00:00.000Z' }
+    { date: '2026-08-10T18:00:00.000Z', day: 'Lunes' },
+    { date: '2026-08-11T10:00:00.000Z', day: 'Martes' }
   ],
   meals: [
     { date: '2026-08-11', kcal: 900, protein: 65 },
@@ -56,5 +61,24 @@ assert.equal(model.proteinLeft, 60);
 assert.equal(model.weight, 81);
 assert.equal(model.weightDelta, 0.5);
 assert.equal(model.insights.some(item => item.title === 'Sesión completada'), true);
+
+
+const accurateCompletion = dashboardModel({
+  today: new Date('2026-08-11T18:00:00.000Z'),
+  plan: { days: 4, routine: {
+    Lunes: [{ name: 'Press banca' }],
+    Martes: [{ name: 'Prensa' }],
+    Miércoles: [{ name: 'Remo' }],
+    Jueves: [{ name: 'Peso muerto rumano' }]
+  } },
+  workouts: [
+    { date: '2026-08-11T08:00:00.000Z', day: 'Lunes' },
+    { date: '2026-08-10T10:00:00.000Z', day: 'Lunes' },
+    { date: '2026-08-10T12:00:00.000Z', day: 'Lunes' }
+  ]
+});
+assert.equal(accurateCompletion.todayDone, false, 'Otra sesión guardada hoy no completa la sesión prevista');
+assert.equal(accurateCompletion.weekDone, 2, 'Los guardados duplicados de la misma sesión no inflan la adherencia');
+assert.equal(accurateCompletion.adherence, 50);
 
 console.log('Daily coach tests passed');
