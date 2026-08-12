@@ -1,0 +1,11 @@
+import assert from 'node:assert/strict';
+await import('../workout-save-v344.js');
+const { normaliseWorkoutInput } = globalThis.FitCoachWorkoutSave;
+const valid = normaliseWorkoutInput([{ name: 'Press', sets: [{ kg: '80', reps: '8', rir: '0' }, { kg: '', reps: '', rir: '' }] }], 'Bien');
+assert.equal(valid.valid, true);
+assert.equal(valid.completedSets, 1);
+assert.deepEqual(valid.exercises[0].sets[0], { kg: 80, reps: 8, rir: 0 });
+assert.equal(normaliseWorkoutInput([{ name: 'Press', sets: [{ kg: '', reps: '', rir: '' }] }]).valid, false);
+assert.match(normaliseWorkoutInput([{ name: 'Press', sets: [{ kg: '80', reps: '0', rir: '2' }] }]).reason, /Revisa/);
+assert.equal(normaliseWorkoutInput([{ name: 'Press', sets: [{ kg: '80', reps: '8', rir: '' }] }]).exercises[0].sets[0].rir, null);
+console.log('Workout save validation tests passed');
