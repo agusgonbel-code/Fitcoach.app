@@ -92,7 +92,8 @@
       preview.innerHTML = `<div class="card"><strong>Científico 4 días · 50 min</strong><div class="muted">Lunes a jueves · ${plan.weeks} semanas · 1-3 RIR · progresión doble</div><button id="activateEvidencePlan">Activar plan comprobado</button></div>` + Object.entries(plan.routine).map(([day, items]) => `<div class="card"><strong>${day} · ~${estimatedMinutes(day)} min</strong>${items.map(item => `<div class="planrow"><span>${item.name}</span><span>${item.sets}×${item.reps} · ${item.rest}s</span></div>`).join('')}</div>`).join('');
       document.getElementById('activateEvidencePlan').onclick = () => {
         localStorage.setItem('fitcoach_active_plan_v33', JSON.stringify(plan));
-        document.querySelector('nav button[data-go="home"]')?.click();
+        // app.js mantiene su estado en memoria; recargar sincroniza Plan, Entrenar y Daily Coach.
+        location.reload();
       };
     });
     const decorate = () => {
