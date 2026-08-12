@@ -44,3 +44,8 @@ Base de evidencia: revisiones y metaanálisis sobre prescripción, volumen/frecu
 ## Recuperación de entrenamientos en curso
 
 FitCoach guarda localmente las cargas, repeticiones, RIR y notas mientras se completa cada sesión. Si Safari se recarga o iOS suspende la app, el borrador del mismo plan y día se restaura automáticamente. El borrador se elimina solo después de guardar una sesión válida y los borradores antiguos caducan a los 14 días.
+
+
+## Guardado válido de sesiones
+
+Antes de cerrar un entrenamiento, FitCoach exige al menos una serie completa, valida límites razonables y conserva correctamente RIR 0. Las series vacías no contaminan el historial ni las recomendaciones del Coach.
