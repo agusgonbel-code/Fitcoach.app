@@ -1,5 +1,12 @@
 # Changelog
 
+## 3.4.3 — Recuperación de sesiones en iPhone
+- Borrador local separado por plan y día para cargas, repeticiones, RIR y notas.
+- Restauración automática tras recarga, cierre de Safari o suspensión de iOS.
+- Limpieza del borrador únicamente después de guardar una sesión válida.
+- Caducidad segura de borradores antiguos a los 14 días.
+- Nueva prueba automática y auditoría del recurso en el bundle web/Capacitor.
+
 ## 3.4.2 — iPhone Photo Storage Safety
 - Fotos de progreso validadas y comprimidas antes de guardarse en IndexedDB.
 - Compatibilidad controlada con JPG, PNG, WebP y HEIC/HEIF.

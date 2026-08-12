@@ -39,3 +39,5 @@ jobs:
           test -f www/backup-v34.js
           test -f www/daily-coach-v34.js
           test -f www/daily-coach-v34.css
+          test -f www/evidence-plan-v342.js
+          test -f www/workout-draft-v343.js
