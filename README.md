@@ -32,3 +32,10 @@ npm run cap:open:ios
 La generación y firma final requieren macOS, Xcode y una cuenta de Apple Developer. Las fotografías de progreso se validan, comprimen y guardan localmente en el dispositivo.
 
 Desde **Ajustes** se puede exportar y restaurar una copia completa versionada. Incluye perfil, objetivos, planes, entrenamientos, nutrición, medidas y las fotografías comprimidas de IndexedDB; la restauración valida todo el archivo y recupera el estado anterior si falla.
+
+
+## Plan científico de 4 días · 50 minutos
+
+Plan seleccionable en **Plan Studio → Científico 4 días · 50 min**. Alterna torso y pierna de lunes a jueves, prescribe 1–3 RIR, descansos de 60–150 segundos y progresión doble. Incluye alternativas para cada ejercicio y opciones de rango tolerable para la rodilla.
+
+Base de evidencia: revisiones y metaanálisis sobre prescripción, volumen/frecuencia, proximidad al fallo y descansos (PMID 37414459, 41343037, 38970765 y 39205815).
