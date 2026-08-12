@@ -33,3 +33,8 @@ test('incluye progresión y respaldo científico', () => {
   assert.match(plan.progression, /2,5-5%/);
   assert.ok(plan.references.length >= 4);
 });
+
+
+test('recarga la aplicación tras activar para sincronizar el estado interno', () => {
+  assert.match(source, /localStorage\.setItem\('fitcoach_active_plan_v33'[\s\S]*location\.reload\(\)/);
+});
