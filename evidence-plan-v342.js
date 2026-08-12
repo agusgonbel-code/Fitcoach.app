@@ -108,9 +108,13 @@
         box.querySelector('h3')?.after(info);
       });
       const guide = document.getElementById('weekGuide');
-      if (guide) guide.textContent = `${plan.warmup} ${plan.progression}`;
+      const guideText = `${plan.warmup} ${plan.progression}`;
+      if (guide && guide.textContent !== guideText) guide.textContent = guideText;
     };
-    new MutationObserver(decorate).observe(document.body, { childList: true, subtree: true });
+    // Observa solo la lista de ejercicios. Observar todo body hacía que la propia
+    // actualización de las instrucciones reactivase el observador indefinidamente.
+    const workoutRoot = document.getElementById('workout');
+    if (workoutRoot) new MutationObserver(decorate).observe(workoutRoot, { childList: true, subtree: true });
     decorate();
   }
 
