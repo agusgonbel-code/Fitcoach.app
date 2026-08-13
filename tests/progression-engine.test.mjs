@@ -15,6 +15,10 @@ const increase = recommendProgression({
 });
 assert.equal(increase.action, 'increase');
 assert.equal(increase.suggestedKg, 82.5);
+assert.equal(recommendProgression({
+  targetReps: '10-15',
+  history: [{ sets: [{ kg: 20, reps: 15, rir: 2 }] }]
+}).suggestedKg, 22.5);
 
 const addReps = recommendProgression({
   targetReps: '6-10',
@@ -40,6 +44,7 @@ const reduceForDecline = recommendProgression({
   targetReps: '6-10',
   history: [
     { sets: [{ kg: 80, reps: 10, rir: 2 }, { kg: 80, reps: 10, rir: 2 }] },
+    { sets: [{ kg: 80, reps: 9, rir: 3 }, { kg: 80, reps: 9, rir: 3 }] },
     { sets: [{ kg: 80, reps: 8, rir: 3 }, { kg: 80, reps: 8, rir: 3 }] }
   ]
 });
