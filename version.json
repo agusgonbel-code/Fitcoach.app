@@ -7,5 +7,6 @@
   "exerciseEquivalents": true,
   "serviceWorker": true,
   "nutritionProgressModules": true,
-  "workoutDraftRecovery": true
+  "workoutDraftRecovery": true,
+  "evidenceProgressionGuidance": true
 }

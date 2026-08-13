@@ -37,6 +37,7 @@ jobs:
           test -f www/photo-storage-v34.js
           test -f www/progress-v34.js
           test -f www/backup-v34.js
+          test -f www/progression-engine-v34.js
           test -f www/daily-coach-v34.js
           test -f www/daily-coach-v34.css
           test -f www/evidence-plan-v342.js
