@@ -7,6 +7,7 @@ Aplicación de entrenamiento, nutrición y progreso con historial persistente, p
 - Inicio profesional con siguiente sesión, progreso semanal, macros restantes y tendencia de peso.
 - Recomendaciones concretas según plan, entrenamientos y nutrición registrados.
 - Última carga, repeticiones y RIR precargados en cada ejercicio.
+- Siguiente objetivo explicable mediante progresión doble: añade repeticiones, sube 2,5–5%, mantén o descarga según rango y RIR.
 - RIR 0 se conserva correctamente y las sesiones vacías no pueden guardarse.
 - Navegación optimizada para iPhone con iconos, áreas táctiles y safe area.
 
@@ -49,3 +50,7 @@ FitCoach guarda localmente las cargas, repeticiones, RIR y notas mientras se com
 ## Guardado válido de sesiones
 
 Antes de cerrar un entrenamiento, FitCoach exige al menos una serie completa, valida límites razonables y conserva correctamente RIR 0. Las series vacías no contaminan el historial ni las recomendaciones del Coach.
+
+## Progresión de carga explicable
+
+FitCoach analiza únicamente el historial local de cada ejercicio. Recomienda mantener la carga y sumar repeticiones dentro del rango, subirla cuando todas las series alcanzan el máximo con RIR controlado, o reducir aproximadamente un 5% ante esfuerzo excesivo o caída repetida. La sugerencia es informativa: nunca modifica automáticamente la sesión ni el historial.
