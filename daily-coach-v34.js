@@ -59,9 +59,15 @@
     const monday = new Date(now);
     monday.setHours(0, 0, 0, 0);
     monday.setDate(monday.getDate() - ((monday.getDay() + 6) % 7));
-    const weekWorkouts = workouts.filter(workout => {
+    const plannedDayNames = new Set(Object.entries(plan?.routine || {})
+      .filter(([, exercises]) => Array.isArray(exercises) && exercises.length)
+      .map(([day]) => day));
+    const completedSessions = new Set();
+    workouts.forEach(workout => {
       const date = new Date(workout?.date);
-      return !Number.isNaN(date.getTime()) && date >= monday && date <= now;
+      const workoutDay = String(workout?.day || '');
+      if (Number.isNaN(date.getTime()) || date < monday || date > now || !plannedDayNames.has(workoutDay)) return;
+      completedSessions.add(`${localDateKey(date)}|${workoutDay}`);
     });
     const todayMeals = meals.filter(meal => String(meal?.date || '').slice(0, 10) === todayKey);
     const calories = todayMeals.reduce((sum, meal) => sum + (Number(meal?.kcal) || 0), 0);
@@ -70,9 +76,12 @@
     const targetProtein = Math.max(0, Number(targets?.protein) || 0);
     const dayName = DAYS[now.getDay()];
     const routine = Array.isArray(plan?.routine?.[dayName]) ? plan.routine[dayName] : [];
-    const todayDone = workouts.some(workout => localDateKey(workout?.date) === todayKey);
-    const plannedDays = Math.max(0, Number(plan?.days) || Object.keys(plan?.routine || {}).length);
-    const adherence = plannedDays ? Math.min(100, Math.round(weekWorkouts.length / plannedDays * 100)) : 0;
+    const todayDone = routine.length > 0 && workouts.some(workout =>
+      localDateKey(workout?.date) === todayKey && String(workout?.day || '') === dayName
+    );
+    const plannedDays = Math.max(0, Number(plan?.days) || plannedDayNames.size);
+    const weekDone = completedSessions.size;
+    const adherence = plannedDays ? Math.min(100, Math.round(weekDone / plannedDays * 100)) : 0;
     const validWeights = metrics.map(metric => Number(metric?.weight)).filter(Number.isFinite);
     const weight = validWeights.at(-1) ?? null;
     const weightDelta = validWeights.length > 1 ? weight - validWeights.at(-2) : null;
@@ -93,7 +102,7 @@
     return {
       name: String(profile?.name || 'Usuario').trim() || 'Usuario',
       dateLabel: new Intl.DateTimeFormat('es-ES', { weekday: 'long', day: 'numeric', month: 'long' }).format(now),
-      dayName, routine, todayDone, weekDone: weekWorkouts.length, plannedDays, adherence,
+      dayName, routine, todayDone, weekDone, plannedDays, adherence,
       calories, protein, targetCalories, targetProtein,
       caloriesLeft: Math.max(0, targetCalories - calories), proteinLeft,
       weight, weightDelta, plan, insights
