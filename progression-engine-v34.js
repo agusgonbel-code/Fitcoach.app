@@ -47,7 +47,12 @@
     const previousAverage = previous.length
       ? previous.reduce((sum, set) => sum + set.reps, 0) / previous.length
       : null;
-    const repeatedDecline = previousAverage !== null && averageReps + 0.5 < previousAverage;
+    const beforePrevious = sessions.at(-3)?.sets ?? [];
+    const beforePreviousAverage = beforePrevious.length
+      ? beforePrevious.reduce((sum, set) => sum + set.reps, 0) / beforePrevious.length
+      : null;
+    const repeatedDecline = beforePreviousAverage !== null && previousAverage !== null &&
+      previousAverage + 0.5 < beforePreviousAverage && averageReps + 0.5 < previousAverage;
 
     if ((averageRir !== null && averageRir < 1) || (anyBelowMinimum && (averageRir === null || averageRir <= 2)) || repeatedDecline) {
       const suggestedKg = roundLoad(load * 0.95, increment);
@@ -58,7 +63,7 @@
     }
 
     if (allAtTop && averageRir !== null && averageRir >= 1) {
-      const suggestedKg = Math.max(load, roundLoad(load * 1.025, increment));
+      const suggestedKg = Math.max(roundLoad(load * 1.025, increment), roundLoad(load + increment, increment));
       return {
         action: 'increase', tone: 'green', suggestedKg,
         text: `Rango completado con RIR controlado: prueba ${suggestedKg} kg y vuelve al mínimo de repeticiones.`
