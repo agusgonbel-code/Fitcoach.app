@@ -195,7 +195,21 @@
     const day = daySelect.value;
     const exercises = plan?.routine?.[day] || [];
     workout.querySelectorAll('.exercise[data-ex]').forEach((box, index) => {
-      const previous = lastExercise(workouts, exercises[index]?.name);
+      const exerciseName = exercises[index]?.name;
+      const exerciseHistory = workouts.flatMap(workout =>
+        (workout?.exercises || []).filter(item => item.name === exerciseName)
+      );
+      const previous = exerciseHistory.at(-1) || null;
+      const recommendation = globalThis.FitCoachProgression?.recommendProgression({
+        history: exerciseHistory, targetReps: exercises[index]?.reps
+      });
+      if (recommendation && !box.querySelector('.fcProgressionHint')) {
+        const hint = document.createElement('div');
+        hint.className = 'notice fcProgressionHint';
+        hint.dataset.tone = recommendation.tone;
+        hint.textContent = 'Siguiente objetivo · ' + recommendation.text;
+        box.querySelector('h3')?.after(hint);
+      }
       if (!previous) return;
       box.classList.add('fcExerciseReady');
       box.querySelectorAll('.setrow').forEach((row, setIndex) => {
