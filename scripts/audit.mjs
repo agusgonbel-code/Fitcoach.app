@@ -48,8 +48,8 @@ for (const file of webFiles) {
   catch { failures.push(`Falta el recurso publicable ${file}.`); }
 }
 
-const [index, app, progress, serviceWorker, readme] = await Promise.all([
-  read('index.html'), read('app.js'), read('progress-v34.js'), read('sw.js'), read('README.md')
+const [index, app, progress, backup, serviceWorker, readme] = await Promise.all([
+  read('index.html'), read('app.js'), read('progress-v34.js'), read('backup-v34.js'), read('sw.js'), read('README.md')
 ]);
 
 check(index.includes(`<span>${version}</span>`), 'La cabecera no muestra la versión actual.');
@@ -58,6 +58,9 @@ check(app.includes(`./sw.js?v=${version}`), 'app.js registra otra versión del s
 check(serviceWorker.includes(`fitcoach-${version.replaceAll('.', '-')}`), 'La caché no coincide con la versión.');
 check(progress.includes('FitCoachLocalDate.localDateKey()'), 'Progreso debe usar la fecha local del dispositivo.');
 check(!progress.includes("new Date().toISOString().slice(0,10)"), 'Progreso conserva una fecha UTC insegura.');
+check(backup.includes(`const APP_VERSION = '${version}'`), 'Las copias no coinciden con la versión actual.');
+check(backup.includes('FitCoachLocalDate?.localDateKey'), 'Las copias deben usar la fecha local del dispositivo.');
+check(!backup.includes("new Date().toISOString().slice(0, 10)"), 'El nombre de la copia conserva una fecha UTC insegura.');
 for (const asset of webFiles.filter(file => file !== 'sw.js' && /\.(?:css|js)$/.test(file))) {
   check(index.includes(`${asset}?v=${version}`), `index.html no referencia ${asset} con v=${version}.`);
 }
