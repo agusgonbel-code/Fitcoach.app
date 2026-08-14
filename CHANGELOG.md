@@ -1,5 +1,12 @@
 # Changelog
 
+## 3.4.3 · Perfil nutricional persistente
+
+- Conserva todos los campos que originan el cálculo de macros.
+- Valida límites razonables antes de calcular.
+- Incluye el perfil nutricional en las copias completas.
+
+
 ## 3.4.3 — Recuperación de sesiones en iPhone
 - Nutrición agrupa las comidas por la fecha local del iPhone, incluso cerca de medianoche.
 - La copia completa incluye el menú generado por la interfaz nutricional actual.
