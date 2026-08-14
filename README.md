@@ -55,6 +55,10 @@ Antes de cerrar un entrenamiento, FitCoach exige al menos una serie completa, va
 
 FitCoach analiza únicamente el historial local de cada ejercicio. Recomienda mantener la carga y sumar repeticiones dentro del rango, subirla cuando todas las series alcanzan el máximo con RIR controlado, o reducir aproximadamente un 5% ante esfuerzo excesivo o caída repetida. La sugerencia es informativa: nunca modifica automáticamente la sesión ni el historial.
 
+## Perfil nutricional persistente
+
+La calculadora conserva en el dispositivo sexo, edad, altura, peso, porcentaje de grasa, actividad, objetivo y fórmula. Al volver a abrir FitCoach muestra los mismos datos que originaron los macros y los incluye en la copia completa.
+
 ## Fechas locales fiables
 
 Los registros diarios y el resumen de Nutrición usan la fecha civil del dispositivo, no UTC. El menú actual de 30 días también forma parte de la copia completa. Así, comidas, objetivos, medidas y fotografías de progreso permanecen en el día correcto aunque se guarden cerca de medianoche o se use el iPhone en otra zona horaria.
