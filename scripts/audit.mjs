@@ -48,14 +48,16 @@ for (const file of webFiles) {
   catch { failures.push(`Falta el recurso publicable ${file}.`); }
 }
 
-const [index, app, serviceWorker, readme] = await Promise.all([
-  read('index.html'), read('app.js'), read('sw.js'), read('README.md')
+const [index, app, progress, serviceWorker, readme] = await Promise.all([
+  read('index.html'), read('app.js'), read('progress-v34.js'), read('sw.js'), read('README.md')
 ]);
 
 check(index.includes(`<span>${version}</span>`), 'La cabecera no muestra la versión actual.');
 check(readme.includes(`# FitCoach ${version}`), 'README no coincide con la versión actual.');
 check(app.includes(`./sw.js?v=${version}`), 'app.js registra otra versión del service worker.');
 check(serviceWorker.includes(`fitcoach-${version.replaceAll('.', '-')}`), 'La caché no coincide con la versión.');
+check(progress.includes('FitCoachLocalDate.localDateKey()'), 'Progreso debe usar la fecha local del dispositivo.');
+check(!progress.includes("new Date().toISOString().slice(0,10)"), 'Progreso conserva una fecha UTC insegura.');
 for (const asset of webFiles.filter(file => file !== 'sw.js' && /\.(?:css|js)$/.test(file))) {
   check(index.includes(`${asset}?v=${version}`), `index.html no referencia ${asset} con v=${version}.`);
 }
