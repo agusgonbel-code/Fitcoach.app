@@ -59,6 +59,7 @@ check(serviceWorker.includes(`fitcoach-${version.replaceAll('.', '-')}`), 'La ca
 check(nutrition.includes('FitCoachLocalDate?.localDateKey'), 'Nutrición debe usar la fecha local del dispositivo.');
 check(!nutrition.includes("new Date().toISOString().slice(0,10)"), 'Nutrición conserva una fecha UTC insegura.');
 check(backup.includes("'v34menu'"), 'La copia no incluye el menú actual de 30 días.');
+check(backup.includes("'fitcoach_nutrition_profile_v34'"), 'La copia no incluye el perfil de la calculadora nutricional.');
 check(progress.includes('FitCoachLocalDate.localDateKey()'), 'Progreso debe usar la fecha local del dispositivo.');
 check(!progress.includes("new Date().toISOString().slice(0,10)"), 'Progreso conserva una fecha UTC insegura.');
 check(backup.includes(`const APP_VERSION = '${version}'`), 'Las copias no coinciden con la versión actual.');
