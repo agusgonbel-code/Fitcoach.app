@@ -8,5 +8,6 @@
   "serviceWorker": true,
   "nutritionProgressModules": true,
   "workoutDraftRecovery": true,
-  "evidenceProgressionGuidance": true
+  "evidenceProgressionGuidance": true,
+  "monthlyMenuDiaryIntegration": true
 }
