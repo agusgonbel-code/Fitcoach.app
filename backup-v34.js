@@ -14,7 +14,8 @@
   const STORAGE_KEYS = [
     'profile', 'targets', 'workouts', 'meals', 'metrics',
     'fitcoach_active_plan_v33', 'fitcoach_priorities_v33',
-    'fitcoach_menu_30_v33', 'v34menu', 'v34meas'
+    'fitcoach_menu_30_v33', 'v34menu', 'v34meas',
+    'fitcoach_nutrition_profile_v34'
   ];
 
   const fail = message => { throw new Error(message); };
