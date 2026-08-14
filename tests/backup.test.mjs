@@ -1,16 +1,17 @@
 import assert from 'node:assert/strict';
+await import('../local-date-v345.js');
 await import('../backup-v34.js');
 
 const {
-  SCHEMA, SCHEMA_VERSION, MAX_PHOTO_BYTES, MAX_TOTAL_PHOTO_BYTES,
-  STORAGE_KEYS, dataUrlBytes, validateJson, validateBackupPayload
+  SCHEMA, SCHEMA_VERSION, APP_VERSION, MAX_PHOTO_BYTES, MAX_TOTAL_PHOTO_BYTES,
+  STORAGE_KEYS, dataUrlBytes, backupFileName, validateJson, validateBackupPayload
 } = globalThis.FitCoachBackup;
 
 const tinyJpeg = 'data:image/jpeg;base64,/9j/2Q==';
 const valid = {
   schema: SCHEMA,
   schemaVersion: SCHEMA_VERSION,
-  appVersion: '3.4.2',
+  appVersion: APP_VERSION,
   exportedAt: '2026-08-11T12:00:00.000Z',
   local: {
     profile: { name: 'Agustín' },
@@ -29,6 +30,8 @@ const valid = {
 
 assert.equal(SCHEMA, 'fitcoach-backup');
 assert.equal(SCHEMA_VERSION, 1);
+assert.equal(APP_VERSION, '3.4.3');
+assert.equal(backupFileName(new Date(2026, 7, 14, 0, 5)), 'fitcoach-backup-3.4.3-2026-08-14.json');
 assert.equal(MAX_PHOTO_BYTES, 25 * 1024 * 1024);
 assert.equal(MAX_TOTAL_PHOTO_BYTES, 75 * 1024 * 1024);
 assert.equal(STORAGE_KEYS.includes('v34meas'), true);
