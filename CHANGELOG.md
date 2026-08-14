@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.4.3 · Menú conectado con el diario
+
+- Cada comida del menú mensual abre su receta completa y permite registrarla en el diario del día con la porción y los macros reales del plan.
+- Los registros procedentes del menú guardan su día y posición de origen para impedir duplicados accidentales sin limitar las recetas añadidas manualmente.
+- El resumen diario y el inicio se actualizan al guardar, manteniendo la persistencia local y el funcionamiento sin conexión.
+
 ## 3.4.3 · Perfil nutricional persistente
 
 - Conserva todos los campos que originan el cálculo de macros.

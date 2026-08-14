@@ -59,6 +59,10 @@ FitCoach analiza únicamente el historial local de cada ejercicio. Recomienda ma
 
 La calculadora conserva en el dispositivo sexo, edad, altura, peso, porcentaje de grasa, actividad, objetivo y fórmula. Al volver a abrir FitCoach muestra los mismos datos que originaron los macros y los incluye en la copia completa.
 
+## Menú conectado con el diario
+
+Cada receta y cada comida del plan de 30 días puede añadirse al registro del día con sus calorías, proteínas, carbohidratos y grasas ajustados a la porción. Las comidas planificadas quedan identificadas para impedir dobles registros accidentales y el resumen de Inicio se actualiza al instante.
+
 ## Fechas locales fiables
 
 Los registros diarios y el resumen de Nutrición usan la fecha civil del dispositivo, no UTC. El menú actual de 30 días también forma parte de la copia completa. Así, comidas, objetivos, medidas y fotografías de progreso permanecen en el día correcto aunque se guarden cerca de medianoche o se use el iPhone en otra zona horaria.
