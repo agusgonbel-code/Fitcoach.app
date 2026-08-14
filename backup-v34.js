@@ -3,7 +3,7 @@
 
   const SCHEMA = 'fitcoach-backup';
   const SCHEMA_VERSION = 1;
-  const APP_VERSION = '3.4.2';
+  const APP_VERSION = '3.4.3';
   const DB_NAME = 'v34photos2';
   const STORE_NAME = 'p';
   const MAX_BACKUP_BYTES = 120 * 1024 * 1024;
@@ -55,6 +55,12 @@
     if (!match) fail('Una fotografía usa un formato de copia no permitido.');
     const padding = match[2].endsWith('==') ? 2 : match[2].endsWith('=') ? 1 : 0;
     return { type: match[1], bytes: Math.floor(match[2].length * 3 / 4) - padding };
+  }
+
+  function backupFileName(value = new Date()) {
+    const localDateKey = globalThis.FitCoachLocalDate?.localDateKey;
+    if (typeof localDateKey !== 'function') fail('No se puede determinar la fecha local de la copia.');
+    return `fitcoach-backup-${APP_VERSION}-${localDateKey(value)}.json`;
   }
 
   function validateBackupPayload(payload) {
@@ -233,7 +239,7 @@
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `fitcoach-backup-${APP_VERSION}-${new Date().toISOString().slice(0, 10)}.json`;
+      link.download = backupFileName();
       link.click();
       setTimeout(() => URL.revokeObjectURL(url), 1000);
       setStatus(`Copia exportada · ${payload.photos.length} fotos`);
@@ -284,8 +290,8 @@
   }
 
   globalThis.FitCoachBackup = {
-    SCHEMA, SCHEMA_VERSION, MAX_BACKUP_BYTES, MAX_PHOTO_BYTES, MAX_TOTAL_PHOTO_BYTES,
-    STORAGE_KEYS, dataUrlBytes, validateJson, validateBackupPayload,
+    SCHEMA, SCHEMA_VERSION, APP_VERSION, MAX_BACKUP_BYTES, MAX_PHOTO_BYTES, MAX_TOTAL_PHOTO_BYTES,
+    STORAGE_KEYS, dataUrlBytes, backupFileName, validateJson, validateBackupPayload,
     createBackupPayload, restoreBackupPayload
   };
 
