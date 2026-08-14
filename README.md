@@ -57,4 +57,4 @@ FitCoach analiza únicamente el historial local de cada ejercicio. Recomienda ma
 
 ## Fechas locales fiables
 
-Los registros diarios usan la fecha civil del dispositivo, no UTC. Así, comidas, objetivos y métricas permanecen en el día correcto aunque se guarden cerca de medianoche o se use el iPhone en otra zona horaria.
+Los registros diarios usan la fecha civil del dispositivo, no UTC. Así, comidas, objetivos, medidas y fotografías de progreso permanecen en el día correcto aunque se guarden cerca de medianoche o se use el iPhone en otra zona horaria.
