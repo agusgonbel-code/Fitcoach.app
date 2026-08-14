@@ -16,6 +16,7 @@ const valid = {
   local: {
     profile: { name: 'Agustín' },
     fitcoach_priorities_v33: ['Hombros'],
+    v34menu: { n: 5, days: [[{ id: 'r1', s: 1 }]] },
     v34meas: [{ id: 'm1', date: '2026-08-11', weight: 81 }]
   },
   photos: [{
@@ -35,6 +36,7 @@ assert.equal(backupFileName(new Date(2026, 7, 14, 0, 5)), 'fitcoach-backup-3.4.3
 assert.equal(MAX_PHOTO_BYTES, 25 * 1024 * 1024);
 assert.equal(MAX_TOTAL_PHOTO_BYTES, 75 * 1024 * 1024);
 assert.equal(STORAGE_KEYS.includes('v34meas'), true);
+assert.equal(STORAGE_KEYS.includes('v34menu'), true);
 assert.equal(STORAGE_KEYS.includes('fitcoach_priorities_v33'), true);
 assert.deepEqual(dataUrlBytes(tinyJpeg), { type: 'image/jpeg', bytes: 4 });
 assert.deepEqual(validateBackupPayload(valid), { photoCount: 1, totalPhotoBytes: 4 });
