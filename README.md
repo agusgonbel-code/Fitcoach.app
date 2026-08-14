@@ -32,7 +32,7 @@ npm run cap:open:ios
 
 La generación y firma final requieren macOS, Xcode y una cuenta de Apple Developer. Las fotografías de progreso se validan, comprimen y guardan localmente en el dispositivo.
 
-Desde **Ajustes** se puede exportar y restaurar una copia completa versionada. Incluye perfil, objetivos, planes, entrenamientos, nutrición, medidas y las fotografías comprimidas de IndexedDB; la restauración valida todo el archivo y recupera el estado anterior si falla.
+Desde **Ajustes** se puede exportar y restaurar una copia completa versionada. El archivo usa la versión actual de FitCoach y la fecha local del iPhone. Incluye perfil, objetivos, planes, entrenamientos, nutrición, medidas y las fotografías comprimidas de IndexedDB; la restauración valida todo el archivo y recupera el estado anterior si falla.
 
 
 ## Plan científico de 4 días · 50 minutos
