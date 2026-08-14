@@ -54,3 +54,7 @@ Antes de cerrar un entrenamiento, FitCoach exige al menos una serie completa, va
 ## Progresión de carga explicable
 
 FitCoach analiza únicamente el historial local de cada ejercicio. Recomienda mantener la carga y sumar repeticiones dentro del rango, subirla cuando todas las series alcanzan el máximo con RIR controlado, o reducir aproximadamente un 5% ante esfuerzo excesivo o caída repetida. La sugerencia es informativa: nunca modifica automáticamente la sesión ni el historial.
+
+## Fechas locales fiables
+
+Los registros diarios usan la fecha civil del dispositivo, no UTC. Así, comidas, objetivos y métricas permanecen en el día correcto aunque se guarden cerca de medianoche o se use el iPhone en otra zona horaria.
