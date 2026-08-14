@@ -1,6 +1,8 @@
 # Changelog
 
 ## 3.4.3 — Recuperación de sesiones en iPhone
+- Nutrición agrupa las comidas por la fecha local del iPhone, incluso cerca de medianoche.
+- La copia completa incluye el menú generado por la interfaz nutricional actual.
 - Copias identificadas con la versión 3.4.3 y la fecha local del iPhone.
 - Auditoría automática contra versiones obsoletas y nombres basados en UTC.
 - Borrador local separado por plan y día para cargas, repeticiones, RIR y notas.

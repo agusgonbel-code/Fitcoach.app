@@ -48,14 +48,17 @@ for (const file of webFiles) {
   catch { failures.push(`Falta el recurso publicable ${file}.`); }
 }
 
-const [index, app, progress, backup, serviceWorker, readme] = await Promise.all([
-  read('index.html'), read('app.js'), read('progress-v34.js'), read('backup-v34.js'), read('sw.js'), read('README.md')
+const [index, app, nutrition, progress, backup, serviceWorker, readme] = await Promise.all([
+  read('index.html'), read('app.js'), read('nutrition-ui-v34.js'), read('progress-v34.js'), read('backup-v34.js'), read('sw.js'), read('README.md')
 ]);
 
 check(index.includes(`<span>${version}</span>`), 'La cabecera no muestra la versión actual.');
 check(readme.includes(`# FitCoach ${version}`), 'README no coincide con la versión actual.');
 check(app.includes(`./sw.js?v=${version}`), 'app.js registra otra versión del service worker.');
 check(serviceWorker.includes(`fitcoach-${version.replaceAll('.', '-')}`), 'La caché no coincide con la versión.');
+check(nutrition.includes('FitCoachLocalDate?.localDateKey'), 'Nutrición debe usar la fecha local del dispositivo.');
+check(!nutrition.includes("new Date().toISOString().slice(0,10)"), 'Nutrición conserva una fecha UTC insegura.');
+check(backup.includes("'v34menu'"), 'La copia no incluye el menú actual de 30 días.');
 check(progress.includes('FitCoachLocalDate.localDateKey()'), 'Progreso debe usar la fecha local del dispositivo.');
 check(!progress.includes("new Date().toISOString().slice(0,10)"), 'Progreso conserva una fecha UTC insegura.');
 check(backup.includes(`const APP_VERSION = '${version}'`), 'Las copias no coinciden con la versión actual.');
