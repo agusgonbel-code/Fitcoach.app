@@ -1,5 +1,14 @@
 # Changelog
 
+## 3.4.4 (1) · Identidad de distribución y metadatos
+
+- Fija versión `3.4.4` y build `1` en el proyecto iOS generado.
+- Valida ambas claves en el `Info.plist` de la aplicación compilada.
+- Añade una ficha española de App Store sin textos provisionales.
+- Comprueba automáticamente los límites editoriales de Apple.
+- No modifica funciones ni datos de FitCoach.
+
+
 ## 3.4.4 · Preparación de privacidad para App Store
 
 - Añade política de privacidad y soporte públicos, accesibles desde Ajustes.
