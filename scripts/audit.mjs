@@ -36,7 +36,7 @@ for (const [group, name] of capacitorPackages) {
 }
 
 const webFiles = [
-  'index.html', 'styles.css', 'enhance-v34.css', 'daily-coach-v34.css', 'data.js',
+  'index.html', 'privacy.html', 'support.html', 'styles.css', 'enhance-v34.css', 'daily-coach-v34.css', 'data.js',
   'nutrition-data.js', 'exercise-equivalents.js', 'local-date-v345.js', 'app.js',
   'nutrition-data-gen-v34.js', 'nutrition-profile-v346.js', 'nutrition-log-v347.js', 'nutrition-ui-v34.js', 'photo-storage-v34.js', 'progress-v34.js', 'backup-v34.js', 'progression-engine-v34.js', 'daily-coach-v34.js',
   'evidence-plan-v342.js', 'workout-draft-v343.js', 'workout-save-v344.js', 'manifest.webmanifest', 'version.json', 'sw.js',
@@ -73,6 +73,16 @@ check(!progress.includes("new Date().toISOString().slice(0,10)"), 'Progreso cons
 check(backup.includes(`const APP_VERSION = '${version}'`), 'Las copias no coinciden con la versión actual.');
 check(backup.includes('FitCoachLocalDate?.localDateKey'), 'Las copias deben usar la fecha local del dispositivo.');
 check(!backup.includes("new Date().toISOString().slice(0, 10)"), 'El nombre de la copia conserva una fecha UTC insegura.');
+const [privacyPage, supportPage, privacyManifest] = await Promise.all([
+  read('privacy.html'), read('support.html'), read('PrivacyInfo.xcprivacy')
+]);
+check(index.includes('href="privacy.html"'), 'Ajustes debe enlazar la política de privacidad.');
+check(index.includes('href="support.html"'), 'Ajustes debe enlazar soporte.');
+check(privacyPage.includes('No recopilamos datos personales'), 'La política debe explicar qué datos recopila FitCoach.');
+check(privacyPage.includes('IndexedDB'), 'La política debe explicar el almacenamiento local de fotografías.');
+check(supportPage.includes('Fitcoach.app/issues/new'), 'Soporte debe ofrecer un canal público.');
+check(/<key>NSPrivacyTracking<\/key>\s*<false\/>/.test(privacyManifest), 'El manifiesto debe declarar que no hay seguimiento.');
+check(/<key>NSPrivacyCollectedDataTypes<\/key>\s*<array\/>/.test(privacyManifest), 'El manifiesto debe declarar que FitCoach no recopila datos.');
 for (const asset of webFiles.filter(file => file !== 'sw.js' && /\.(?:css|js)$/.test(file))) {
   check(index.includes(`${asset}?v=${version}`), `index.html no referencia ${asset} con v=${version}.`);
 }
