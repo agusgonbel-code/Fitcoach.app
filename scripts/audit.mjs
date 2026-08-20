@@ -14,6 +14,7 @@ const manifest = JSON.parse(await read('manifest.webmanifest'));
 const capacitor = JSON.parse(await read('capacitor.config.json'));
 const release = JSON.parse(await read('app-store/release.json'));
 const storeMetadata = JSON.parse(await read('app-store/metadata.es-ES.json'));
+const storeScreenshots = JSON.parse(await read('app-store/screenshots.es-ES.json'));
 const version = versionJson.version;
 
 check(/^\d+\.\d+\.\d+$/.test(version), 'version.json debe usar versión semántica.');
@@ -32,6 +33,13 @@ check(storeMetadata.subtitle.length <= 30, 'El subtítulo supera 30 caracteres.'
 check(storeMetadata.promotionalText.length <= 170, 'El texto promocional supera 170 caracteres.');
 check(storeMetadata.keywords.length <= 100, 'Las palabras clave superan 100 caracteres.');
 check(storeMetadata.description.length <= 4000, 'La descripción supera 4000 caracteres.');
+check(storeScreenshots.locale === storeMetadata.locale, 'El plan de capturas no coincide con el idioma de la ficha.');
+check(storeScreenshots.platform === 'IPHONE', 'El plan de capturas debe corresponder a iPhone.');
+check(storeScreenshots.scenes.length >= storeScreenshots.minimumRequired, 'Faltan capturas para App Store.');
+check(storeScreenshots.scenes.length <= storeScreenshots.maximumAllowed, 'Sobran capturas para App Store.');
+check(storeScreenshots.scenes.every(scene => typeof scene.headline === 'string' && scene.headline.length <= 40), 'Algún titular de captura no es válido.');
+check(storeScreenshots.scenes.every(scene => typeof scene.supportingText === 'string' && scene.supportingText.length <= 70), 'Algún texto de captura no es válido.');
+check(storeScreenshots.privacyRules.some(rule => /datos ficticios/i.test(rule)), 'El plan de capturas debe exigir datos ficticios.');
 
 const capacitorPackages = [
   ['dependencies', '@capacitor/core'],
