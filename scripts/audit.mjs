@@ -58,7 +58,7 @@ const webFiles = [
   'index.html', 'privacy.html', 'support.html', 'styles.css', 'enhance-v34.css', 'daily-coach-v34.css', 'data.js',
   'nutrition-data.js', 'exercise-equivalents.js', 'local-date-v345.js', 'app.js',
   'nutrition-data-gen-v34.js', 'nutrition-profile-v346.js', 'nutrition-log-v347.js', 'nutrition-ui-v34.js', 'photo-storage-v34.js', 'progress-v34.js', 'backup-v34.js', 'progression-engine-v34.js', 'daily-coach-v34.js',
-  'evidence-plan-v342.js', 'workout-draft-v343.js', 'workout-save-v344.js', 'accessibility-v348.js', 'accessibility-v348.css', 'manifest.webmanifest', 'version.json', 'sw.js',
+  'evidence-plan-v342.js', 'workout-draft-v343.js', 'workout-save-v344.js', 'rest-timer-v349.js', 'accessibility-v348.js', 'accessibility-v348.css', 'manifest.webmanifest', 'version.json', 'sw.js',
   'icon-192.png', 'icon-512.png'
 ];
 
@@ -67,8 +67,8 @@ for (const file of webFiles) {
   catch { failures.push(`Falta el recurso publicable ${file}.`); }
 }
 
-const [index, app, nutrition, nutritionLog, dailyCoach, progress, backup, accessibility, accessibilityStyles, serviceWorker, readme] = await Promise.all([
-  read('index.html'), read('app.js'), read('nutrition-ui-v34.js'), read('nutrition-log-v347.js'), read('daily-coach-v34.js'), read('progress-v34.js'), read('backup-v34.js'), read('accessibility-v348.js'), read('accessibility-v348.css'), read('sw.js'), read('README.md')
+const [index, app, nutrition, nutritionLog, dailyCoach, progress, backup, restTimer, accessibility, accessibilityStyles, serviceWorker, readme] = await Promise.all([
+  read('index.html'), read('app.js'), read('nutrition-ui-v34.js'), read('nutrition-log-v347.js'), read('daily-coach-v34.js'), read('progress-v34.js'), read('backup-v34.js'), read('rest-timer-v349.js'), read('accessibility-v348.js'), read('accessibility-v348.css'), read('sw.js'), read('README.md')
 ]);
 
 check(index.includes(`<span>${version}</span>`), 'La cabecera no muestra la versión actual.');
@@ -92,6 +92,12 @@ check(!progress.includes("new Date().toISOString().slice(0,10)"), 'Progreso cons
 check(backup.includes(`const APP_VERSION = '${version}'`), 'Las copias no coinciden con la versión actual.');
 check(backup.includes('FitCoachLocalDate?.localDateKey'), 'Las copias deben usar la fecha local del dispositivo.');
 check(dailyCoach.includes(`accessibility-v348.js?v=${version}`), 'Daily Coach debe cargar la capa de accesibilidad versionada.');
+check(index.includes(`rest-timer-v349.js?v=${version}`), 'Entrenar debe cargar el temporizador de descansos versionado.');
+check(serviceWorker.includes(`rest-timer-v349.js?v=${version}`), 'La caché offline debe incluir el temporizador de descansos.');
+check(restTimer.includes('sessionStorage'), 'El temporizador debe conservar el descanso durante la sesión.');
+check(restTimer.includes('endAt'), 'El temporizador debe calcular el descanso con una hora final absoluta.');
+check(restTimer.includes("setAttribute('role', 'timer')"), 'El temporizador debe exponer un rol accesible.');
+check(restTimer.includes('vibrate'), 'El temporizador debe avisar al completar el descanso cuando el dispositivo lo permita.');
 check(accessibility.includes("aria-current', 'page'"), 'La navegación accesible debe identificar la página activa.');
 check(accessibility.includes("role', 'status'"), 'Los resultados dinámicos deben anunciarse como estados.');
 check(accessibility.includes('label.htmlFor'), 'Los formularios deben asociar etiquetas y controles.');
