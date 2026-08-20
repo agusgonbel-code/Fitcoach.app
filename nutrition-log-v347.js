@@ -45,5 +45,41 @@
       : { meals: [...meals, { ...entry }], added: true };
   }
 
-  globalThis.FitCoachNutritionLog = { createMealEntry, appendMeal };
+  function mealTotals(meals) {
+    if (!Array.isArray(meals)) fail('Diario no válido');
+    return meals.reduce((totals, meal) => ({
+      kcal: totals.kcal + finite(meal?.kcal ?? 0, 'Calorías'),
+      protein: totals.protein + finite(meal?.protein ?? 0, 'Proteína'),
+      carbs: totals.carbs + finite(meal?.carbs ?? 0, 'Carbohidratos'),
+      fat: totals.fat + finite(meal?.fat ?? 0, 'Grasas')
+    }), { kcal: 0, protein: 0, carbs: 0, fat: 0 });
+  }
+
+  function updateMeal(meals, index, changes) {
+    if (!Array.isArray(meals)) fail('Diario no válido');
+    if (!Number.isInteger(index) || index < 0 || index >= meals.length) fail('Comida no encontrada');
+    if (!changes || typeof changes !== 'object') fail('Cambios no válidos');
+    const name = String(changes.name ?? '').trim().slice(0, 160);
+    if (!name) fail('El nombre de la comida es obligatorio');
+    const next = {
+      ...meals[index],
+      name,
+      kcal: Math.round(finite(changes.kcal, 'Calorías')),
+      protein: Math.round(finite(changes.protein, 'Proteína')),
+      carbs: Math.round(finite(changes.carbs, 'Carbohidratos')),
+      fat: Math.round(finite(changes.fat, 'Grasas'))
+    };
+    if (next.kcal > 10000 || [next.protein, next.carbs, next.fat].some(value => value > 1000)) {
+      fail('Valores nutricionales fuera del rango permitido');
+    }
+    return meals.map((meal, mealIndex) => mealIndex === index ? next : { ...meal });
+  }
+
+  function removeMeal(meals, index) {
+    if (!Array.isArray(meals)) fail('Diario no válido');
+    if (!Number.isInteger(index) || index < 0 || index >= meals.length) fail('Comida no encontrada');
+    return meals.filter((_, mealIndex) => mealIndex !== index).map(meal => ({ ...meal }));
+  }
+
+  globalThis.FitCoachNutritionLog = { createMealEntry, appendMeal, mealTotals, updateMeal, removeMeal };
 })();
