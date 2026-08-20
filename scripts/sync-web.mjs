@@ -11,7 +11,7 @@ const webFiles = [
   'index.html', 'privacy.html', 'support.html', 'styles.css', 'enhance-v34.css', 'daily-coach-v34.css', 'data.js',
   'nutrition-data.js', 'exercise-equivalents.js', 'local-date-v345.js', 'app.js',
   'nutrition-data-gen-v34.js', 'nutrition-profile-v346.js', 'nutrition-log-v347.js', 'nutrition-ui-v34.js', 'photo-storage-v34.js', 'progress-v34.js', 'backup-v34.js', 'progression-engine-v34.js', 'daily-coach-v34.js',
-  'evidence-plan-v342.js', 'workout-draft-v343.js', 'workout-save-v344.js', 'manifest.webmanifest', 'version.json', 'sw.js',
+  'evidence-plan-v342.js', 'workout-draft-v343.js', 'workout-save-v344.js', 'accessibility-v348.js', 'accessibility-v348.css', 'manifest.webmanifest', 'version.json', 'sw.js',
   'icon-192.png', 'icon-512.png'
 ];
 
