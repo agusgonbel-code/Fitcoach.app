@@ -1,5 +1,13 @@
 # Changelog
 
+## 3.4.4 · Preparación de privacidad para App Store
+
+- Añade política de privacidad y soporte públicos, accesibles desde Ajustes.
+- Incluye `PrivacyInfo.xcprivacy` en el target nativo sin declarar seguimiento ni recopilación.
+- Verifica en macOS que el manifiesto y las páginas legales forman parte de `FitCoach.app`.
+- No modifica datos, entrenamiento, nutrición, progreso ni copias existentes.
+
+
 ## 3.4.4 · Diario nutricional editable
 
 - Muestra el detalle de todas las comidas del día y los totales de calorías, proteína, carbohidratos y grasas.
