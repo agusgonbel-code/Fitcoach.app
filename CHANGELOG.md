@@ -1,5 +1,13 @@
 # Changelog
 
+## 3.4.4 · Diario nutricional editable
+
+- Muestra el detalle de todas las comidas del día y los totales de calorías, proteína, carbohidratos y grasas.
+- Permite corregir una entrada mediante validación de nombre y rangos nutricionales.
+- Permite eliminarla únicamente tras una confirmación explícita en dos pasos.
+- Migra de forma compatible las comidas anteriores a identificadores locales estables.
+- Sincroniza cualquier corrección con el resumen de Inicio y las copias completas.
+
 ## 3.4.3 · Menú conectado con el diario
 
 - Cada comida del menú mensual abre su receta completa y permite registrarla en el diario del día con la porción y los macros reales del plan.

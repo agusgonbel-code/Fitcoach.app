@@ -32,8 +32,8 @@ const valid = {
 
 assert.equal(SCHEMA, 'fitcoach-backup');
 assert.equal(SCHEMA_VERSION, 1);
-assert.equal(APP_VERSION, '3.4.3');
-assert.equal(backupFileName(new Date(2026, 7, 14, 0, 5)), 'fitcoach-backup-3.4.3-2026-08-14.json');
+assert.equal(APP_VERSION, '3.4.4');
+assert.equal(backupFileName(new Date(2026, 7, 14, 0, 5)), 'fitcoach-backup-3.4.4-2026-08-14.json');
 assert.equal(MAX_PHOTO_BYTES, 25 * 1024 * 1024);
 assert.equal(MAX_TOTAL_PHOTO_BYTES, 75 * 1024 * 1024);
 assert.equal(STORAGE_KEYS.includes('v34meas'), true);

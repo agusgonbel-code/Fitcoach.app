@@ -3,7 +3,7 @@
 
   const SCHEMA = 'fitcoach-backup';
   const SCHEMA_VERSION = 1;
-  const APP_VERSION = '3.4.3';
+  const APP_VERSION = '3.4.4';
   const DB_NAME = 'v34photos2';
   const STORE_NAME = 'p';
   const MAX_BACKUP_BYTES = 120 * 1024 * 1024;

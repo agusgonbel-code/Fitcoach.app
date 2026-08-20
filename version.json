@@ -1,5 +1,5 @@
 {
-  "version": "3.4.3",
+  "version": "3.4.4",
   "recipes": 102,
   "monthlyMenuDays": 30,
   "macroCalculator": true,
@@ -9,5 +9,6 @@
   "nutritionProgressModules": true,
   "workoutDraftRecovery": true,
   "evidenceProgressionGuidance": true,
-  "monthlyMenuDiaryIntegration": true
+  "monthlyMenuDiaryIntegration": true,
+  "editableNutritionDiary": true
 }
