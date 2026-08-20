@@ -8,6 +8,8 @@ on:
       - 'privacy.html'
       - 'support.html'
       - 'PrivacyInfo.xcprivacy'
+      - 'app-store/**'
+      - 'version.json'
       - '*.js'
       - '*.css'
       - '*.png'
@@ -24,6 +26,8 @@ on:
       - 'privacy.html'
       - 'support.html'
       - 'PrivacyInfo.xcprivacy'
+      - 'app-store/**'
+      - 'version.json'
       - '*.js'
       - '*.css'
       - '*.png'
@@ -84,7 +88,7 @@ jobs:
             -destination 'generic/platform=iOS Simulator' \
             CODE_SIGNING_ALLOWED=NO \
             build
-      - name: Validate application identity and privacy
+      - name: Validate application identity, release and privacy
         id: app
         shell: bash
         run: |
@@ -95,8 +99,14 @@ jobs:
           PRIVACY="$APP_PATH/PrivacyInfo.xcprivacy"
           BUNDLE_ID="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$PLIST")"
           DISPLAY_NAME="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleDisplayName' "$PLIST" 2>/dev/null || /usr/libexec/PlistBuddy -c 'Print :CFBundleName' "$PLIST")"
+          VERSION="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$PLIST")"
+          BUILD="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' "$PLIST")"
+          EXPECTED_VERSION="$(node -p "require('./app-store/release.json').marketingVersion")"
+          EXPECTED_BUILD="$(node -p "require('./app-store/release.json').buildNumber")"
           test "$BUNDLE_ID" = 'com.fitcoach.app'
           test "$DISPLAY_NAME" = 'FitCoach'
+          test "$VERSION" = "$EXPECTED_VERSION"
+          test "$BUILD" = "$EXPECTED_BUILD"
           test -f "$APP_PATH/public/privacy.html"
           test -f "$APP_PATH/public/support.html"
           test -f "$PRIVACY"
@@ -105,6 +115,7 @@ jobs:
           test "$(plutil -extract NSPrivacyCollectedDataTypes json -o - "$PRIVACY")" = '[]'
           echo "Bundle ID: $BUNDLE_ID"
           echo "Display name: $DISPLAY_NAME"
+          echo "Release: $VERSION ($BUILD)"
           echo "path=$APP_PATH" >> "$GITHUB_OUTPUT"
       - name: Stage simulator artifact
         shell: bash
