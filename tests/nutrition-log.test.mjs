@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 
 await import('../nutrition-log-v347.js');
-const { createMealEntry, appendMeal } = globalThis.FitCoachNutritionLog;
+const { createMealEntry, appendMeal, mealTotals, updateMeal, removeMeal } = globalThis.FitCoachNutritionLog;
 
 const recipe = {
   id: 'r-1', name: 'Pollo con arroz',
@@ -31,3 +31,22 @@ assert.equal(appendMeal([libraryEntry], libraryEntry).meals.length, 2);
 assert.throws(() => createMealEntry({ date: '14/08/2026', recipe }), /Fecha no válida/);
 assert.throws(() => createMealEntry({ date: '2026-08-14', recipe, scale: 0 }), /Porción fuera/);
 assert.throws(() => appendMeal({}, entry), /Diario no válido/);
+
+assert.deepEqual(mealTotals([entry, libraryEntry]), {
+  kcal: 1441, protein: 108, carbs: 164, fat: 36
+});
+const corrected = updateMeal([entry, libraryEntry], 0, {
+  name: 'Pollo con arroz corregido', kcal: 760, protein: 58, carbs: 84, fat: 18
+});
+assert.equal(corrected[0].name, 'Pollo con arroz corregido');
+assert.equal(corrected[0].sourceId, entry.sourceId, 'La corrección debe conservar el origen planificado');
+assert.equal(corrected[1].name, libraryEntry.name);
+assert.equal(entry.name, 'Pollo con arroz', 'La corrección no debe mutar el diario original');
+assert.throws(() => updateMeal([entry], 0, { name: '', kcal: 1, protein: 1, carbs: 1, fat: 1 }), /obligatorio/);
+assert.throws(() => updateMeal([entry], 0, { name: 'Error', kcal: -1, protein: 1, carbs: 1, fat: 1 }), /Calorías/);
+
+const removed = removeMeal(corrected, 0);
+assert.equal(removed.length, 1);
+assert.equal(removed[0].origin, 'recipe-library');
+assert.equal(corrected.length, 2, 'La eliminación no debe mutar el diario original');
+assert.throws(() => removeMeal(corrected, 3), /no encontrada/);
