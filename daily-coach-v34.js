@@ -287,6 +287,7 @@
       if (button.dataset.go === 'home') setTimeout(renderDashboard, 0);
       if (button.dataset.go === 'training') setTimeout(enhanceWorkout, 0);
     }));
+    window.addEventListener('fitcoach:meals-changed', renderDashboard);
     enhanceWorkout();
     document.addEventListener('visibilitychange', () => { if (!document.hidden) renderDashboard(); });
   }
