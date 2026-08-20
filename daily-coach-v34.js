@@ -276,7 +276,16 @@
     showToast.timer = setTimeout(() => { toast.className = ''; }, 2800);
   }
 
+  function loadAccessibility() {
+    if (document.querySelector('script[data-fitcoach-accessibility]')) return;
+    const script = document.createElement('script');
+    script.src = 'accessibility-v348.js?v=3.4.4';
+    script.dataset.fitcoachAccessibility = 'true';
+    document.head.appendChild(script);
+  }
+
   function init() {
+    loadAccessibility();
     renderDashboard();
     const save = document.getElementById('saveWorkout');
     if (save) save.onclick = saveWorkoutGuided;
