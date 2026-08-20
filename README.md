@@ -63,6 +63,8 @@ La calculadora conserva en el dispositivo sexo, edad, altura, peso, porcentaje d
 
 Cada receta y cada comida del plan de 30 días puede añadirse al registro del día con sus calorías, proteínas, carbohidratos y grasas ajustados a la porción. Las comidas planificadas quedan identificadas para impedir dobles registros accidentales y el resumen de Inicio se actualiza al instante.
 
+El apartado **Diario** permite revisar cualquier fecha, ver kcal y los cuatro macronutrientes, corregir una entrada con validación o eliminarla después de una confirmación. Las operaciones conservan el origen del menú y no modifican otros días.
+
 ## Fechas locales fiables
 
 Los registros diarios y el resumen de Nutrición usan la fecha civil del dispositivo, no UTC. El menú actual de 30 días también forma parte de la copia completa. Así, comidas, objetivos, medidas y fotografías de progreso permanecen en el día correcto aunque se guarden cerca de medianoche o se use el iPhone en otra zona horaria.
