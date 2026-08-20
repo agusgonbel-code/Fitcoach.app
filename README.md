@@ -93,3 +93,9 @@ La configuración de publicación se conserva en `app-store/release.json`: bundl
 `app-store/metadata.es-ES.json` contiene la ficha española inicial. Las pruebas controlan los límites de nombre, subtítulo, texto promocional, palabras clave y descripción antes de enviarla a App Store Connect.
 
 `app-store/screenshots.es-ES.json` define cinco capturas coherentes para iPhone: Daily Coach, entrenamiento guiado, calculadora de macros, menú con receta y progreso. Incluye la preparación de cada escena y reglas para usar únicamente datos ficticios, sin fotografías ni medidas personales reales.
+
+## Accesibilidad de navegación
+
+La capa `accessibility-v348.js` asocia las etiquetas visibles con sus controles, identifica la pantalla activa, estructura las pestañas de Nutrición para tecnologías de asistencia y anuncia los resultados dinámicos sin interrumpir el flujo. Las pestañas admiten flechas, Inicio y Fin; al cambiar desde la barra inferior, el foco pasa al título de la nueva pantalla.
+
+La interfaz incorpora foco de alto contraste y respeta `prefers-reduced-motion`. Estas mejoras preparan la evaluación con VoiceOver, Voice Control, contraste y movimiento reducido, pero la declaración final en App Store Connect solo debe activarse después de comprobar todos los recorridos comunes en un iPhone real.
