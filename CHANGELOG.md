@@ -6,6 +6,7 @@
 - Valida ambas claves en el `Info.plist` de la aplicación compilada.
 - Añade una ficha española de App Store sin textos provisionales.
 - Comprueba automáticamente los límites editoriales de Apple.
+- Define y valida cinco escenas de capturas para iPhone con datos ficticios.
 - No modifica funciones ni datos de FitCoach.
 
 
