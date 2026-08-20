@@ -25,3 +25,28 @@ test('los metadatos españoles cumplen los límites de App Store', () => {
   assert.ok(Number.isInteger(release.buildNumber) && release.buildNumber > 0);
   assert.match(release.minimumIos, /^\d+\.\d+$/);
 });
+
+test('el plan de capturas cubre las funciones principales sin datos personales', () => {
+  const screenshots = readJson('../app-store/screenshots.es-ES.json');
+  const index = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
+
+  assert.equal(screenshots.locale, 'es-ES');
+  assert.equal(screenshots.platform, 'IPHONE');
+  assert.equal(screenshots.orientation, 'PORTRAIT');
+  assert.equal(screenshots.minimumRequired, 1);
+  assert.equal(screenshots.maximumAllowed, 10);
+  assert.ok(screenshots.scenes.length >= screenshots.minimumRequired);
+  assert.ok(screenshots.scenes.length <= screenshots.maximumAllowed);
+  assert.deepEqual(screenshots.scenes.map(scene => scene.order), [1, 2, 3, 4, 5]);
+  assert.equal(new Set(screenshots.scenes.map(scene => scene.id)).size, screenshots.scenes.length);
+
+  for (const scene of screenshots.scenes) {
+    assert.ok(scene.headline.length > 0 && scene.headline.length <= 40);
+    assert.ok(scene.supportingText.length > 0 && scene.supportingText.length <= 70);
+    assert.ok(scene.setup.length > 0);
+    assert.match(index, new RegExp(`id="${scene.surface}"`));
+  }
+
+  assert.ok(screenshots.privacyRules.some(rule => /datos ficticios/i.test(rule)));
+  assert.ok(screenshots.privacyRules.some(rule => /fotografías.*persona real/i.test(rule)));
+});
