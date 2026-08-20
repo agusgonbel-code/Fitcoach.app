@@ -91,3 +91,5 @@ La declaración debe revisarse si se incorporan cuentas, sincronización remota,
 La configuración de publicación se conserva en `app-store/release.json`: bundle `com.fitcoach.app`, versión `3.4.4` y compilación `1`. El instalador nativo aplica esos valores al proyecto Xcode generado y CI comprueba `CFBundleShortVersionString` y `CFBundleVersion` dentro de la aplicación compilada.
 
 `app-store/metadata.es-ES.json` contiene la ficha española inicial. Las pruebas controlan los límites de nombre, subtítulo, texto promocional, palabras clave y descripción antes de enviarla a App Store Connect.
+
+`app-store/screenshots.es-ES.json` define cinco capturas coherentes para iPhone: Daily Coach, entrenamiento guiado, calculadora de macros, menú con receta y progreso. Incluye la preparación de cada escena y reglas para usar únicamente datos ficticios, sin fotografías ni medidas personales reales.
