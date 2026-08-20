@@ -48,8 +48,8 @@ for (const file of webFiles) {
   catch { failures.push(`Falta el recurso publicable ${file}.`); }
 }
 
-const [index, app, nutrition, progress, backup, serviceWorker, readme] = await Promise.all([
-  read('index.html'), read('app.js'), read('nutrition-ui-v34.js'), read('progress-v34.js'), read('backup-v34.js'), read('sw.js'), read('README.md')
+const [index, app, nutrition, nutritionLog, dailyCoach, progress, backup, serviceWorker, readme] = await Promise.all([
+  read('index.html'), read('app.js'), read('nutrition-ui-v34.js'), read('nutrition-log-v347.js'), read('daily-coach-v34.js'), read('progress-v34.js'), read('backup-v34.js'), read('sw.js'), read('README.md')
 ]);
 
 check(index.includes(`<span>${version}</span>`), 'La cabecera no muestra la versión actual.');
@@ -59,6 +59,12 @@ check(serviceWorker.includes(`fitcoach-${version.replaceAll('.', '-')}`), 'La ca
 check(nutrition.includes('FitCoachLocalDate?.localDateKey'), 'Nutrición debe usar la fecha local del dispositivo.');
 check(nutrition.includes('FitCoachNutritionLog'), 'Nutrición debe registrar recetas mediante el diario validado.');
 check(nutrition.includes('fitcoach:meals-changed'), 'Nutrición debe sincronizar el diario con Inicio.');
+check(nutrition.includes('data-meal-id'), 'Nutrición debe mostrar el detalle editable del diario.');
+check(nutrition.includes('Confirmar eliminación'), 'Nutrición debe exigir confirmación antes de eliminar.');
+check(nutritionLog.includes('function migrateMeals'), 'El diario debe migrar registros antiguos a identificadores seguros.');
+check(nutritionLog.includes('function updateMeal'), 'El diario debe permitir correcciones validadas.');
+check(nutritionLog.includes('function removeMeal'), 'El diario debe permitir eliminar por identificador estable.');
+check(dailyCoach.includes("addEventListener('fitcoach:meals-changed', renderDashboard)"), 'Inicio debe reaccionar al editar el diario.');
 check(!nutrition.includes("new Date().toISOString().slice(0,10)"), 'Nutrición conserva una fecha UTC insegura.');
 check(backup.includes("'v34menu'"), 'La copia no incluye el menú actual de 30 días.');
 check(backup.includes("'fitcoach_nutrition_profile_v34'"), 'La copia no incluye el perfil de la calculadora nutricional.');
