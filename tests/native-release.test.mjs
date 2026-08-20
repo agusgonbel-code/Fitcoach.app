@@ -9,12 +9,17 @@ test('la distribución nativa conserva identidad, privacidad y compilación veri
   const sync = readFileSync(new URL('../scripts/sync-web.mjs', import.meta.url), 'utf8');
   const workflow = readFileSync(new URL('../.github/workflows/ios-native-ci.yml', import.meta.url), 'utf8');
   const manifest = readFileSync(new URL('../PrivacyInfo.xcprivacy', import.meta.url), 'utf8');
+  const release = JSON.parse(readFileSync(new URL('../app-store/release.json', import.meta.url), 'utf8'));
+  const version = JSON.parse(readFileSync(new URL('../version.json', import.meta.url), 'utf8'));
   const privacy = readFileSync(new URL('../privacy.html', import.meta.url), 'utf8');
   const support = readFileSync(new URL('../support.html', import.meta.url), 'utf8');
 
   assert.equal(config.appId, 'com.fitcoach.app');
   assert.equal(config.appName, 'FitCoach');
   assert.equal(config.webDir, 'www');
+  assert.equal(release.bundleId, config.appId);
+  assert.equal(release.marketingVersion, version.version);
+  assert.equal(release.buildNumber, 1);
   assert.equal(pkg.dependencies['@capacitor/core'], '8.5.0');
   assert.equal(pkg.dependencies['@capacitor/ios'], '8.5.0');
   assert.equal(pkg.devDependencies['@capacitor/cli'], '8.5.0');
@@ -29,6 +34,10 @@ test('la distribución nativa conserva identidad, privacidad y compilación veri
   assert.match(assets, /PrivacyInfo\.xcprivacy/);
   assert.match(assets, /PBXResourcesBuildPhase/);
   assert.match(assets, /PrivacyInfo\.xcprivacy in Resources/);
+  assert.match(assets, /MARKETING_VERSION/);
+  assert.match(assets, /CURRENT_PROJECT_VERSION/);
+  assert.match(assets, /release\.marketingVersion/);
+  assert.match(assets, /release\.buildNumber/);
 
   assert.match(manifest, /<key>NSPrivacyTracking<\/key>\s*<false\/>/);
   assert.match(manifest, /<key>NSPrivacyCollectedDataTypes<\/key>\s*<array\/>/);
@@ -41,6 +50,10 @@ test('la distribución nativa conserva identidad, privacidad y compilación veri
   assert.match(workflow, /generic\/platform=iOS Simulator/);
   assert.match(workflow, /CODE_SIGNING_ALLOWED=NO/);
   assert.match(workflow, /com\.fitcoach\.app/);
+  assert.match(workflow, /CFBundleShortVersionString/);
+  assert.match(workflow, /CFBundleVersion/);
+  assert.match(workflow, /EXPECTED_VERSION/);
+  assert.match(workflow, /EXPECTED_BUILD/);
   assert.match(workflow, /plutil -lint/);
   assert.match(workflow, /NSPrivacyCollectedDataTypes/);
   assert.match(workflow, /FitCoach-iOS-Simulator/);
