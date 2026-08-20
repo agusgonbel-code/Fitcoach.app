@@ -1,4 +1,4 @@
-# FitCoach 3.4.3
+# FitCoach 3.4.4
 
 Aplicación de entrenamiento, nutrición y progreso con historial persistente, planificación por objetivos, progresión mediante RIR, menús de 30 días y comparación local de fotografías.
 
@@ -62,6 +62,8 @@ La calculadora conserva en el dispositivo sexo, edad, altura, peso, porcentaje d
 ## Menú conectado con el diario
 
 Cada receta y cada comida del plan de 30 días puede añadirse al registro del día con sus calorías, proteínas, carbohidratos y grasas ajustados a la porción. Las comidas planificadas quedan identificadas para impedir dobles registros accidentales y el resumen de Inicio se actualiza al instante.
+
+El diario muestra cada comida y los cuatro macronutrientes del día. Al tocar una entrada se puede corregir nombre, calorías y macros, o eliminarla mediante una confirmación en dos pasos. Los registros anteriores reciben un identificador local estable sin cambiar su fecha ni sus valores.
 
 ## Fechas locales fiables
 
