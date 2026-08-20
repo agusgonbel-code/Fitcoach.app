@@ -5,6 +5,9 @@ on:
   pull_request:
     paths:
       - 'index.html'
+      - 'privacy.html'
+      - 'support.html'
+      - 'PrivacyInfo.xcprivacy'
       - '*.js'
       - '*.css'
       - '*.png'
@@ -18,6 +21,9 @@ on:
     branches: [main]
     paths:
       - 'index.html'
+      - 'privacy.html'
+      - 'support.html'
+      - 'PrivacyInfo.xcprivacy'
       - '*.js'
       - '*.css'
       - '*.png'
@@ -63,7 +69,7 @@ jobs:
           npm run sync:web
       - name: Generate native iOS project
         run: npx cap add ios
-      - name: Install FitCoach native assets
+      - name: Install FitCoach native assets and privacy manifest
         run: npm run ios:assets
       - name: Validate Capacitor configuration
         run: npx cap doctor ios
@@ -78,7 +84,7 @@ jobs:
             -destination 'generic/platform=iOS Simulator' \
             CODE_SIGNING_ALLOWED=NO \
             build
-      - name: Validate application identity
+      - name: Validate application identity and privacy
         id: app
         shell: bash
         run: |
@@ -86,10 +92,17 @@ jobs:
           APP_PATH="$(find "$HOME/Library/Developer/Xcode/DerivedData" -path '*Build/Products/Debug-iphonesimulator/App.app' -print -quit)"
           test -n "$APP_PATH"
           PLIST="$APP_PATH/Info.plist"
+          PRIVACY="$APP_PATH/PrivacyInfo.xcprivacy"
           BUNDLE_ID="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$PLIST")"
           DISPLAY_NAME="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleDisplayName' "$PLIST" 2>/dev/null || /usr/libexec/PlistBuddy -c 'Print :CFBundleName' "$PLIST")"
           test "$BUNDLE_ID" = 'com.fitcoach.app'
           test "$DISPLAY_NAME" = 'FitCoach'
+          test -f "$APP_PATH/public/privacy.html"
+          test -f "$APP_PATH/public/support.html"
+          test -f "$PRIVACY"
+          plutil -lint "$PRIVACY"
+          test "$(plutil -extract NSPrivacyTracking raw -o - "$PRIVACY")" = 'false'
+          test "$(plutil -extract NSPrivacyCollectedDataTypes json -o - "$PRIVACY")" = '[]'
           echo "Bundle ID: $BUNDLE_ID"
           echo "Display name: $DISPLAY_NAME"
           echo "path=$APP_PATH" >> "$GITHUB_OUTPUT"

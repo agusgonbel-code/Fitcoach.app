@@ -33,6 +33,8 @@ jobs:
         run: |
           cmp --silent index.html www/index.html
           cmp --silent app.js www/app.js
+          cmp --silent privacy.html www/privacy.html
+          cmp --silent support.html www/support.html
           test -f www/nutrition-profile-v346.js
           test -f www/nutrition-log-v347.js
           test -f www/nutrition-ui-v34.js

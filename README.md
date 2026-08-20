@@ -75,3 +75,13 @@ El diario muestra cada comida y los cuatro macronutrientes del día. Al tocar un
 ## Fechas locales fiables
 
 Los registros diarios y el resumen de Nutrición usan la fecha civil del dispositivo, no UTC. El menú actual de 30 días también forma parte de la copia completa. Así, comidas, objetivos, medidas y fotografías de progreso permanecen en el día correcto aunque se guarden cerca de medianoche o se use el iPhone en otra zona horaria.
+
+## Privacidad y soporte para App Store
+
+- Política pública: `https://agusgonbel-code.github.io/Fitcoach.app/privacy.html`.
+- Soporte público: `https://agusgonbel-code.github.io/Fitcoach.app/support.html`.
+- El paquete nativo incluye `PrivacyInfo.xcprivacy` y declara que FitCoach no realiza seguimiento ni recopila datos.
+- Perfil, entrenamientos, nutrición, medidas y fotografías se procesan y guardan localmente.
+- GitHub Actions comprueba el manifiesto y las páginas legales dentro de `FitCoach.app`.
+
+La declaración debe revisarse si se incorporan cuentas, sincronización remota, analítica, publicidad, HealthKit u otros servicios externos.
