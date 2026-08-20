@@ -12,6 +12,8 @@ const packageLock = JSON.parse(await read('package-lock.json'));
 const versionJson = JSON.parse(await read('version.json'));
 const manifest = JSON.parse(await read('manifest.webmanifest'));
 const capacitor = JSON.parse(await read('capacitor.config.json'));
+const release = JSON.parse(await read('app-store/release.json'));
+const storeMetadata = JSON.parse(await read('app-store/metadata.es-ES.json'));
 const version = versionJson.version;
 
 check(/^\d+\.\d+\.\d+$/.test(version), 'version.json debe usar versión semántica.');
@@ -21,6 +23,15 @@ check(manifest.version === version, 'manifest.webmanifest no coincide con versio
 check(capacitor.webDir === 'www', 'Capacitor debe usar www como webDir.');
 check(/^([a-zA-Z][\w]*)(\.[a-zA-Z][\w]*)+$/.test(capacitor.appId), 'Capacitor debe usar un appId válido.');
 check(typeof capacitor.appName === 'string' && capacitor.appName.trim(), 'Capacitor debe declarar appName.');
+check(release.bundleId === capacitor.appId, 'El bundleId de App Store no coincide con Capacitor.');
+check(release.marketingVersion === version, 'La versión de App Store no coincide con FitCoach.');
+check(Number.isInteger(release.buildNumber) && release.buildNumber > 0, 'El build de App Store debe ser un entero positivo.');
+check(storeMetadata.name === capacitor.appName, 'El nombre de App Store no coincide con Capacitor.');
+check(storeMetadata.name.length <= 30, 'El nombre supera 30 caracteres.');
+check(storeMetadata.subtitle.length <= 30, 'El subtítulo supera 30 caracteres.');
+check(storeMetadata.promotionalText.length <= 170, 'El texto promocional supera 170 caracteres.');
+check(storeMetadata.keywords.length <= 100, 'Las palabras clave superan 100 caracteres.');
+check(storeMetadata.description.length <= 4000, 'La descripción supera 4000 caracteres.');
 
 const capacitorPackages = [
   ['dependencies', '@capacitor/core'],
