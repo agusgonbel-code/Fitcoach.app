@@ -24,16 +24,25 @@ npm run sync:web
 
 ## Preparación para iPhone
 
+Para generar por primera vez el proyecto nativo, instalar el icono de 1024 px y abrirlo en Xcode:
+
 ```bash
 npm run cap:add:ios
+npm run cap:open:ios
+```
+
+Después de cualquier cambio web, sincroniza el proyecto existente antes de abrirlo:
+
+```bash
 npm run ios:prepare
 npm run cap:open:ios
 ```
 
-La generación y firma final requieren macOS, Xcode y una cuenta de Apple Developer. Las fotografías de progreso se validan, comprimen y guardan localmente en el dispositivo.
+GitHub Actions reproduce esta preparación en macOS, compila la aplicación para el simulador sin firma, comprueba el identificador `com.fitcoach.app` y publica un artefacto `FitCoach.app` durante 14 días. La instalación en un iPhone, el archivo para TestFlight y la firma final requieren Xcode y una cuenta de Apple Developer.
+
+Las fotografías de progreso se validan, comprimen y guardan localmente en el dispositivo.
 
 Desde **Ajustes** se puede exportar y restaurar una copia completa versionada. El archivo usa la versión actual de FitCoach y la fecha local del iPhone. Incluye perfil, objetivos, planes, entrenamientos, nutrición, medidas y las fotografías comprimidas de IndexedDB; la restauración valida todo el archivo y recupera el estado anterior si falla.
-
 
 ## Plan científico de 4 días · 50 minutos
 
@@ -41,11 +50,9 @@ Plan seleccionable en **Plan Studio → Científico 4 días · 50 min**. Alterna
 
 Base de evidencia: revisiones y metaanálisis sobre prescripción, volumen/frecuencia, proximidad al fallo y descansos (PMID 37414459, 41343037, 38970765 y 39205815).
 
-
 ## Recuperación de entrenamientos en curso
 
 FitCoach guarda localmente las cargas, repeticiones, RIR y notas mientras se completa cada sesión. Si Safari se recarga o iOS suspende la app, el borrador del mismo plan y día se restaura automáticamente. El borrador se elimina solo después de guardar una sesión válida y los borradores antiguos caducan a los 14 días.
-
 
 ## Guardado válido de sesiones
 
