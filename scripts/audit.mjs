@@ -58,7 +58,7 @@ const webFiles = [
   'index.html', 'privacy.html', 'support.html', 'styles.css', 'enhance-v34.css', 'daily-coach-v34.css', 'data.js',
   'nutrition-data.js', 'exercise-equivalents.js', 'local-date-v345.js', 'app.js',
   'nutrition-data-gen-v34.js', 'nutrition-profile-v346.js', 'nutrition-log-v347.js', 'nutrition-ui-v34.js', 'photo-storage-v34.js', 'progress-v34.js', 'backup-v34.js', 'progression-engine-v34.js', 'daily-coach-v34.js',
-  'evidence-plan-v342.js', 'workout-draft-v343.js', 'workout-save-v344.js', 'manifest.webmanifest', 'version.json', 'sw.js',
+  'evidence-plan-v342.js', 'workout-draft-v343.js', 'workout-save-v344.js', 'accessibility-v348.js', 'accessibility-v348.css', 'manifest.webmanifest', 'version.json', 'sw.js',
   'icon-192.png', 'icon-512.png'
 ];
 
@@ -67,8 +67,8 @@ for (const file of webFiles) {
   catch { failures.push(`Falta el recurso publicable ${file}.`); }
 }
 
-const [index, app, nutrition, nutritionLog, dailyCoach, progress, backup, serviceWorker, readme] = await Promise.all([
-  read('index.html'), read('app.js'), read('nutrition-ui-v34.js'), read('nutrition-log-v347.js'), read('daily-coach-v34.js'), read('progress-v34.js'), read('backup-v34.js'), read('sw.js'), read('README.md')
+const [index, app, nutrition, nutritionLog, dailyCoach, progress, backup, accessibility, accessibilityStyles, serviceWorker, readme] = await Promise.all([
+  read('index.html'), read('app.js'), read('nutrition-ui-v34.js'), read('nutrition-log-v347.js'), read('daily-coach-v34.js'), read('progress-v34.js'), read('backup-v34.js'), read('accessibility-v348.js'), read('accessibility-v348.css'), read('sw.js'), read('README.md')
 ]);
 
 check(index.includes(`<span>${version}</span>`), 'La cabecera no muestra la versión actual.');
@@ -91,6 +91,13 @@ check(progress.includes('FitCoachLocalDate.localDateKey()'), 'Progreso debe usar
 check(!progress.includes("new Date().toISOString().slice(0,10)"), 'Progreso conserva una fecha UTC insegura.');
 check(backup.includes(`const APP_VERSION = '${version}'`), 'Las copias no coinciden con la versión actual.');
 check(backup.includes('FitCoachLocalDate?.localDateKey'), 'Las copias deben usar la fecha local del dispositivo.');
+check(dailyCoach.includes(`accessibility-v348.js?v=${version}`), 'Daily Coach debe cargar la capa de accesibilidad versionada.');
+check(accessibility.includes("aria-current', 'page'"), 'La navegación accesible debe identificar la página activa.');
+check(accessibility.includes("role', 'status'"), 'Los resultados dinámicos deben anunciarse como estados.');
+check(accessibility.includes('label.htmlFor'), 'Los formularios deben asociar etiquetas y controles.');
+check(accessibility.includes('ArrowLeft'), 'Las pestañas de Nutrición deben admitir navegación por teclado.');
+check(accessibilityStyles.includes(':focus-visible'), 'Los controles deben mostrar un foco visible.');
+check(accessibilityStyles.includes('prefers-reduced-motion'), 'La interfaz debe respetar movimiento reducido.');
 check(!backup.includes("new Date().toISOString().slice(0, 10)"), 'El nombre de la copia conserva una fecha UTC insegura.');
 const [privacyPage, supportPage, privacyManifest] = await Promise.all([
   read('privacy.html'), read('support.html'), read('PrivacyInfo.xcprivacy')
@@ -102,7 +109,7 @@ check(privacyPage.includes('IndexedDB'), 'La política debe explicar el almacena
 check(supportPage.includes('Fitcoach.app/issues/new'), 'Soporte debe ofrecer un canal público.');
 check(/<key>NSPrivacyTracking<\/key>\s*<false\/>/.test(privacyManifest), 'El manifiesto debe declarar que no hay seguimiento.');
 check(/<key>NSPrivacyCollectedDataTypes<\/key>\s*<array\/>/.test(privacyManifest), 'El manifiesto debe declarar que FitCoach no recopila datos.');
-for (const asset of webFiles.filter(file => file !== 'sw.js' && /\.(?:css|js)$/.test(file))) {
+for (const asset of webFiles.filter(file => !['sw.js', 'accessibility-v348.js', 'accessibility-v348.css'].includes(file) && /\.(?:css|js)$/.test(file))) {
   check(index.includes(`${asset}?v=${version}`), `index.html no referencia ${asset} con v=${version}.`);
 }
 for (const match of index.matchAll(/[?&]v=(\d+\.\d+\.\d+)/g)) {
