@@ -85,3 +85,9 @@ Los registros diarios y el resumen de Nutrición usan la fecha civil del disposi
 - GitHub Actions comprueba el manifiesto y las páginas legales dentro de `FitCoach.app`.
 
 La declaración debe revisarse si se incorporan cuentas, sincronización remota, analítica, publicidad, HealthKit u otros servicios externos.
+
+## Identidad de distribución y ficha española
+
+La configuración de publicación se conserva en `app-store/release.json`: bundle `com.fitcoach.app`, versión `3.4.4` y compilación `1`. El instalador nativo aplica esos valores al proyecto Xcode generado y CI comprueba `CFBundleShortVersionString` y `CFBundleVersion` dentro de la aplicación compilada.
+
+`app-store/metadata.es-ES.json` contiene la ficha española inicial. Las pruebas controlan los límites de nombre, subtítulo, texto promocional, palabras clave y descripción antes de enviarla a App Store Connect.
