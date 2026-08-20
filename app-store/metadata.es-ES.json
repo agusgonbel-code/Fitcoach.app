@@ -1,0 +1,12 @@
+{
+  "locale": "es-ES",
+  "name": "FitCoach",
+  "subtitle": "Entrena, come y progresa",
+  "promotionalText": "Organiza entrenamiento, nutrición y progreso desde el iPhone con planes claros, historial local y recomendaciones explicables.",
+  "description": "FitCoach reúne en una sola aplicación la planificación de entrenamiento, el registro nutricional y el seguimiento del progreso.\n\nENTRENAMIENTO\n• Planes según objetivo, días disponibles y duración.\n• Rutina científica de cuatro días y 50 minutos.\n• Registro de cargas, repeticiones y RIR.\n• Último rendimiento visible y progresión doble explicable.\n• Alternativas para cada ejercicio.\n\nNUTRICIÓN\n• Calculadora de calorías y macronutrientes.\n• Menú de 30 días con recetas e ingredientes.\n• Diario editable con calorías, proteína, carbohidratos y grasas.\n\nPROGRESO Y PRIVACIDAD\n• Medidas corporales y fotografías comparables.\n• Copia completa exportable y restauración validada.\n• Datos almacenados localmente en el dispositivo.\n• Sin cuenta, anuncios, analítica ni seguimiento.\n\nLas recomendaciones son informativas y no sustituyen la valoración de un profesional sanitario o del ejercicio.",
+  "keywords": "fitness,entrenamiento,fuerza,músculo,nutrición,macros,progreso,rutinas,gimnasio,RIR",
+  "primaryCategory": "HEALTH_AND_FITNESS",
+  "privacyUrl": "https://agusgonbel-code.github.io/Fitcoach.app/privacy.html",
+  "supportUrl": "https://agusgonbel-code.github.io/Fitcoach.app/support.html",
+  "reviewNotes": "La aplicación funciona sin cuenta y guarda sus datos localmente. Todas las secciones pueden revisarse desde la navegación inferior. Ajustes contiene exportación, privacidad y soporte."
+}
