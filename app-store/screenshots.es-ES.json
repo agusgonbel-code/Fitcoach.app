@@ -1,0 +1,54 @@
+{
+  "locale": "es-ES",
+  "platform": "IPHONE",
+  "orientation": "PORTRAIT",
+  "minimumRequired": 1,
+  "maximumAllowed": 10,
+  "scenes": [
+    {
+      "order": 1,
+      "id": "daily-coach",
+      "surface": "home",
+      "headline": "Tu día, claro de un vistazo",
+      "supportingText": "Entrenamiento, macros y progreso en un solo lugar",
+      "setup": ["Activar el plan científico de 4 días", "Añadir registros de demostración sin datos personales"]
+    },
+    {
+      "order": 2,
+      "id": "guided-workout",
+      "surface": "training",
+      "headline": "Progresa en cada sesión",
+      "supportingText": "Última carga, repeticiones, RIR y siguiente objetivo",
+      "setup": ["Abrir un día del plan activo", "Mostrar una sesión de demostración parcialmente completada"]
+    },
+    {
+      "order": 3,
+      "id": "nutrition-targets",
+      "surface": "nutrition",
+      "headline": "Macros adaptados a tu objetivo",
+      "supportingText": "Calcula, guarda y utiliza tus cuatro objetivos diarios",
+      "setup": ["Abrir la calculadora", "Usar un perfil ficticio y mostrar el resultado"]
+    },
+    {
+      "order": 4,
+      "id": "monthly-menu",
+      "surface": "nutrition",
+      "headline": "30 días de comidas y recetas",
+      "supportingText": "Ingredientes, cantidades y elaboración paso a paso",
+      "setup": ["Generar el menú con objetivos ficticios", "Abrir una receta completa"]
+    },
+    {
+      "order": 5,
+      "id": "progress",
+      "surface": "progress",
+      "headline": "Comprueba tu evolución",
+      "supportingText": "Sesiones, marcas, medidas y comparaciones privadas",
+      "setup": ["Cargar métricas de demostración", "No utilizar fotografías personales reales"]
+    }
+  ],
+  "privacyRules": [
+    "No mostrar nombres, fotografías ni medidas de una persona real",
+    "Usar únicamente datos ficticios coherentes entre capturas",
+    "Capturar la interfaz del binario final sin elementos externos"
+  ]
+}

@@ -54,6 +54,8 @@ Base de evidencia: revisiones y metaanálisis sobre prescripción, volumen/frecu
 
 FitCoach guarda localmente las cargas, repeticiones, RIR y notas mientras se completa cada sesión. Si Safari se recarga o iOS suspende la app, el borrador del mismo plan y día se restaura automáticamente. El borrador se elimina solo después de guardar una sesión válida y los borradores antiguos caducan a los 14 días.
 
+Cada ejercicio ofrece un temporizador de descanso con la duración prescrita por el plan. El contador usa una hora final real, por lo que continúa correctamente si el iPhone bloquea o suspende la aplicación; permite ajustar ±15 segundos, omitirlo y avisa al terminar sin alterar el entrenamiento.
+
 ## Guardado válido de sesiones
 
 Antes de cerrar un entrenamiento, FitCoach exige al menos una serie completa, valida límites razonables y conserva correctamente RIR 0. Las series vacías no contaminan el historial ni las recomendaciones del Coach.
@@ -85,3 +87,17 @@ Los registros diarios y el resumen de Nutrición usan la fecha civil del disposi
 - GitHub Actions comprueba el manifiesto y las páginas legales dentro de `FitCoach.app`.
 
 La declaración debe revisarse si se incorporan cuentas, sincronización remota, analítica, publicidad, HealthKit u otros servicios externos.
+
+## Identidad de distribución y ficha española
+
+La configuración de publicación se conserva en `app-store/release.json`: bundle `com.fitcoach.app`, versión `3.4.4` y compilación `1`. El instalador nativo aplica esos valores al proyecto Xcode generado y CI comprueba `CFBundleShortVersionString` y `CFBundleVersion` dentro de la aplicación compilada.
+
+`app-store/metadata.es-ES.json` contiene la ficha española inicial. Las pruebas controlan los límites de nombre, subtítulo, texto promocional, palabras clave y descripción antes de enviarla a App Store Connect.
+
+`app-store/screenshots.es-ES.json` define cinco capturas coherentes para iPhone: Daily Coach, entrenamiento guiado, calculadora de macros, menú con receta y progreso. Incluye la preparación de cada escena y reglas para usar únicamente datos ficticios, sin fotografías ni medidas personales reales.
+
+## Accesibilidad de navegación
+
+La capa `accessibility-v348.js` asocia las etiquetas visibles con sus controles, identifica la pantalla activa, estructura las pestañas de Nutrición para tecnologías de asistencia y anuncia los resultados dinámicos sin interrumpir el flujo. Las pestañas admiten flechas, Inicio y Fin; al cambiar desde la barra inferior, el foco pasa al título de la nueva pantalla.
+
+La interfaz incorpora foco de alto contraste y respeta `prefers-reduced-motion`. Estas mejoras preparan la evaluación con VoiceOver, Voice Control, contraste y movimiento reducido, pero la declaración final en App Store Connect solo debe activarse después de comprobar todos los recorridos comunes en un iPhone real.

@@ -1,5 +1,22 @@
 # Changelog
 
+## Temporizador de descansos fiable en iPhone
+
+- Descansos por ejercicio según la prescripción de 60–150 segundos del plan.
+- Contador persistente en la sesión y exacto tras suspensión o bloqueo de iOS.
+- Ajuste de ±15 segundos, omisión, anuncio accesible y vibración compatible.
+- Sin cambios en entrenamientos, nutrición ni datos guardados.
+
+## 3.4.4 (1) · Identidad de distribución y metadatos
+
+- Fija versión `3.4.4` y build `1` en el proyecto iOS generado.
+- Valida ambas claves en el `Info.plist` de la aplicación compilada.
+- Añade una ficha española de App Store sin textos provisionales.
+- Comprueba automáticamente los límites editoriales de Apple.
+- Define y valida cinco escenas de capturas para iPhone con datos ficticios.
+- No modifica funciones ni datos de FitCoach.
+
+
 ## 3.4.4 · Preparación de privacidad para App Store
 
 - Añade política de privacidad y soporte públicos, accesibles desde Ajustes.

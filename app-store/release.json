@@ -1,0 +1,7 @@
+{
+  "bundleId": "com.fitcoach.app",
+  "marketingVersion": "3.4.4",
+  "buildNumber": 1,
+  "minimumIos": "15.0",
+  "sku": "fitcoach-ios"
+}

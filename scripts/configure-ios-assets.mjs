@@ -7,6 +7,8 @@ const root = path.resolve(import.meta.dirname, '..');
 const iconSource = path.join(root, 'icon-512.png');
 const iconDestination = path.join(root, 'ios', 'App', 'App', 'Assets.xcassets', 'AppIcon.appiconset', 'AppIcon-512@2x.png');
 const privacySource = path.join(root, 'PrivacyInfo.xcprivacy');
+const versionPath = path.join(root, 'version.json');
+const releasePath = path.join(root, 'app-store', 'release.json');
 const privacyDestination = path.join(root, 'ios', 'App', 'App', 'PrivacyInfo.xcprivacy');
 const projectPath = path.join(root, 'ios', 'App', 'App.xcodeproj', 'project.pbxproj');
 
@@ -19,6 +21,12 @@ for (const file of [iconDestination, projectPath]) {
 
 await promisify(execFile)('sips', ['-z', '1024', '1024', iconSource, '--out', iconDestination]);
 await copyFile(privacySource, privacyDestination);
+
+const appVersion = JSON.parse(await readFile(versionPath, 'utf8')).version;
+const release = JSON.parse(await readFile(releasePath, 'utf8'));
+if (release.bundleId !== 'com.fitcoach.app') throw new Error('El bundleId de distribución no coincide con FitCoach.');
+if (release.marketingVersion !== appVersion) throw new Error('La versión nativa no coincide con version.json.');
+if (!Number.isInteger(release.buildNumber) || release.buildNumber < 1) throw new Error('El número de compilación debe ser un entero positivo.');
 
 let project = await readFile(projectPath, 'utf8');
 const fileRef = 'F17C00010000000000000001';
@@ -46,5 +54,14 @@ if (!project.includes(resourceLine.trim())) {
   if (!resources.test(project)) throw new Error('No se encontró la fase Resources en el proyecto Xcode.');
   project = project.replace(resources, `$1${resourceLine}`);
 }
+const replaceBuildSetting = (source, name, value) => {
+  const pattern = new RegExp(`(${name} = )[^;]+;`, 'g');
+  const matches = source.match(pattern) ?? [];
+  if (!matches.length) throw new Error(`No se encontró ${name} en el proyecto Xcode.`);
+  return source.replace(pattern, (_, prefix) => `${prefix}${value};`);
+};
+project = replaceBuildSetting(project, 'MARKETING_VERSION', release.marketingVersion);
+project = replaceBuildSetting(project, 'CURRENT_PROJECT_VERSION', String(release.buildNumber));
+
 await writeFile(projectPath, project, 'utf8');
-console.log('Icono y manifiesto de privacidad de FitCoach instalados en el proyecto iOS.');
+console.log(`FitCoach ${release.marketingVersion} (${release.buildNumber}): icono y privacidad instalados en iOS.`);
