@@ -1,6 +1,6 @@
 const { test, expect } = require('@playwright/test');
 test('unified intake opens, generates and persists without page errors', async ({ page }) => {
-  const errors=[]; page.on('pageerror',e=>errors.push(e.message));
+  const errors=[]; page.on('pageerror',e=>errors.push(e.stack||e.message));
   await page.goto('http://127.0.0.1:4173/',{waitUntil:'domcontentloaded'});
   await expect(page.locator('#fcIntakeModal')).toBeVisible();
   await expect(page.getByText('Configurar usuario o cliente')).toBeVisible();
