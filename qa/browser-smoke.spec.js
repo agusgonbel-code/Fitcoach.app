@@ -1,16 +1,4 @@
 const { test, expect } = require('@playwright/test');
-test('unified intake opens, generates and persists without page errors', async ({ page }) => {
-  const errors=[]; page.on('pageerror',e=>errors.push(e.stack||e.message));
-  await page.goto('http://127.0.0.1:4173/',{waitUntil:'domcontentloaded'});
-  await expect(page.locator('#fcIntakeModal')).toBeVisible();
-  await expect(page.getByText('Configurar usuario o cliente')).toBeVisible();
-  await page.locator('#fcNext').click(); await page.locator('#fcNext').click(); await page.locator('#fcNext').click();
-  await expect(page.locator('#fcGenerate')).toBeVisible();
-  await page.locator('#fcGenerate').click();
-  await page.waitForFunction(()=>localStorage.getItem('fitcoach_client_profile_v35')!==null);
-  const profile=await page.evaluate(()=>JSON.parse(localStorage.getItem('fitcoach_client_profile_v35')));
-  const targets=await page.evaluate(()=>JSON.parse(localStorage.getItem('targets')));
-  expect(profile.days).toBeGreaterThanOrEqual(2); expect(profile.meals).toBeGreaterThanOrEqual(3);
-  expect(targets.kcal).toBeGreaterThan(1000); expect(targets.protein).toBeGreaterThan(40);
-  expect(errors).toEqual([]);
-});
+async function completeIntake(page){await expect(page.locator('#fcIntakeModal')).toBeVisible();await page.locator('#fcNext').click();await page.locator('#fcNext').click();await page.locator('#fcNext').click();await expect(page.locator('#fcGenerate')).toBeVisible();await page.locator('#fcGenerate').click();await page.waitForFunction(()=>localStorage.getItem('fitcoach_client_profile_v35')!==null);}
+test('unified intake opens, generates and persists without page errors', async ({ page }) => {const errors=[];page.on('pageerror',e=>errors.push(e.stack||e.message));await page.goto('http://127.0.0.1:4173/',{waitUntil:'domcontentloaded'});await expect(page.getByText('Configurar usuario o cliente')).toBeVisible();await completeIntake(page);const profile=await page.evaluate(()=>JSON.parse(localStorage.getItem('fitcoach_client_profile_v35')));const targets=await page.evaluate(()=>JSON.parse(localStorage.getItem('targets')));expect(profile.days).toBeGreaterThanOrEqual(2);expect(profile.meals).toBeGreaterThanOrEqual(3);expect(targets.kcal).toBeGreaterThan(1000);expect(targets.protein).toBeGreaterThan(40);expect(errors).toEqual([]);});
+test('trainer can create a client, record check-in and keep recommendation auditable',async({page})=>{const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('http://127.0.0.1:4173/',{waitUntil:'domcontentloaded'});await completeIntake(page);await page.waitForSelector('nav [data-go="clients"]');await page.locator('nav [data-go="clients"]').click();await expect(page.locator('#clients')).toBeVisible();await page.locator('#cwName').fill('Cliente QA');await page.locator('#cwAdd').click();await expect(page.getByText('Cliente QA')).toBeVisible();const card=page.locator('#cwList .card').filter({hasText:'Cliente QA'});await card.locator('summary').click();await card.locator('[data-k="weight"]').fill('80');await card.locator('[data-k="waist"]').fill('90');await card.locator('[data-act="check"]').click();const saved=await page.evaluate(()=>JSON.parse(localStorage.getItem('fitcoach_clients_v40')));expect(saved).toHaveLength(1);expect(saved[0].checkins).toHaveLength(1);expect(errors).toEqual([]);});
