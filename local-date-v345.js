@@ -12,7 +12,6 @@
 
   globalThis.FitCoachLocalDate = { localDateKey };
 
-  // Carga secuencial del nuevo motor unificado sin acoplarlo al bundle legado.
   if (typeof document !== 'undefined') {
     const load = src => new Promise((resolve, reject) => {
       if (document.querySelector(`script[data-fc-v35="${src}"]`)) return resolve();
@@ -21,6 +20,9 @@
       script.onload = resolve; script.onerror = reject;
       document.head.append(script);
     });
-    load('client-engine-v35.js').then(() => load('unified-intake-v35.js')).catch(() => {});
+    load('client-engine-v35.js')
+      .then(() => load('unified-intake-v35.js'))
+      .then(() => load('mobile-quality-v41.js'))
+      .catch(() => {});
   }
 })();
