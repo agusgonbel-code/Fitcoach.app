@@ -18,6 +18,11 @@
     const map=Object.fromEntries((ingredients||[]).map(item=>[item.id,item]));
     return (recipes||[]).filter(recipe=>{const text=recipeText(recipe,map);return !terms.some(term=>text.includes(term));});
   }
+  function validMacros(macros){
+    if(macros==null)return true;
+    if(typeof macros!=='object')return false;
+    return ['kcal','p','c','f'].every(key=>Number.isFinite(Number(macros[key]))&&Number(macros[key])>=0);
+  }
   function validateMenuStructure(result,profile={},requestedDays=30){
     const expectedMeals=Math.min(6,Math.max(3,Math.round(Number(profile.meals)||4)));
     const expectedDays=Math.min(30,Math.max(1,Math.round(Number(requestedDays)||30)));
@@ -25,6 +30,8 @@
     if(days.length!==expectedDays)throw new Error(`El menú está incompleto: se solicitaron ${expectedDays} días y se generaron ${days.length}.`);
     const bad=days.find(day=>!Array.isArray(day.meals)||day.meals.length!==expectedMeals||day.meals.some(meal=>!meal||!meal.recipeId));
     if(bad)throw new Error(`No hay suficientes recetas para completar ${expectedMeals} comidas al día. Amplía la biblioteca o revisa las preferencias antes de generar el menú.`);
+    const corrupt=days.find(day=>day.meals.some(meal=>!validMacros(meal.macros)));
+    if(corrupt)throw new Error('El menú contiene datos nutricionales no válidos. Vuelve a generarlo antes de guardarlo o usarlo.');
     return result;
   }
   function install(engine){
@@ -34,10 +41,10 @@
     if(typeof originalMenu==='function')engine.generateMenu=(input,targets,recipes=[],ingredients=[],days=30)=>{
       const profile=engine.normalizeProfile?engine.normalizeProfile(input):input||{},safeRecipes=filterAllergyUnsafeRecipes(profile,recipes,ingredients);
       let result=originalMenu(input,targets,safeRecipes,ingredients,days);
-      try{result=validateMenuStructure(result,profile,days);}catch(error){if(allergyTerms(profile).length)throw new Error('No hay suficientes recetas compatibles con las alergias indicadas para completar todas las comidas. Revisa las restricciones o amplía la biblioteca.');throw error;}
-      return{...result,quality:{...(result.quality||{}),allergyScreening:'ingredient-aware-v41',menuCompleteness:'strict-v42',localPlanDates:true}};
+      try{result=validateMenuStructure(result,profile,days);}catch(error){if(allergyTerms(profile).length&&/recetas/.test(String(error?.message||'')))throw new Error('No hay suficientes recetas compatibles con las alergias indicadas para completar todas las comidas. Revisa las restricciones o amplía la biblioteca.');throw error;}
+      return{...result,quality:{...(result.quality||{}),allergyScreening:'ingredient-aware-v41',menuCompleteness:'strict-v42',macroPayloadValidation:'strict-v43',localPlanDates:true}};
     };
     engine.__qualityV41=true;return engine;
   }
-  return{install,localDateKey,allergyTerms,filterAllergyUnsafeRecipes,validateMenuStructure};
+  return{install,localDateKey,allergyTerms,filterAllergyUnsafeRecipes,validMacros,validateMenuStructure};
 });
