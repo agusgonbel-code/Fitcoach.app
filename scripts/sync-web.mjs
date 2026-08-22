@@ -11,8 +11,9 @@ const webFiles = [
   'index.html', 'privacy.html', 'support.html', 'styles.css', 'enhance-v34.css', 'daily-coach-v34.css', 'data.js',
   'nutrition-data.js', 'exercise-equivalents.js', 'local-date-v345.js', 'app.js',
   'nutrition-data-gen-v34.js', 'nutrition-profile-v346.js', 'nutrition-log-v347.js', 'nutrition-ui-v34.js', 'photo-storage-v34.js', 'progress-v34.js', 'backup-v34.js', 'progression-engine-v34.js', 'daily-coach-v34.js',
-  'evidence-plan-v342.js', 'workout-draft-v343.js', 'workout-save-v344.js', 'manifest.webmanifest', 'version.json', 'sw.js',
-  'icon-192.png', 'icon-512.png'
+  'evidence-plan-v342.js', 'workout-draft-v343.js', 'workout-save-v344.js',
+  'client-engine-v35.js','unified-intake-v35.js','adaptive-review-v36.js','weekly-adaptation-v36.js','weekly-review-ui-v36.js','coach-workspace-v40.js',
+  'manifest.webmanifest', 'version.json', 'sw.js', 'icon-192.png', 'icon-512.png'
 ];
 
 const audit = spawnSync(process.execPath, [path.join(root, 'scripts/audit.mjs')], { cwd: root, encoding: 'utf8' });
@@ -23,7 +24,6 @@ if (audit.status !== 0) process.exit(audit.status ?? 1);
 await rm(staging, { recursive: true, force: true });
 await rm(backup, { recursive: true, force: true });
 await mkdir(staging, { recursive: true });
-
 try {
   for (const file of webFiles) await cp(path.join(root, file), path.join(staging, file));
   await rename(destination, backup).catch(error => { if (error.code !== 'ENOENT') throw error; });
