@@ -13,10 +13,15 @@
   }
   function allergyTerms(profile={}){return String(profile.allergies||'').split(/[,;\n]+/).map(norm).filter(Boolean);}
   function recipeText(recipe={},ingredientMap={}){const names=(recipe.ings||[]).map(([id])=>ingredientMap[id]?.name||'');return norm([recipe.name||'',...names].join(' '));}
+  function hasUnknownIngredients(recipe={},ingredientMap={}){return (recipe.ings||[]).some(([id])=>!ingredientMap[id]);}
   function filterAllergyUnsafeRecipes(profile,recipes=[],ingredients=[]){
     const terms=allergyTerms(profile);if(!terms.length)return recipes.slice();
     const map=Object.fromEntries((ingredients||[]).map(item=>[item.id,item]));
-    return (recipes||[]).filter(recipe=>{const text=recipeText(recipe,map);return !terms.some(term=>text.includes(term));});
+    return (recipes||[]).filter(recipe=>{
+      // Con alergias activas, un ingrediente que no podemos identificar no se considera seguro.
+      if(hasUnknownIngredients(recipe,map))return false;
+      const text=recipeText(recipe,map);return !terms.some(term=>text.includes(term));
+    });
   }
   function validMacros(macros){
     if(macros==null)return true;
@@ -42,9 +47,9 @@
       const profile=engine.normalizeProfile?engine.normalizeProfile(input):input||{},safeRecipes=filterAllergyUnsafeRecipes(profile,recipes,ingredients);
       let result=originalMenu(input,targets,safeRecipes,ingredients,days);
       try{result=validateMenuStructure(result,profile,days);}catch(error){if(allergyTerms(profile).length&&/recetas/.test(String(error?.message||'')))throw new Error('No hay suficientes recetas compatibles con las alergias indicadas para completar todas las comidas. Revisa las restricciones o amplía la biblioteca.');throw error;}
-      return{...result,quality:{...(result.quality||{}),allergyScreening:'ingredient-aware-v41',menuCompleteness:'strict-v42',macroPayloadValidation:'strict-v43',localPlanDates:true}};
+      return{...result,quality:{...(result.quality||{}),allergyScreening:'ingredient-aware-fail-closed-v44',menuCompleteness:'strict-v42',macroPayloadValidation:'strict-v43',localPlanDates:true}};
     };
     engine.__qualityV41=true;return engine;
   }
-  return{install,localDateKey,allergyTerms,filterAllergyUnsafeRecipes,validMacros,validateMenuStructure};
+  return{install,localDateKey,allergyTerms,filterAllergyUnsafeRecipes,hasUnknownIngredients,validMacros,validateMenuStructure};
 });
