@@ -1,0 +1,44 @@
+name: FitCoach Release Stress
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  stress:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - name: Run unit and invariant suite 10 times
+        shell: bash
+        run: |
+          set -euo pipefail
+          for i in $(seq 1 10); do
+            echo "=== FitCoach unit pass $i/10 ==="
+            npm test
+            npm run audit
+          done
+      - name: Install Chromium for repeated user journeys
+        run: |
+          npm install --no-save @playwright/test
+          npx playwright install --with-deps chromium
+      - name: Start app
+        run: python3 -m http.server 4173 >/tmp/fitcoach-http.log 2>&1 &
+      - name: Run browser journey 10 times
+        shell: bash
+        run: |
+          set -euo pipefail
+          for i in $(seq 1 10); do
+            echo "=== FitCoach browser pass $i/10 ==="
+            npx playwright test qa/browser-smoke.spec.js --reporter=line
+          done
