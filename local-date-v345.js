@@ -21,6 +21,7 @@
       document.head.append(script);
     });
     load('client-engine-v35.js')
+      .then(() => load('client-quality-v41.js'))
       .then(() => load('unified-intake-v35.js'))
       .then(() => load('mobile-quality-v41.js'))
       .catch(() => {});
