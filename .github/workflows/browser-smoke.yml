@@ -21,4 +21,4 @@ jobs:
       - name: Start app
         run: python3 -m http.server 4173 >/tmp/fitcoach-http.log 2>&1 &
       - name: Run smoke and mobile viewport gates
-        run: npx playwright test qa/browser-smoke.spec.js qa/mobile-layout.spec.js --reporter=line
+        run: npx playwright test qa/browser-smoke.spec.js qa/mobile-layout.spec.js qa/coach-ops-v47.spec.js --reporter=line

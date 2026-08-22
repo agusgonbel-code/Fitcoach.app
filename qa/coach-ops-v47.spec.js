@@ -1,0 +1,3 @@
+const {test,expect}=require('@playwright/test');
+const BASE='http://127.0.0.1:4173';
+test('coach operations runtime loads and ranks an urgent client',async({page})=>{await page.goto(`${BASE}/`);await page.waitForLoadState('domcontentloaded');await page.evaluate(()=>{localStorage.setItem('fitcoach_clients_v40',JSON.stringify([{id:'u1',name:'Urgente',status:'active',goal:'recomp',checkins:[]}]))});await page.reload();await page.waitForFunction(()=>Boolean(globalThis.FitCoachCoachOpsV47),null,{timeout:10000});const board=await page.evaluate(()=>globalThis.FitCoachCoachOpsV47.operationsBoard(JSON.parse(localStorage.getItem('fitcoach_clients_v40'))));expect(board[0].name).toBe('Urgente');expect(board[0].priority.score).toBeGreaterThanOrEqual(35);});
