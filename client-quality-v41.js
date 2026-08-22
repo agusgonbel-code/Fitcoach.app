@@ -17,39 +17,29 @@
   function filterAllergyUnsafeRecipes(profile,recipes=[],ingredients=[]){
     const terms=allergyTerms(profile);if(!terms.length)return recipes.slice();
     const map=Object.fromEntries((ingredients||[]).map(item=>[item.id,item]));
-    return (recipes||[]).filter(recipe=>{
-      // Con alergias activas, un ingrediente que no podemos identificar no se considera seguro.
-      if(hasUnknownIngredients(recipe,map))return false;
-      const text=recipeText(recipe,map);return !terms.some(term=>text.includes(term));
-    });
+    return (recipes||[]).filter(recipe=>{if(hasUnknownIngredients(recipe,map))return false;const text=recipeText(recipe,map);return !terms.some(term=>text.includes(term));});
   }
-  function validMacros(macros){
-    if(macros==null)return true;
-    if(typeof macros!=='object')return false;
-    return ['kcal','p','c','f'].every(key=>Number.isFinite(Number(macros[key]))&&Number(macros[key])>=0);
-  }
+  function validMacros(macros){if(macros==null)return true;if(typeof macros!=='object')return false;return ['kcal','p','c','f'].every(key=>Number.isFinite(Number(macros[key]))&&Number(macros[key])>=0);}
   function validateMenuStructure(result,profile={},requestedDays=30){
-    const expectedMeals=Math.min(6,Math.max(3,Math.round(Number(profile.meals)||4)));
-    const expectedDays=Math.min(30,Math.max(1,Math.round(Number(requestedDays)||30)));
-    const days=Array.isArray(result?.days)?result.days:[];
+    const expectedMeals=Math.min(6,Math.max(3,Math.round(Number(profile.meals)||4))),expectedDays=Math.min(30,Math.max(1,Math.round(Number(requestedDays)||30))),days=Array.isArray(result?.days)?result.days:[];
     if(days.length!==expectedDays)throw new Error(`El menú está incompleto: se solicitaron ${expectedDays} días y se generaron ${days.length}.`);
-    const bad=days.find(day=>!Array.isArray(day.meals)||day.meals.length!==expectedMeals||day.meals.some(meal=>!meal||!meal.recipeId));
-    if(bad)throw new Error(`No hay suficientes recetas para completar ${expectedMeals} comidas al día. Amplía la biblioteca o revisa las preferencias antes de generar el menú.`);
-    const corrupt=days.find(day=>day.meals.some(meal=>!validMacros(meal.macros)));
-    if(corrupt)throw new Error('El menú contiene datos nutricionales no válidos. Vuelve a generarlo antes de guardarlo o usarlo.');
+    const bad=days.find(day=>!Array.isArray(day.meals)||day.meals.length!==expectedMeals||day.meals.some(meal=>!meal||!meal.recipeId));if(bad)throw new Error(`No hay suficientes recetas para completar ${expectedMeals} comidas al día. Amplía la biblioteca o revisa las preferencias antes de generar el menú.`);
+    const corrupt=days.find(day=>day.meals.some(meal=>!validMacros(meal.macros)));if(corrupt)throw new Error('El menú contiene datos nutricionales no válidos. Vuelve a generarlo antes de guardarlo o usarlo.');
     return result;
+  }
+  function validateTrainingStructure(plan,profile={}){
+    const expected=Math.min(6,Math.max(2,Math.round(Number(profile.days)||4))),routine=plan&&typeof plan.routine==='object'?plan.routine:{},days=Object.entries(routine);
+    if(days.length!==expected)throw new Error(`El plan de entrenamiento está incompleto: esperabas ${expected} días y se generaron ${days.length}.`);
+    const sparse=days.find(([,items])=>!Array.isArray(items)||items.length<3||items.some(item=>!item?.name||!Number.isFinite(Number(item.sets))||Number(item.sets)<=0||!item.reps));
+    if(sparse)throw new Error('No hay suficientes ejercicios compatibles para crear una sesión completa y segura. Amplía el material disponible o revisa las limitaciones.');
+    return plan;
   }
   function install(engine){
     if(!engine||engine.__qualityV41)return engine;
     const originalPlan=engine.buildTrainingPlan?.bind(engine),originalMenu=engine.generateMenu?.bind(engine);
-    if(typeof originalPlan==='function')engine.buildTrainingPlan=(input,exercises)=>{const plan=originalPlan(input,exercises),start=new Date(),end=new Date(start);end.setDate(end.getDate()+(Number(plan.weeks)||8)*7-1);return{...plan,start:localDateKey(start),end:localDateKey(end)};};
-    if(typeof originalMenu==='function')engine.generateMenu=(input,targets,recipes=[],ingredients=[],days=30)=>{
-      const profile=engine.normalizeProfile?engine.normalizeProfile(input):input||{},safeRecipes=filterAllergyUnsafeRecipes(profile,recipes,ingredients);
-      let result=originalMenu(input,targets,safeRecipes,ingredients,days);
-      try{result=validateMenuStructure(result,profile,days);}catch(error){if(allergyTerms(profile).length&&/recetas/.test(String(error?.message||'')))throw new Error('No hay suficientes recetas compatibles con las alergias indicadas para completar todas las comidas. Revisa las restricciones o amplía la biblioteca.');throw error;}
-      return{...result,quality:{...(result.quality||{}),allergyScreening:'ingredient-aware-fail-closed-v44',menuCompleteness:'strict-v42',macroPayloadValidation:'strict-v43',localPlanDates:true}};
-    };
+    if(typeof originalPlan==='function')engine.buildTrainingPlan=(input,exercises)=>{const profile=engine.normalizeProfile?engine.normalizeProfile(input):input||{},plan=validateTrainingStructure(originalPlan(input,exercises),profile),start=new Date(),end=new Date(start);end.setDate(end.getDate()+(Number(plan.weeks)||8)*7-1);return{...plan,start:localDateKey(start),end:localDateKey(end),quality:{...(plan.quality||{}),trainingCompleteness:'strict-v45'}};};
+    if(typeof originalMenu==='function')engine.generateMenu=(input,targets,recipes=[],ingredients=[],days=30)=>{const profile=engine.normalizeProfile?engine.normalizeProfile(input):input||{},safeRecipes=filterAllergyUnsafeRecipes(profile,recipes,ingredients);let result=originalMenu(input,targets,safeRecipes,ingredients,days);try{result=validateMenuStructure(result,profile,days);}catch(error){if(allergyTerms(profile).length&&/recetas/.test(String(error?.message||'')))throw new Error('No hay suficientes recetas compatibles con las alergias indicadas para completar todas las comidas. Revisa las restricciones o amplía la biblioteca.');throw error;}return{...result,quality:{...(result.quality||{}),allergyScreening:'ingredient-aware-fail-closed-v44',menuCompleteness:'strict-v42',macroPayloadValidation:'strict-v43',localPlanDates:true}};};
     engine.__qualityV41=true;return engine;
   }
-  return{install,localDateKey,allergyTerms,filterAllergyUnsafeRecipes,hasUnknownIngredients,validMacros,validateMenuStructure};
+  return{install,localDateKey,allergyTerms,filterAllergyUnsafeRecipes,hasUnknownIngredients,validMacros,validateMenuStructure,validateTrainingStructure};
 });
