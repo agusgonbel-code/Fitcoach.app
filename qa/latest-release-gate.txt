@@ -1,59 +1,29 @@
 FITCOACH FAST RELEASE GATE
-SOURCE_COMMIT: a745e17db0d4f762a6b15c020ef9f395935a5135
-RESULT: FAIL
-EXIT_CODE: 1
-UTC: 2026-08-23T14:09:21Z
+SOURCE_COMMIT: 3c2df4461fb94382bc5f5034359c79cc550d7953
+RESULT: PASS
+EXIT_CODE: 0
+UTC: 2026-08-23T15:11:30Z
 COVERAGE: browser smoke + 320/375/390/430 mobile + coach ops + accessibility + v48 profile/macro safety
 --- TEST OUTPUT (tail) ---
 
 Running 18 tests using 2 workers
 
-[1/18] qa/accessibility.spec.js:5:1 › FitCoach has unique ids, labelled controls and usable touch targets
-[2/18] qa/browser-smoke.spec.js:3:1 › unified intake opens, generates and persists without page errors
+[1/18] qa/browser-smoke.spec.js:3:1 › unified intake opens, generates and persists without page errors
+[2/18] qa/accessibility.spec.js:5:1 › FitCoach has unique ids, labelled controls and usable touch targets
 [3/18] qa/browser-smoke.spec.js:4:1 › trainer can create a client, record check-in and keep recommendation auditable
-[4/18] qa/coach-ops-v47.spec.js:3:1 › coach operations runtime loads and ranks an urgent client
-[5/18] qa/coach-ops-v47.spec.js:5:1 › adaptive review respects real spacing between weekly weigh-ins
-[6/18] qa/mobile-layout.spec.js:5:39 › FitCoach fits 320px without horizontal overflow
-[7/18] qa/accessibility.spec.js:33:1 › FitCoach exposes keyboard focus indication and reduced-motion-safe CSS
+[4/18] qa/accessibility.spec.js:33:1 › FitCoach exposes keyboard focus indication and reduced-motion-safe CSS
+[5/18] qa/coach-ops-v47.spec.js:3:1 › coach operations runtime loads and ranks an urgent client
+[6/18] qa/coach-ops-v47.spec.js:5:1 › adaptive review respects real spacing between weekly weigh-ins
+[7/18] qa/mobile-layout.spec.js:5:39 › FitCoach fits 320px without horizontal overflow
 [8/18] qa/quality-v48.spec.js:7:1 › fresh FitCoach launch never injects personal identity or anthropometrics
-[9/18] qa/mobile-layout.spec.js:5:39 › FitCoach fits 375px without horizontal overflow
-[10/18] qa/mobile-layout.spec.js:5:39 › FitCoach fits 390px without horizontal overflow
-  1) qa/quality-v48.spec.js:7:1 › fresh FitCoach launch never injects personal identity or anthropometrics 
-
-    Error: expect(locator).toHaveValue(expected) failed
-
-    Locator:  locator('#age,#calcAge').first()
-    Expected: ""
-    Received: "46"
-    Timeout:  5000ms
-
-    Call log:
-      - Expect "toHaveValue" with timeout 5000ms
-      - waiting for locator('#age,#calcAge').first()
-        14 × locator resolved to <input id="age" min="14" max="100" type="number" aria-label="Edad"/>
-           - unexpected value "46"
-
-
-      12 |   await page.locator('[data-go="nutrition"]').click();
-      13 |   await expect(page.locator('#doCalc')).toBeVisible();
-    > 14 |   await expect(page.locator('#age,#calcAge').first()).toHaveValue('');
-         |                                                       ^
-      15 |   await expect(page.locator('#hei,#calcHeight').first()).toHaveValue('');
-      16 |   await expect(page.locator('#wei,#calcWeight').first()).toHaveValue('');
-      17 |   await expect(page.locator('#bf,#calcFat').first()).toHaveValue('');
-        at /home/runner/work/Fitcoach.app/Fitcoach.app/qa/quality-v48.spec.js:14:55
-
-    Error Context: test-results/qa-quality-v48-fresh-FitCo-353e4-identity-or-anthropometrics/error-context.md
-
-
-[11/18] qa/quality-v48.spec.js:20:1 › FitCoach rejects unsupported low calorie calculations before persisting targets
-[12/18] qa/mobile-layout.spec.js:5:39 › FitCoach fits 430px without horizontal overflow
-[13/18] qa/quality-v48.spec.js:38:1 › FitCoach accepts normal macro inputs and labels form controls for assistive tech
+[9/18] qa/quality-v48.spec.js:20:1 › FitCoach rejects unsupported low calorie calculations before persisting targets
+[10/18] qa/quality-v48.spec.js:38:1 › FitCoach accepts normal macro inputs and labels form controls for assistive tech
+[11/18] qa/mobile-layout.spec.js:5:39 › FitCoach fits 375px without horizontal overflow
+[12/18] qa/mobile-layout.spec.js:5:39 › FitCoach fits 390px without horizontal overflow
+[13/18] qa/mobile-layout.spec.js:5:39 › FitCoach fits 430px without horizontal overflow
 [14/18] qa/mobile-layout.spec.js:6:120 › FitCoach iPhone landscape stays usable without horizontal overflow
 [15/18] qa/mobile-layout.spec.js:6:120 › FitCoach iPad portrait stays usable without horizontal overflow
 [16/18] qa/mobile-layout.spec.js:6:120 › FitCoach iPad landscape stays usable without horizontal overflow
 [17/18] qa/mobile-layout.spec.js:7:1 › FitCoach mobile layer includes safe areas and reduced overflow policy
 [18/18] qa/mobile-layout.spec.js:8:1 › FitCoach professional mobile CSS forbids word-by-word collapse
-  1 failed
-    qa/quality-v48.spec.js:7:1 › fresh FitCoach launch never injects personal identity or anthropometrics 
-  17 passed (20.9s)
+  18 passed (23.9s)
