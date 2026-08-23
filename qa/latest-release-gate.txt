@@ -1,19 +1,19 @@
 FITCOACH FAST RELEASE GATE
-SOURCE_COMMIT: 1dd3767ba7a89ca5da7bdfe47c2884a84b01219e
+SOURCE_COMMIT: 291143202e2e0a6e3de85df7e473d1e9f508b1b4
 RESULT: FAIL
 EXIT_CODE: 1
-UTC: 2026-08-23T00:08:22Z
+UTC: 2026-08-23T00:11:25Z
 COVERAGE: browser smoke + 320/375/390/430 mobile + coach ops + accessibility + v48 profile/macro safety
 --- TEST OUTPUT (tail) ---
 
 Running 14 tests using 2 workers
 
-[1/14] qa/accessibility.spec.js:5:1 › FitCoach has unique ids, labelled controls and usable touch targets
-[2/14] qa/browser-smoke.spec.js:3:1 › unified intake opens, generates and persists without page errors
+[1/14] qa/browser-smoke.spec.js:3:1 › unified intake opens, generates and persists without page errors
+[2/14] qa/accessibility.spec.js:5:1 › FitCoach has unique ids, labelled controls and usable touch targets
 [3/14] qa/browser-smoke.spec.js:4:1 › trainer can create a client, record check-in and keep recommendation auditable
   1) qa/accessibility.spec.js:5:1 › FitCoach has unique ids, labelled controls and usable touch targets 
 
-    Error: unnamed controls after nav 2
+    Error: unnamed controls after nav 4
 
     expect(received).toEqual(expected) // deep equality
 
@@ -22,7 +22,7 @@ Running 14 tests using 2 workers
 
     - Array []
     + Array [
-    +   "<select id=\"trainingDay\"><option>Lunes</option><option>Martes</option><option>Miércoles</option><option>Jueves</option></select>",
+    +   "<input id=\"md\" type=\"date\">",
     + ]
 
       26 |       return !(el.getAttribute('aria-label')||el.getAttribute('title')||el.textContent||'').trim();
@@ -40,63 +40,14 @@ Running 14 tests using 2 workers
 [4/14] qa/accessibility.spec.js:33:1 › FitCoach exposes keyboard focus indication and reduced-motion-safe CSS
 [5/14] qa/coach-ops-v47.spec.js:3:1 › coach operations runtime loads and ranks an urgent client
 [6/14] qa/mobile-layout.spec.js:5:39 › FitCoach fits 320px without horizontal overflow
-[7/14] qa/quality-v48.spec.js:5:1 › fresh FitCoach launch never injects a personal name
-[8/14] qa/quality-v48.spec.js:12:1 › FitCoach rejects unsupported low calorie calculations before persisting targets
-[9/14] qa/mobile-layout.spec.js:5:39 › FitCoach fits 375px without horizontal overflow
-[10/14] qa/mobile-layout.spec.js:5:39 › FitCoach fits 390px without horizontal overflow
-[11/14] qa/mobile-layout.spec.js:5:39 › FitCoach fits 430px without horizontal overflow
-[12/14] qa/mobile-layout.spec.js:6:1 › FitCoach mobile layer includes safe areas and reduced overflow policy
-[13/14] qa/mobile-layout.spec.js:7:1 › FitCoach professional mobile CSS forbids word-by-word collapse
-  2) qa/quality-v48.spec.js:12:1 › FitCoach rejects unsupported low calorie calculations before persisting targets 
-
-    Test timeout of 30000ms exceeded.
-
-    Error: locator.selectOption: Test timeout of 30000ms exceeded.
-    Call log:
-      - waiting for locator('#calcSex')
-
-
-      15 |   await page.waitForFunction(()=>Boolean(window.FitCoachQualityV48));
-      16 |   await page.locator('[data-go="nutrition"]').click();
-    > 17 |   await page.locator('#calcSex').selectOption('f');
-         |                                  ^
-      18 |   await page.locator('#calcAge').fill('100');
-      19 |   await page.locator('#calcHeight').fill('120');
-      20 |   await page.locator('#calcWeight').fill('35');
-        at /home/runner/work/Fitcoach.app/Fitcoach.app/qa/quality-v48.spec.js:17:34
-
-    Error Context: test-results/qa-quality-v48-FitCoach-re-3dd43-s-before-persisting-targets/error-context.md
-
-
-[14/14] qa/quality-v48.spec.js:29:1 › FitCoach accepts normal macro inputs and labels form controls for assistive tech
-  3) qa/quality-v48.spec.js:29:1 › FitCoach accepts normal macro inputs and labels form controls for assistive tech 
-
-    Error: expect(locator).toHaveAttribute(expected) failed
-
-    Locator: locator('#calcAge')
-    Expected: "Edad"
-    Timeout: 5000ms
-    Error: element(s) not found
-
-    Call log:
-      - Expect "toHaveAttribute" with timeout 5000ms
-      - waiting for locator('#calcAge')
-
-
-      32 |   await page.waitForFunction(()=>Boolean(window.FitCoachQualityV48));
-      33 |   await page.locator('[data-go="nutrition"]').click();
-    > 34 |   await expect(page.locator('#calcAge')).toHaveAttribute('aria-label','Edad');
-         |                                          ^
-      35 |   await expect(page.locator('#calcWeight')).toHaveAttribute('aria-label','Peso');
-      36 |   await page.locator('#calculateMacros').click();
-      37 |   await expect(page.locator('#macroResult')).toContainText('kcal');
-        at /home/runner/work/Fitcoach.app/Fitcoach.app/qa/quality-v48.spec.js:34:42
-
-    Error Context: test-results/qa-quality-v48-FitCoach-ac-a263a-controls-for-assistive-tech/error-context.md
-
-
-  3 failed
+[7/14] qa/quality-v48.spec.js:6:1 › fresh FitCoach launch never injects a personal name
+[8/14] qa/quality-v48.spec.js:13:1 › FitCoach rejects unsupported low calorie calculations before persisting targets
+[9/14] qa/quality-v48.spec.js:31:1 › FitCoach accepts normal macro inputs and labels form controls for assistive tech
+[10/14] qa/mobile-layout.spec.js:5:39 › FitCoach fits 375px without horizontal overflow
+[11/14] qa/mobile-layout.spec.js:5:39 › FitCoach fits 390px without horizontal overflow
+[12/14] qa/mobile-layout.spec.js:5:39 › FitCoach fits 430px without horizontal overflow
+[13/14] qa/mobile-layout.spec.js:6:1 › FitCoach mobile layer includes safe areas and reduced overflow policy
+[14/14] qa/mobile-layout.spec.js:7:1 › FitCoach professional mobile CSS forbids word-by-word collapse
+  1 failed
     qa/accessibility.spec.js:5:1 › FitCoach has unique ids, labelled controls and usable touch targets 
-    qa/quality-v48.spec.js:12:1 › FitCoach rejects unsupported low calorie calculations before persisting targets 
-    qa/quality-v48.spec.js:29:1 › FitCoach accepts normal macro inputs and labels form controls for assistive tech 
-  11 passed (42.5s)
+  13 passed (15.2s)
