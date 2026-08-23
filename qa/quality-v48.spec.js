@@ -2,16 +2,19 @@ const { test, expect } = require('@playwright/test');
 const BASE='http://127.0.0.1:4173';
 async function seedProfile(page){await page.addInitScript(()=>localStorage.setItem('fitcoach_client_profile_v35',JSON.stringify({name:'QA',sex:'m',age:40,height:178,weight:80,bodyFat:20,activity:1.45,goal:'recomp',experience:'intermediate',days:4,minutes:50,weeks:8,equipment:['Máquina','Mancuernas','Barra','Polea'],meals:4,mealPattern:'balanced',diet:'mediterranean',budget:'medium',cookMinutes:30})))}
 async function openNutrition(page){await page.locator('[data-go="nutrition"]').click();await expect(page.locator('#doCalc')).toBeVisible()}
+const activeField=(page,modern,legacy)=>page.locator(`#${modern},#${legacy}`).filter({visible:true}).first();
 
 test('fresh FitCoach launch never injects personal identity or anthropometrics',async({page})=>{
   await page.goto(BASE+'/',{waitUntil:'domcontentloaded'});
   const profile=await page.evaluate(()=>JSON.parse(localStorage.getItem('profile')||'null'));
   expect(profile).toEqual({name:''});
   await expect(page.locator('#greeting')).not.toContainText('Agustín');
-  await expect(page.locator('#calcAge')).toHaveValue('');
-  await expect(page.locator('#calcHeight')).toHaveValue('');
-  await expect(page.locator('#calcWeight')).toHaveValue('');
-  await expect(page.locator('#calcFat')).toHaveValue('');
+  await page.locator('[data-go="nutrition"]').click();
+  await expect(page.locator('#doCalc')).toBeVisible();
+  await expect(page.locator('#age,#calcAge').first()).toHaveValue('');
+  await expect(page.locator('#hei,#calcHeight').first()).toHaveValue('');
+  await expect(page.locator('#wei,#calcWeight').first()).toHaveValue('');
+  await expect(page.locator('#bf,#calcFat').first()).toHaveValue('');
 });
 
 test('FitCoach rejects unsupported low calorie calculations before persisting targets',async({page})=>{
