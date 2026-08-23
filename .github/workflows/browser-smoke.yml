@@ -13,7 +13,7 @@ jobs:
   smoke:
     if: ${{ github.event_name != 'push' || !contains(github.event.head_commit.message, '[skip ci]') }}
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -25,12 +25,12 @@ jobs:
           npx playwright install --with-deps chromium
       - name: Start app
         run: python3 -m http.server 4173 >/tmp/fitcoach-http.log 2>&1 &
-      - name: Run smoke, mobile, coach, accessibility and v48 quality gates
+      - name: Run smoke, mobile, coach, accessibility, v48 and user-behavior gates
         id: gate
         shell: bash
         run: |
           set +e
-          npx playwright test qa/browser-smoke.spec.js qa/mobile-layout.spec.js qa/coach-ops-v47.spec.js qa/accessibility.spec.js qa/quality-v48.spec.js --reporter=line > /tmp/fitcoach-gate.log 2>&1
+          npx playwright test qa/browser-smoke.spec.js qa/mobile-layout.spec.js qa/coach-ops-v47.spec.js qa/accessibility.spec.js qa/quality-v48.spec.js qa/user-100-sim.spec.js --reporter=line > /tmp/fitcoach-gate.log 2>&1
           code=$?
           set -e
           mkdir -p qa
@@ -40,9 +40,9 @@ jobs:
             if [ "$code" -eq 0 ]; then echo 'RESULT: PASS'; else echo 'RESULT: FAIL'; fi
             echo "EXIT_CODE: $code"
             echo "UTC: $(date -u +'%Y-%m-%dT%H:%M:%SZ')"
-            echo 'COVERAGE: browser smoke + 320/375/390/430 mobile + coach ops + accessibility + v48 profile/macro safety'
+            echo 'COVERAGE: browser smoke + 320/375/390/430 mobile + coach ops + accessibility + v48 profile/macro safety + 26 user-behavior scenarios'
             echo '--- TEST OUTPUT (tail) ---'
-            tail -n 300 /tmp/fitcoach-gate.log
+            tail -n 420 /tmp/fitcoach-gate.log
           } > qa/latest-release-gate.txt
           echo "code=$code" >> "$GITHUB_OUTPUT"
       - name: Persist gate evidence
