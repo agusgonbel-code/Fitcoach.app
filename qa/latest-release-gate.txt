@@ -1,28 +1,45 @@
 FITCOACH FAST RELEASE GATE
-SOURCE_COMMIT: d7e834d77bbb502513207ae722c68f68de319b78
-RESULT: PASS
-EXIT_CODE: 0
-UTC: 2026-08-23T06:10:28Z
+SOURCE_COMMIT: a9ca7065be071556a008f0af6d20f4e0acca6e6d
+RESULT: FAIL
+EXIT_CODE: 1
+UTC: 2026-08-23T12:11:30Z
 COVERAGE: browser smoke + 320/375/390/430 mobile + coach ops + accessibility + v48 profile/macro safety
 --- TEST OUTPUT (tail) ---
 
-Running 17 tests using 2 workers
+Running 18 tests using 2 workers
 
-[1/17] qa/accessibility.spec.js:5:1 › FitCoach has unique ids, labelled controls and usable touch targets
-[2/17] qa/browser-smoke.spec.js:3:1 › unified intake opens, generates and persists without page errors
-[3/17] qa/browser-smoke.spec.js:4:1 › trainer can create a client, record check-in and keep recommendation auditable
-[4/17] qa/accessibility.spec.js:33:1 › FitCoach exposes keyboard focus indication and reduced-motion-safe CSS
-[5/17] qa/coach-ops-v47.spec.js:3:1 › coach operations runtime loads and ranks an urgent client
-[6/17] qa/mobile-layout.spec.js:5:39 › FitCoach fits 320px without horizontal overflow
-[7/17] qa/quality-v48.spec.js:6:1 › fresh FitCoach launch never injects a personal name
-[8/17] qa/quality-v48.spec.js:13:1 › FitCoach rejects unsupported low calorie calculations before persisting targets
-[9/17] qa/quality-v48.spec.js:31:1 › FitCoach accepts normal macro inputs and labels form controls for assistive tech
-[10/17] qa/mobile-layout.spec.js:5:39 › FitCoach fits 375px without horizontal overflow
-[11/17] qa/mobile-layout.spec.js:5:39 › FitCoach fits 390px without horizontal overflow
-[12/17] qa/mobile-layout.spec.js:5:39 › FitCoach fits 430px without horizontal overflow
-[13/17] qa/mobile-layout.spec.js:6:120 › FitCoach iPhone landscape stays usable without horizontal overflow
-[14/17] qa/mobile-layout.spec.js:6:120 › FitCoach iPad portrait stays usable without horizontal overflow
-[15/17] qa/mobile-layout.spec.js:6:120 › FitCoach iPad landscape stays usable without horizontal overflow
-[16/17] qa/mobile-layout.spec.js:7:1 › FitCoach mobile layer includes safe areas and reduced overflow policy
-[17/17] qa/mobile-layout.spec.js:8:1 › FitCoach professional mobile CSS forbids word-by-word collapse
-  17 passed (21.2s)
+[1/18] qa/accessibility.spec.js:5:1 › FitCoach has unique ids, labelled controls and usable touch targets
+[2/18] qa/browser-smoke.spec.js:3:1 › unified intake opens, generates and persists without page errors
+[3/18] qa/browser-smoke.spec.js:4:1 › trainer can create a client, record check-in and keep recommendation auditable
+[4/18] qa/accessibility.spec.js:33:1 › FitCoach exposes keyboard focus indication and reduced-motion-safe CSS
+[5/18] qa/coach-ops-v47.spec.js:3:1 › coach operations runtime loads and ranks an urgent client
+[6/18] qa/coach-ops-v47.spec.js:5:1 › adaptive review respects real spacing between weekly weigh-ins
+[7/18] qa/mobile-layout.spec.js:5:39 › FitCoach fits 320px without horizontal overflow
+[8/18] qa/mobile-layout.spec.js:5:39 › FitCoach fits 375px without horizontal overflow
+[9/18] qa/mobile-layout.spec.js:5:39 › FitCoach fits 390px without horizontal overflow
+[10/18] qa/mobile-layout.spec.js:5:39 › FitCoach fits 430px without horizontal overflow
+[11/18] qa/mobile-layout.spec.js:6:120 › FitCoach iPhone landscape stays usable without horizontal overflow
+  1) qa/coach-ops-v47.spec.js:5:1 › adaptive review respects real spacing between weekly weigh-ins ─
+
+    TimeoutError: page.waitForFunction: Timeout 10000ms exceeded.
+
+      3 | test('coach operations runtime loads and ranks an urgent client',async({page})=>{await page.goto(`${BASE}/`);await page.waitForLoadState('domcontentloaded');await page.evaluate(()=>{localStorage.setItem('fitcoach_clients_v40',JSON.stringify([{id:'u1',name:'Urgente',status:'active',goal:'recomp',checkins:[]}]))});await page.reload();await page.waitForFunction(()=>Boolean(globalThis.FitCoachCoachOpsV47),null,{timeout:10000});const board=await page.evaluate(()=>globalThis.FitCoachCoachOpsV47.operationsBoard(JSON.parse(localStorage.getItem('fitcoach_clients_v40'))));expect(board[0].name).toBe('Urgente');expect(board[0].priority.score).toBeGreaterThanOrEqual(35);});
+      4 |
+    > 5 | test('adaptive review respects real spacing between weekly weigh-ins',async({page})=>{await page.goto(`${BASE}/`);await page.waitForLoadState('domcontentloaded');await page.waitForFunction(()=>Boolean(globalThis.FitCoachWorkspace&&globalThis.FitCoachAdaptiveReview),null,{timeout:10000});const result=await page.evaluate(()=>{const client={id:'dated',name:'Cadencia real',goal:'gain',profile:{goal:'gain'},targets:{kcal:2400,protein:160,carbs:300,fat:62},checkins:[{date:'2026-07-01',weight:80,adherence:.95,recovery:4,performance:.2,sleep:4,hunger:3},{date:'2026-07-08',weight:80.1,adherence:.95,recovery:4,performance:.2,sleep:4,hunger:3},{date:'2026-07-15',weight:80.2,adherence:.95,recovery:4,performance:.2,sleep:4,hunger:3},{date:'2026-07-22',weight:80.3,adherence:.95,recovery:4,performance:.2,sleep:4,hunger:3}]};return globalThis.FitCoachWorkspace.recommendation(client);});expect(result.weightTrend.enough).toBe(true);expect(result.weightTrend.spanDays).toBeGreaterThan(10);expect(result.weightTrend.ratePct).toBeGreaterThan(.1);expect(result.weightTrend.ratePct).toBeLessThan(.2);expect(result.calorieDelta).toBe(0);});
+        |                                                                                                                                                                              ^
+      6 |
+        at /home/runner/work/Fitcoach.app/Fitcoach.app/qa/coach-ops-v47.spec.js:5:174
+
+    Error Context: test-results/qa-coach-ops-v47-adaptive--e32a2-ng-between-weekly-weigh-ins/error-context.md
+
+
+[12/18] qa/quality-v48.spec.js:6:1 › fresh FitCoach launch never injects a personal name
+[13/18] qa/quality-v48.spec.js:13:1 › FitCoach rejects unsupported low calorie calculations before persisting targets
+[14/18] qa/mobile-layout.spec.js:6:120 › FitCoach iPad portrait stays usable without horizontal overflow
+[15/18] qa/quality-v48.spec.js:31:1 › FitCoach accepts normal macro inputs and labels form controls for assistive tech
+[16/18] qa/mobile-layout.spec.js:6:120 › FitCoach iPad landscape stays usable without horizontal overflow
+[17/18] qa/mobile-layout.spec.js:7:1 › FitCoach mobile layer includes safe areas and reduced overflow policy
+[18/18] qa/mobile-layout.spec.js:8:1 › FitCoach professional mobile CSS forbids word-by-word collapse
+  1 failed
+    qa/coach-ops-v47.spec.js:5:1 › adaptive review respects real spacing between weekly weigh-ins ──
+  17 passed (20.9s)
