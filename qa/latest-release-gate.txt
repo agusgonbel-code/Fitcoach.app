@@ -1,42 +1,16 @@
 FITCOACH FAST RELEASE GATE
-SOURCE_COMMIT: 4e26aac1043bd5f50a1b64135d7d7236d13c44e9
-RESULT: FAIL
-EXIT_CODE: 1
-UTC: 2026-08-23T00:12:58Z
+SOURCE_COMMIT: c092d7e0e45d45a97a44fc3f75e90527c9efb468
+RESULT: PASS
+EXIT_CODE: 0
+UTC: 2026-08-23T00:44:49Z
 COVERAGE: browser smoke + 320/375/390/430 mobile + coach ops + accessibility + v48 profile/macro safety
 --- TEST OUTPUT (tail) ---
 
 Running 14 tests using 2 workers
 
-[1/14] qa/browser-smoke.spec.js:3:1 › unified intake opens, generates and persists without page errors
-[2/14] qa/accessibility.spec.js:5:1 › FitCoach has unique ids, labelled controls and usable touch targets
+[1/14] qa/accessibility.spec.js:5:1 › FitCoach has unique ids, labelled controls and usable touch targets
+[2/14] qa/browser-smoke.spec.js:3:1 › unified intake opens, generates and persists without page errors
 [3/14] qa/browser-smoke.spec.js:4:1 › trainer can create a client, record check-in and keep recommendation auditable
-  1) qa/accessibility.spec.js:5:1 › FitCoach has unique ids, labelled controls and usable touch targets 
-
-    Error: unnamed controls after nav 6
-
-    expect(received).toEqual(expected) // deep equality
-
-    - Expected  - 1
-    + Received  + 3
-
-    - Array []
-    + Array [
-    +   "<select id=\"cwGoal\"><option value=\"recomp\">Recomposición</option><option value=\"loss\">Pérdida de grasa</option><option value=\"gain\">Ganancia muscular</option><option value=\"maintai",
-    + ]
-
-      26 |       return !(el.getAttribute('aria-label')||el.getAttribute('title')||el.textContent||'').trim();
-      27 |     }).map(el=>el.outerHTML.slice(0,180)));
-    > 28 |     expect(unnamed,`unnamed controls after nav ${i}`).toEqual([]);
-         |                                                       ^
-      29 |   }
-      30 |   await context.close();
-      31 | });
-        at /home/runner/work/Fitcoach.app/Fitcoach.app/qa/accessibility.spec.js:28:55
-
-    Error Context: test-results/qa-accessibility-FitCoach--d8f6d-ls-and-usable-touch-targets/error-context.md
-
-
 [4/14] qa/accessibility.spec.js:33:1 › FitCoach exposes keyboard focus indication and reduced-motion-safe CSS
 [5/14] qa/coach-ops-v47.spec.js:3:1 › coach operations runtime loads and ranks an urgent client
 [6/14] qa/mobile-layout.spec.js:5:39 › FitCoach fits 320px without horizontal overflow
@@ -48,6 +22,4 @@ Running 14 tests using 2 workers
 [12/14] qa/mobile-layout.spec.js:5:39 › FitCoach fits 430px without horizontal overflow
 [13/14] qa/mobile-layout.spec.js:6:1 › FitCoach mobile layer includes safe areas and reduced overflow policy
 [14/14] qa/mobile-layout.spec.js:7:1 › FitCoach professional mobile CSS forbids word-by-word collapse
-  1 failed
-    qa/accessibility.spec.js:5:1 › FitCoach has unique ids, labelled controls and usable touch targets 
-  13 passed (16.1s)
+  14 passed (13.1s)
