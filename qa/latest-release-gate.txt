@@ -1,8 +1,8 @@
 FITCOACH FAST RELEASE GATE
-SOURCE_COMMIT: 3c2df4461fb94382bc5f5034359c79cc550d7953
+SOURCE_COMMIT: f7cda9777d13b942856e6cca2d02d968eff8e7e6
 RESULT: PASS
 EXIT_CODE: 0
-UTC: 2026-08-23T15:11:30Z
+UTC: 2026-08-23T15:17:17Z
 COVERAGE: browser smoke + 320/375/390/430 mobile + coach ops + accessibility + v48 profile/macro safety
 --- TEST OUTPUT (tail) ---
 
@@ -26,4 +26,4 @@ Running 18 tests using 2 workers
 [16/18] qa/mobile-layout.spec.js:6:120 › FitCoach iPad landscape stays usable without horizontal overflow
 [17/18] qa/mobile-layout.spec.js:7:1 › FitCoach mobile layer includes safe areas and reduced overflow policy
 [18/18] qa/mobile-layout.spec.js:8:1 › FitCoach professional mobile CSS forbids word-by-word collapse
-  18 passed (23.9s)
+  18 passed (22.1s)
