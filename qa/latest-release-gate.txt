@@ -1,29 +1,227 @@
 FITCOACH FAST RELEASE GATE
-SOURCE_COMMIT: 54bce1db7debf774329be3979b38080286e28f71
-RESULT: PASS
-EXIT_CODE: 0
-UTC: 2026-08-23T18:46:13Z
-COVERAGE: browser smoke + 320/375/390/430 mobile + coach ops + accessibility + v48 profile/macro safety
+SOURCE_COMMIT: a2a3f8b3c54a6c1d0060745912d5a29a89192e4d
+RESULT: FAIL
+EXIT_CODE: 1
+UTC: 2026-08-23T18:50:23Z
+COVERAGE: browser smoke + 320/375/390/430 mobile + coach ops + accessibility + v48 profile/macro safety + 26 user-behavior scenarios
 --- TEST OUTPUT (tail) ---
 
-Running 18 tests using 2 workers
+Running 44 tests using 2 workers
 
-[1/18] qa/browser-smoke.spec.js:3:1 › unified intake opens, generates and persists without page errors
-[2/18] qa/accessibility.spec.js:5:1 › FitCoach has unique ids, labelled controls and usable touch targets
-[3/18] qa/browser-smoke.spec.js:4:1 › trainer can create a client, record check-in and keep recommendation auditable
-[4/18] qa/accessibility.spec.js:33:1 › FitCoach exposes keyboard focus indication and reduced-motion-safe CSS
-[5/18] qa/coach-ops-v47.spec.js:3:1 › coach operations runtime loads and ranks an urgent client
-[6/18] qa/coach-ops-v47.spec.js:5:1 › adaptive review respects real spacing between weekly weigh-ins
-[7/18] qa/mobile-layout.spec.js:5:39 › FitCoach fits 320px without horizontal overflow
-[8/18] qa/quality-v48.spec.js:7:1 › fresh FitCoach launch never injects personal identity or anthropometrics
-[9/18] qa/quality-v48.spec.js:20:1 › FitCoach rejects unsupported low calorie calculations before persisting targets
-[10/18] qa/quality-v48.spec.js:38:1 › FitCoach accepts normal macro inputs and labels form controls for assistive tech
-[11/18] qa/mobile-layout.spec.js:5:39 › FitCoach fits 375px without horizontal overflow
-[12/18] qa/mobile-layout.spec.js:5:39 › FitCoach fits 390px without horizontal overflow
-[13/18] qa/mobile-layout.spec.js:5:39 › FitCoach fits 430px without horizontal overflow
-[14/18] qa/mobile-layout.spec.js:6:120 › FitCoach iPhone landscape stays usable without horizontal overflow
-[15/18] qa/mobile-layout.spec.js:6:120 › FitCoach iPad portrait stays usable without horizontal overflow
-[16/18] qa/mobile-layout.spec.js:6:120 › FitCoach iPad landscape stays usable without horizontal overflow
-[17/18] qa/mobile-layout.spec.js:7:1 › FitCoach mobile layer includes safe areas and reduced overflow policy
-[18/18] qa/mobile-layout.spec.js:8:1 › FitCoach professional mobile CSS forbids word-by-word collapse
-  18 passed (23.1s)
+[1/44] qa/accessibility.spec.js:5:1 › FitCoach has unique ids, labelled controls and usable touch targets
+[2/44] qa/browser-smoke.spec.js:3:1 › unified intake opens, generates and persists without page errors
+[3/44] qa/browser-smoke.spec.js:4:1 › trainer can create a client, record check-in and keep recommendation auditable
+[4/44] qa/accessibility.spec.js:33:1 › FitCoach exposes keyboard focus indication and reduced-motion-safe CSS
+[5/44] qa/coach-ops-v47.spec.js:3:1 › coach operations runtime loads and ranks an urgent client
+[6/44] qa/coach-ops-v47.spec.js:5:1 › adaptive review respects real spacing between weekly weigh-ins
+[7/44] qa/mobile-layout.spec.js:5:39 › FitCoach fits 320px without horizontal overflow
+[8/44] qa/quality-v48.spec.js:7:1 › fresh FitCoach launch never injects personal identity or anthropometrics
+[9/44] qa/quality-v48.spec.js:20:1 › FitCoach rejects unsupported low calorie calculations before persisting targets
+[10/44] qa/quality-v48.spec.js:38:1 › FitCoach accepts normal macro inputs and labels form controls for assistive tech
+[11/44] qa/user-100-sim.spec.js:5:161 › usuario navega a Inicio sin romper estado
+[12/44] qa/user-100-sim.spec.js:5:161 › usuario navega a Plan sin romper estado
+[13/44] qa/user-100-sim.spec.js:5:161 › usuario navega a Entrenar sin romper estado
+[14/44] qa/user-100-sim.spec.js:5:161 › usuario navega a Nutrición sin romper estado
+[15/44] qa/user-100-sim.spec.js:5:161 › usuario navega a Progreso sin romper estado
+[16/44] qa/user-100-sim.spec.js:5:161 › usuario navega a Ajustes sin romper estado
+[17/44] qa/user-100-sim.spec.js:6:38 › usuario usa FitCoach a 320px sin scroll horizontal
+[18/44] qa/mobile-layout.spec.js:5:39 › FitCoach fits 375px without horizontal overflow
+[19/44] qa/user-100-sim.spec.js:6:38 › usuario usa FitCoach a 375px sin scroll horizontal
+[20/44] qa/user-100-sim.spec.js:6:38 › usuario usa FitCoach a 390px sin scroll horizontal
+[21/44] qa/user-100-sim.spec.js:6:38 › usuario usa FitCoach a 430px sin scroll horizontal
+[22/44] qa/user-100-sim.spec.js:7:1 › usuario cambia objetivo del plan
+[23/44] qa/user-100-sim.spec.js:8:1 › usuario cambia días del plan
+[24/44] qa/user-100-sim.spec.js:9:1 › usuario cambia duración del plan
+[25/44] qa/user-100-sim.spec.js:10:1 › usuario introduce fecha de inicio
+[26/44] qa/mobile-layout.spec.js:5:39 › FitCoach fits 390px without horizontal overflow
+[27/44] qa/user-100-sim.spec.js:11:73 › usuario abre pestaña nutrición calculator
+[28/44] qa/mobile-layout.spec.js:5:39 › FitCoach fits 430px without horizontal overflow
+[29/44] qa/mobile-layout.spec.js:6:120 › FitCoach iPhone landscape stays usable without horizontal overflow
+[30/44] qa/mobile-layout.spec.js:6:120 › FitCoach iPad portrait stays usable without horizontal overflow
+[31/44] qa/mobile-layout.spec.js:6:120 › FitCoach iPad landscape stays usable without horizontal overflow
+[32/44] qa/mobile-layout.spec.js:7:1 › FitCoach mobile layer includes safe areas and reduced overflow policy
+[33/44] qa/mobile-layout.spec.js:8:1 › FitCoach professional mobile CSS forbids word-by-word collapse
+  1) qa/user-100-sim.spec.js:11:73 › usuario abre pestaña nutrición calculator ─────────────────────
+
+    Test timeout of 30000ms exceeded.
+
+    Error: locator.click: Test timeout of 30000ms exceeded.
+    Call log:
+      - waiting for locator('[data-tab="calculator"]')
+
+
+       9 | test('usuario cambia duración del plan',async({page})=>{await ready(page);await page.locator('nav [data-go="plan"]').click();await page.locator('#minutes').selectOption('45');await expect(page.locator('#minutes')).toHaveValue('45')});
+      10 | test('usuario introduce fecha de inicio',async({page})=>{await ready(page);await page.locator('nav [data-go="plan"]').click();await page.locator('#start').fill('2026-09-01');await expect(page.locator('#start')).toHaveValue('2026-09-01')});
+    > 11 | for(const tab of ['calculator','today','recipes','ingredients','menus'])test(`usuario abre pestaña nutrición ${tab}`,async({page})=>{await ready(page);await page.locator('nav [data-go="nutrition"]').click();const b=page.locator(`[data-tab="${tab}"]`);await b.click();await expect(page.locator(`#${tab}`)).toBeVisible()});
+         |                                                                                                                                                                                                                                                                    ^
+      12 | test('usuario guarda un nombre de perfil',async({page})=>{await ready(page);await page.locator('nav [data-go="settings"]').click();await page.locator('#profileName').fill('Usuario QA');page.once('dialog',d=>d.accept());await page.locator('#saveProfile').click();await expect(page.locator('#profileName')).toHaveValue('Usuario QA')});
+      13 | test('usuario ve controles táctiles suficientemente grandes',async({page})=>{await ready(page);const small=await page.locator('nav button:visible').evaluateAll(ns=>ns.filter(n=>{const r=n.getBoundingClientRect();return r.height<44}).length);expect(small).toBe(0)});
+      14 | test('usuario puede usar teclado para enfocar navegación',async({page})=>{await ready(page);await page.keyboard.press('Tab');expect(await page.evaluate(()=>document.activeElement!==document.body)).toBeTruthy()});
+        at /home/runner/work/Fitcoach.app/Fitcoach.app/qa/user-100-sim.spec.js:11:260
+
+    Error Context: test-results/qa-user-100-sim-usuario-abre-pestaña-nutrición-calculator/error-context.md
+
+
+[34/44] qa/user-100-sim.spec.js:11:73 › usuario abre pestaña nutrición today
+  2) qa/user-100-sim.spec.js:11:73 › usuario abre pestaña nutrición today ──────────────────────────
+
+    Test timeout of 30000ms exceeded.
+
+    Error: locator.click: Test timeout of 30000ms exceeded.
+    Call log:
+      - waiting for locator('[data-tab="today"]')
+
+
+       9 | test('usuario cambia duración del plan',async({page})=>{await ready(page);await page.locator('nav [data-go="plan"]').click();await page.locator('#minutes').selectOption('45');await expect(page.locator('#minutes')).toHaveValue('45')});
+      10 | test('usuario introduce fecha de inicio',async({page})=>{await ready(page);await page.locator('nav [data-go="plan"]').click();await page.locator('#start').fill('2026-09-01');await expect(page.locator('#start')).toHaveValue('2026-09-01')});
+    > 11 | for(const tab of ['calculator','today','recipes','ingredients','menus'])test(`usuario abre pestaña nutrición ${tab}`,async({page})=>{await ready(page);await page.locator('nav [data-go="nutrition"]').click();const b=page.locator(`[data-tab="${tab}"]`);await b.click();await expect(page.locator(`#${tab}`)).toBeVisible()});
+         |                                                                                                                                                                                                                                                                    ^
+      12 | test('usuario guarda un nombre de perfil',async({page})=>{await ready(page);await page.locator('nav [data-go="settings"]').click();await page.locator('#profileName').fill('Usuario QA');page.once('dialog',d=>d.accept());await page.locator('#saveProfile').click();await expect(page.locator('#profileName')).toHaveValue('Usuario QA')});
+      13 | test('usuario ve controles táctiles suficientemente grandes',async({page})=>{await ready(page);const small=await page.locator('nav button:visible').evaluateAll(ns=>ns.filter(n=>{const r=n.getBoundingClientRect();return r.height<44}).length);expect(small).toBe(0)});
+      14 | test('usuario puede usar teclado para enfocar navegación',async({page})=>{await ready(page);await page.keyboard.press('Tab');expect(await page.evaluate(()=>document.activeElement!==document.body)).toBeTruthy()});
+        at /home/runner/work/Fitcoach.app/Fitcoach.app/qa/user-100-sim.spec.js:11:260
+
+    Error Context: test-results/qa-user-100-sim-usuario-abre-pestaña-nutrición-today/error-context.md
+
+
+[35/44] qa/user-100-sim.spec.js:11:73 › usuario abre pestaña nutrición recipes
+  3) qa/user-100-sim.spec.js:11:73 › usuario abre pestaña nutrición recipes ────────────────────────
+
+    Test timeout of 30000ms exceeded.
+
+    Error: locator.click: Test timeout of 30000ms exceeded.
+    Call log:
+      - waiting for locator('[data-tab="recipes"]')
+
+
+       9 | test('usuario cambia duración del plan',async({page})=>{await ready(page);await page.locator('nav [data-go="plan"]').click();await page.locator('#minutes').selectOption('45');await expect(page.locator('#minutes')).toHaveValue('45')});
+      10 | test('usuario introduce fecha de inicio',async({page})=>{await ready(page);await page.locator('nav [data-go="plan"]').click();await page.locator('#start').fill('2026-09-01');await expect(page.locator('#start')).toHaveValue('2026-09-01')});
+    > 11 | for(const tab of ['calculator','today','recipes','ingredients','menus'])test(`usuario abre pestaña nutrición ${tab}`,async({page})=>{await ready(page);await page.locator('nav [data-go="nutrition"]').click();const b=page.locator(`[data-tab="${tab}"]`);await b.click();await expect(page.locator(`#${tab}`)).toBeVisible()});
+         |                                                                                                                                                                                                                                                                    ^
+      12 | test('usuario guarda un nombre de perfil',async({page})=>{await ready(page);await page.locator('nav [data-go="settings"]').click();await page.locator('#profileName').fill('Usuario QA');page.once('dialog',d=>d.accept());await page.locator('#saveProfile').click();await expect(page.locator('#profileName')).toHaveValue('Usuario QA')});
+      13 | test('usuario ve controles táctiles suficientemente grandes',async({page})=>{await ready(page);const small=await page.locator('nav button:visible').evaluateAll(ns=>ns.filter(n=>{const r=n.getBoundingClientRect();return r.height<44}).length);expect(small).toBe(0)});
+      14 | test('usuario puede usar teclado para enfocar navegación',async({page})=>{await ready(page);await page.keyboard.press('Tab');expect(await page.evaluate(()=>document.activeElement!==document.body)).toBeTruthy()});
+        at /home/runner/work/Fitcoach.app/Fitcoach.app/qa/user-100-sim.spec.js:11:260
+
+    Error Context: test-results/qa-user-100-sim-usuario-abre-pestaña-nutrición-recipes/error-context.md
+
+
+[36/44] qa/user-100-sim.spec.js:11:73 › usuario abre pestaña nutrición ingredients
+  4) qa/user-100-sim.spec.js:11:73 › usuario abre pestaña nutrición ingredients ────────────────────
+
+    Test timeout of 30000ms exceeded.
+
+    Error: locator.click: Test timeout of 30000ms exceeded.
+    Call log:
+      - waiting for locator('[data-tab="ingredients"]')
+
+
+       9 | test('usuario cambia duración del plan',async({page})=>{await ready(page);await page.locator('nav [data-go="plan"]').click();await page.locator('#minutes').selectOption('45');await expect(page.locator('#minutes')).toHaveValue('45')});
+      10 | test('usuario introduce fecha de inicio',async({page})=>{await ready(page);await page.locator('nav [data-go="plan"]').click();await page.locator('#start').fill('2026-09-01');await expect(page.locator('#start')).toHaveValue('2026-09-01')});
+    > 11 | for(const tab of ['calculator','today','recipes','ingredients','menus'])test(`usuario abre pestaña nutrición ${tab}`,async({page})=>{await ready(page);await page.locator('nav [data-go="nutrition"]').click();const b=page.locator(`[data-tab="${tab}"]`);await b.click();await expect(page.locator(`#${tab}`)).toBeVisible()});
+         |                                                                                                                                                                                                                                                                    ^
+      12 | test('usuario guarda un nombre de perfil',async({page})=>{await ready(page);await page.locator('nav [data-go="settings"]').click();await page.locator('#profileName').fill('Usuario QA');page.once('dialog',d=>d.accept());await page.locator('#saveProfile').click();await expect(page.locator('#profileName')).toHaveValue('Usuario QA')});
+      13 | test('usuario ve controles táctiles suficientemente grandes',async({page})=>{await ready(page);const small=await page.locator('nav button:visible').evaluateAll(ns=>ns.filter(n=>{const r=n.getBoundingClientRect();return r.height<44}).length);expect(small).toBe(0)});
+      14 | test('usuario puede usar teclado para enfocar navegación',async({page})=>{await ready(page);await page.keyboard.press('Tab');expect(await page.evaluate(()=>document.activeElement!==document.body)).toBeTruthy()});
+        at /home/runner/work/Fitcoach.app/Fitcoach.app/qa/user-100-sim.spec.js:11:260
+
+    Error Context: test-results/qa-user-100-sim-usuario-abre-pestaña-nutrición-ingredients/error-context.md
+
+
+[37/44] qa/user-100-sim.spec.js:11:73 › usuario abre pestaña nutrición menus
+  5) qa/user-100-sim.spec.js:11:73 › usuario abre pestaña nutrición menus ──────────────────────────
+
+    Test timeout of 30000ms exceeded.
+
+    Error: locator.click: Test timeout of 30000ms exceeded.
+    Call log:
+      - waiting for locator('[data-tab="menus"]')
+
+
+       9 | test('usuario cambia duración del plan',async({page})=>{await ready(page);await page.locator('nav [data-go="plan"]').click();await page.locator('#minutes').selectOption('45');await expect(page.locator('#minutes')).toHaveValue('45')});
+      10 | test('usuario introduce fecha de inicio',async({page})=>{await ready(page);await page.locator('nav [data-go="plan"]').click();await page.locator('#start').fill('2026-09-01');await expect(page.locator('#start')).toHaveValue('2026-09-01')});
+    > 11 | for(const tab of ['calculator','today','recipes','ingredients','menus'])test(`usuario abre pestaña nutrición ${tab}`,async({page})=>{await ready(page);await page.locator('nav [data-go="nutrition"]').click();const b=page.locator(`[data-tab="${tab}"]`);await b.click();await expect(page.locator(`#${tab}`)).toBeVisible()});
+         |                                                                                                                                                                                                                                                                    ^
+      12 | test('usuario guarda un nombre de perfil',async({page})=>{await ready(page);await page.locator('nav [data-go="settings"]').click();await page.locator('#profileName').fill('Usuario QA');page.once('dialog',d=>d.accept());await page.locator('#saveProfile').click();await expect(page.locator('#profileName')).toHaveValue('Usuario QA')});
+      13 | test('usuario ve controles táctiles suficientemente grandes',async({page})=>{await ready(page);const small=await page.locator('nav button:visible').evaluateAll(ns=>ns.filter(n=>{const r=n.getBoundingClientRect();return r.height<44}).length);expect(small).toBe(0)});
+      14 | test('usuario puede usar teclado para enfocar navegación',async({page})=>{await ready(page);await page.keyboard.press('Tab');expect(await page.evaluate(()=>document.activeElement!==document.body)).toBeTruthy()});
+        at /home/runner/work/Fitcoach.app/Fitcoach.app/qa/user-100-sim.spec.js:11:260
+
+    Error Context: test-results/qa-user-100-sim-usuario-abre-pestaña-nutrición-menus/error-context.md
+
+
+[38/44] qa/user-100-sim.spec.js:12:1 › usuario guarda un nombre de perfil
+[39/44] qa/user-100-sim.spec.js:13:1 › usuario ve controles táctiles suficientemente grandes
+[40/44] qa/user-100-sim.spec.js:14:1 › usuario puede usar teclado para enfocar navegación
+[41/44] qa/user-100-sim.spec.js:15:1 › usuario con reducir movimiento mantiene la app operativa
+[42/44] qa/user-100-sim.spec.js:16:1 › usuario vuelve Inicio tras visitar varias áreas
+[43/44] qa/user-100-sim.spec.js:17:1 › usuario recarga y conserva el perfil unificado
+  6) qa/user-100-sim.spec.js:17:1 › usuario recarga y conserva el perfil unificado ─────────────────
+
+    Error: expect(received).toBeTruthy()
+
+    Received: null
+
+      15 | test('usuario con reducir movimiento mantiene la app operativa',async({page})=>{await page.emulateMedia({reducedMotion:'reduce'});await ready(page);await expect(page.locator('#home')).toBeVisible()});
+      16 | test('usuario vuelve Inicio tras visitar varias áreas',async({page})=>{await ready(page);for(const t of ['training','nutrition','progress','home'])await page.locator(`nav [data-go="${t}"]`).click();await expect(page.locator('#home')).toBeVisible()});
+    > 17 | test('usuario recarga y conserva el perfil unificado',async({page})=>{await ready(page);const before=await page.evaluate(()=>localStorage.getItem('fitcoach_client_profile_v35'));expect(before).toBeTruthy();await page.reload({waitUntil:'domcontentloaded'});expect(await page.evaluate(()=>localStorage.getItem('fitcoach_client_profile_v35'))).toBe(before)});
+         |                                                                                                                                                                                                  ^
+      18 | test('usuario no recibe errores de página al recorrer navegación completa',async({page})=>{const e=errors(page);await ready(page);for(const t of ['plan','training','nutrition','progress','settings','home'])await page.locator(`nav [data-go="${t}"]`).click();expect(e).toEqual([])});
+      19 |
+        at /home/runner/work/Fitcoach.app/Fitcoach.app/qa/user-100-sim.spec.js:17:194
+
+    Error Context: test-results/qa-user-100-sim-usuario-re-38ace-onserva-el-perfil-unificado/error-context.md
+
+
+[44/44] qa/user-100-sim.spec.js:18:1 › usuario no recibe errores de página al recorrer navegación completa
+  7) qa/user-100-sim.spec.js:18:1 › usuario no recibe errores de página al recorrer navegación completa 
+
+    Test timeout of 30000ms exceeded.
+
+    Error: locator.click: Test timeout of 30000ms exceeded.
+    Call log:
+      - waiting for locator('nav [data-go="progress"]')
+        - locator resolved to <button data-go="progress">Progreso</button>
+      - attempting click action
+        2 × waiting for element to be visible, enabled and stable
+          - element is visible, enabled and stable
+          - scrolling into view if needed
+          - done scrolling
+          - <div class="fcIntake">…</div> from <div class="fcModal" id="fcIntakeModal">…</div> subtree intercepts pointer events
+        - retrying click action
+        - waiting 20ms
+        2 × waiting for element to be visible, enabled and stable
+          - element is visible, enabled and stable
+          - scrolling into view if needed
+          - done scrolling
+          - <div class="fcIntake">…</div> from <div class="fcModal" id="fcIntakeModal">…</div> subtree intercepts pointer events
+        - retrying click action
+          - waiting 100ms
+        57 × waiting for element to be visible, enabled and stable
+           - element is visible, enabled and stable
+           - scrolling into view if needed
+           - done scrolling
+           - <div class="fcIntake">…</div> from <div class="fcModal" id="fcIntakeModal">…</div> subtree intercepts pointer events
+         - retrying click action
+           - waiting 500ms
+
+
+      16 | test('usuario vuelve Inicio tras visitar varias áreas',async({page})=>{await ready(page);for(const t of ['training','nutrition','progress','home'])await page.locator(`nav [data-go="${t}"]`).click();await expect(page.locator('#home')).toBeVisible()});
+      17 | test('usuario recarga y conserva el perfil unificado',async({page})=>{await ready(page);const before=await page.evaluate(()=>localStorage.getItem('fitcoach_client_profile_v35'));expect(before).toBeTruthy();await page.reload({waitUntil:'domcontentloaded'});expect(await page.evaluate(()=>localStorage.getItem('fitcoach_client_profile_v35'))).toBe(before)});
+    > 18 | test('usuario no recibe errores de página al recorrer navegación completa',async({page})=>{const e=errors(page);await ready(page);for(const t of ['plan','training','nutrition','progress','settings','home'])await page.locator(`nav [data-go="${t}"]`).click();expect(e).toEqual([])});
+         |                                                                                                                                                                                                                                                          ^
+      19 |
+        at /home/runner/work/Fitcoach.app/Fitcoach.app/qa/user-100-sim.spec.js:18:250
+
+    Error Context: test-results/qa-user-100-sim-usuario-no-027c2-ecorrer-navegación-completa/error-context.md
+
+
+  7 failed
+    qa/user-100-sim.spec.js:11:73 › usuario abre pestaña nutrición calculator ──────────────────────
+    qa/user-100-sim.spec.js:11:73 › usuario abre pestaña nutrición today ───────────────────────────
+    qa/user-100-sim.spec.js:11:73 › usuario abre pestaña nutrición recipes ─────────────────────────
+    qa/user-100-sim.spec.js:11:73 › usuario abre pestaña nutrición ingredients ─────────────────────
+    qa/user-100-sim.spec.js:11:73 › usuario abre pestaña nutrición menus ───────────────────────────
+    qa/user-100-sim.spec.js:17:1 › usuario recarga y conserva el perfil unificado ──────────────────
+    qa/user-100-sim.spec.js:18:1 › usuario no recibe errores de página al recorrer navegación completa 
+  37 passed (3.3m)
