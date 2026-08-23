@@ -1,5 +1,6 @@
 const { test, expect } = require('@playwright/test');
 const BASE='http://127.0.0.1:4173';
+async function seedProfile(page){await page.addInitScript(()=>localStorage.setItem('fitcoach_client_profile_v35',JSON.stringify({name:'QA',sex:'m',age:40,height:178,weight:80,activity:1.45,goal:'recomp',experience:'intermediate',days:4,minutes:50,equipment:['Máquina','Mancuernas','Barra','Polea']})))}
 
 test('fresh FitCoach launch never injects a personal name',async({page})=>{
   await page.goto(BASE+'/',{waitUntil:'domcontentloaded'});
@@ -9,6 +10,7 @@ test('fresh FitCoach launch never injects a personal name',async({page})=>{
 });
 
 test('FitCoach rejects unsupported low calorie calculations before persisting targets',async({page})=>{
+  await seedProfile(page);
   await page.goto(BASE+'/',{waitUntil:'domcontentloaded'});
   await page.waitForFunction(()=>Boolean(window.FitCoachQualityV48));
   await page.locator('[data-go="nutrition"]').click();
@@ -25,6 +27,7 @@ test('FitCoach rejects unsupported low calorie calculations before persisting ta
 });
 
 test('FitCoach accepts normal macro inputs and labels form controls for assistive tech',async({page})=>{
+  await seedProfile(page);
   await page.goto(BASE+'/',{waitUntil:'domcontentloaded'});
   await page.waitForFunction(()=>Boolean(window.FitCoachQualityV48));
   await page.locator('[data-go="nutrition"]').click();
