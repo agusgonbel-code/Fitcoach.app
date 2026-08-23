@@ -1,7 +1,7 @@
 (()=>{'use strict';
 const $=id=>document.getElementById(id);
 const first=(...ids)=>ids.map($).find(Boolean)||null;
-const labels={trainingDay:'Día de entrenamiento',sx:'Sexo',age:'Edad',hei:'Altura en centímetros',wei:'Peso en kilogramos',bf:'Grasa corporal en porcentaje',act:'Nivel de actividad',ng:'Objetivo',eq:'Ecuación',meals:'Comidas por día'};
+const labels={trainingDay:'Día de entrenamiento',sx:'Sexo',age:'Edad',hei:'Altura en centímetros',wei:'Peso en kilogramos',bf:'Grasa corporal en porcentaje',act:'Nivel de actividad',ng:'Objetivo',eq:'Ecuación',meals:'Comidas por día',md:'Fecha de medición'};
 function labelControls(root=document){
   root.querySelectorAll('input,select,textarea').forEach(control=>{
     if(control.getAttribute('aria-label')||control.getAttribute('aria-labelledby'))return;
