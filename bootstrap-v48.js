@@ -27,5 +27,15 @@ function installFreshGuard(){
   observer.observe(document.documentElement,{childList:true,subtree:true});
   window.addEventListener('load',()=>{clearFreshDefaults(document);setTimeout(()=>{clearFreshDefaults(document);observer.disconnect();},250);},{once:true});
 }
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',installFreshGuard,{once:true});else installFreshGuard();
+function installOnboardingReloadGuard(){
+  document.addEventListener('click',event=>{
+    if(!event.target.closest?.('#fcGenerate'))return;
+    queueMicrotask(()=>{
+      try{
+        if(localStorage.getItem('fitcoach_client_profile_v35')!==null)location.reload();
+      }catch{}
+    });
+  });
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>{installFreshGuard();installOnboardingReloadGuard();},{once:true});else{installFreshGuard();installOnboardingReloadGuard();}
 })();
