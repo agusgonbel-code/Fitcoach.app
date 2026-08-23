@@ -1,6 +1,23 @@
 const {test,expect}=require('@playwright/test');
 const URL='http://127.0.0.1:4173/';
-async function ready(page){await page.goto(URL,{waitUntil:'domcontentloaded'});const modal=page.locator('#fcIntakeModal');if(await modal.count()&&await modal.isVisible().catch(()=>false)){for(let i=0;i<3;i++)await page.locator('#fcNext').click();await page.locator('#fcGenerate').click();await page.waitForFunction(()=>localStorage.getItem('fitcoach_client_profile_v35')!==null);}await expect(page.locator('#home')).toBeVisible();}
+async function ready(page){
+  await page.goto(URL,{waitUntil:'domcontentloaded'});
+  const modal=page.locator('#fcIntakeModal');
+  let hasProfile=await page.evaluate(()=>localStorage.getItem('fitcoach_client_profile_v35')!==null);
+  if(!hasProfile){
+    await modal.waitFor({state:'visible',timeout:4000}).catch(()=>{});
+    if(await modal.isVisible().catch(()=>false)){
+      for(let i=0;i<3;i++) await page.locator('#fcNext').click();
+      await page.locator('#fcGenerate').click();
+      await page.waitForFunction(()=>localStorage.getItem('fitcoach_client_profile_v35')!==null,null,{timeout:7000});
+      await modal.waitFor({state:'hidden',timeout:5000}).catch(()=>{});
+    }
+  }
+  hasProfile=await page.evaluate(()=>localStorage.getItem('fitcoach_client_profile_v35')!==null);
+  expect(hasProfile,'onboarding must finish before the main app becomes interactive').toBeTruthy();
+  await expect(page.locator('#home')).toBeVisible();
+  await expect(modal).toBeHidden();
+}
 async function nutrition(page){await ready(page);await page.locator('nav [data-go="nutrition"]').click();await expect(page.locator('#nutrition')).toBeVisible();}
 function errors(page){const a=[];page.on('pageerror',e=>a.push(e.message));return a}
 for(const [name,target] of [['Inicio','home'],['Plan','plan'],['Entrenar','training'],['Nutrición','nutrition'],['Progreso','progress'],['Ajustes','settings']])test(`usuario navega a ${name} sin romper estado`,async({page})=>{const e=errors(page);await ready(page);await page.locator(`nav [data-go="${target}"]`).click();await expect(page.locator(`#${target}`)).toBeVisible();expect(e).toEqual([])});
@@ -19,5 +36,5 @@ test('usuario ve controles táctiles suficientemente grandes',async({page})=>{aw
 test('usuario puede usar teclado para enfocar navegación',async({page})=>{await ready(page);await page.keyboard.press('Tab');expect(await page.evaluate(()=>document.activeElement!==document.body)).toBeTruthy()});
 test('usuario con reducir movimiento mantiene la app operativa',async({page})=>{await page.emulateMedia({reducedMotion:'reduce'});await ready(page);await expect(page.locator('#home')).toBeVisible()});
 test('usuario vuelve Inicio tras visitar varias áreas',async({page})=>{await ready(page);for(const t of ['training','nutrition','progress','home'])await page.locator(`nav [data-go="${t}"]`).click();await expect(page.locator('#home')).toBeVisible()});
-test('usuario recarga y conserva el perfil unificado',async({page})=>{await ready(page);const before=await page.evaluate(()=>localStorage.getItem('fitcoach_client_profile_v35'));expect(before).toBeTruthy();await page.reload({waitUntil:'domcontentloaded'});expect(await page.evaluate(()=>localStorage.getItem('fitcoach_client_profile_v35'))).toBe(before)});
+test('usuario recarga y conserva el perfil unificado',async({page})=>{await ready(page);const before=await page.evaluate(()=>localStorage.getItem('fitcoach_client_profile_v35'));expect(before).toBeTruthy();await page.reload({waitUntil:'domcontentloaded'});await expect(page.locator('#fcIntakeModal')).toBeHidden();expect(await page.evaluate(()=>localStorage.getItem('fitcoach_client_profile_v35'))).toBe(before)});
 test('usuario no recibe errores de página al recorrer navegación completa',async({page})=>{const e=errors(page);await ready(page);for(const t of ['plan','training','nutrition','progress','settings','home'])await page.locator(`nav [data-go="${t}"]`).click();expect(e).toEqual([])});
