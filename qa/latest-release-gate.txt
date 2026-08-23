@@ -1,15 +1,15 @@
 FITCOACH FAST RELEASE GATE
-SOURCE_COMMIT: 97d085ef348d1e871823049a36809b086267af26
+SOURCE_COMMIT: d7e834d77bbb502513207ae722c68f68de319b78
 RESULT: PASS
 EXIT_CODE: 0
-UTC: 2026-08-23T03:12:36Z
+UTC: 2026-08-23T06:10:28Z
 COVERAGE: browser smoke + 320/375/390/430 mobile + coach ops + accessibility + v48 profile/macro safety
 --- TEST OUTPUT (tail) ---
 
 Running 17 tests using 2 workers
 
-[1/17] qa/browser-smoke.spec.js:3:1 › unified intake opens, generates and persists without page errors
-[2/17] qa/accessibility.spec.js:5:1 › FitCoach has unique ids, labelled controls and usable touch targets
+[1/17] qa/accessibility.spec.js:5:1 › FitCoach has unique ids, labelled controls and usable touch targets
+[2/17] qa/browser-smoke.spec.js:3:1 › unified intake opens, generates and persists without page errors
 [3/17] qa/browser-smoke.spec.js:4:1 › trainer can create a client, record check-in and keep recommendation auditable
 [4/17] qa/accessibility.spec.js:33:1 › FitCoach exposes keyboard focus indication and reduced-motion-safe CSS
 [5/17] qa/coach-ops-v47.spec.js:3:1 › coach operations runtime loads and ranks an urgent client
@@ -25,4 +25,4 @@ Running 17 tests using 2 workers
 [15/17] qa/mobile-layout.spec.js:6:120 › FitCoach iPad landscape stays usable without horizontal overflow
 [16/17] qa/mobile-layout.spec.js:7:1 › FitCoach mobile layer includes safe areas and reduced overflow policy
 [17/17] qa/mobile-layout.spec.js:8:1 › FitCoach professional mobile CSS forbids word-by-word collapse
-  17 passed (20.9s)
+  17 passed (21.2s)
