@@ -1,0 +1,36 @@
+FITCOACH USER SIMULATION
+SOURCE_COMMIT: 506151ff550d799089aab888cb63dca45251a90d
+RESULT: PASS
+EXIT_CODE: 0
+SCENARIOS: 26
+UTC: 2026-08-23T18:59:06Z
+
+Running 26 tests using 1 worker
+
+[1/26] qa/user-100-sim.spec.js:23:161 › usuario navega a Inicio sin romper estado
+[2/26] qa/user-100-sim.spec.js:23:161 › usuario navega a Plan sin romper estado
+[3/26] qa/user-100-sim.spec.js:23:161 › usuario navega a Entrenar sin romper estado
+[4/26] qa/user-100-sim.spec.js:23:161 › usuario navega a Nutrición sin romper estado
+[5/26] qa/user-100-sim.spec.js:23:161 › usuario navega a Progreso sin romper estado
+[6/26] qa/user-100-sim.spec.js:23:161 › usuario navega a Ajustes sin romper estado
+[7/26] qa/user-100-sim.spec.js:24:38 › usuario usa FitCoach a 320px sin scroll horizontal
+[8/26] qa/user-100-sim.spec.js:24:38 › usuario usa FitCoach a 375px sin scroll horizontal
+[9/26] qa/user-100-sim.spec.js:24:38 › usuario usa FitCoach a 390px sin scroll horizontal
+[10/26] qa/user-100-sim.spec.js:24:38 › usuario usa FitCoach a 430px sin scroll horizontal
+[11/26] qa/user-100-sim.spec.js:25:1 › usuario cambia objetivo del plan
+[12/26] qa/user-100-sim.spec.js:26:1 › usuario cambia días del plan
+[13/26] qa/user-100-sim.spec.js:27:1 › usuario cambia duración del plan
+[14/26] qa/user-100-sim.spec.js:28:1 › usuario introduce fecha de inicio
+[15/26] qa/user-100-sim.spec.js:29:1 › nutrición nunca queda en blanco tras onboarding
+[16/26] qa/user-100-sim.spec.js:30:1 › nutrición ofrece una acción visible
+[17/26] qa/user-100-sim.spec.js:31:1 › nutrición ofrece datos o controles interactivos
+[18/26] qa/user-100-sim.spec.js:32:1 › nutrición sigue operativa al recargar
+[19/26] qa/user-100-sim.spec.js:33:1 › nutrición cabe en iPhone pequeño
+[20/26] qa/user-100-sim.spec.js:34:1 › usuario guarda un nombre de perfil
+[21/26] qa/user-100-sim.spec.js:35:1 › usuario ve controles táctiles suficientemente grandes
+[22/26] qa/user-100-sim.spec.js:36:1 › usuario puede usar teclado para enfocar navegación
+[23/26] qa/user-100-sim.spec.js:37:1 › usuario con reducir movimiento mantiene la app operativa
+[24/26] qa/user-100-sim.spec.js:38:1 › usuario vuelve Inicio tras visitar varias áreas
+[25/26] qa/user-100-sim.spec.js:39:1 › usuario recarga y conserva el perfil unificado
+[26/26] qa/user-100-sim.spec.js:40:1 › usuario no recibe errores de página al recorrer navegación completa
+  26 passed (58.6s)
