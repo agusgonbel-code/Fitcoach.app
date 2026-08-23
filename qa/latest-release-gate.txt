@@ -1,8 +1,8 @@
 FITCOACH FAST RELEASE GATE
-SOURCE_COMMIT: 291143202e2e0a6e3de85df7e473d1e9f508b1b4
+SOURCE_COMMIT: 4e26aac1043bd5f50a1b64135d7d7236d13c44e9
 RESULT: FAIL
 EXIT_CODE: 1
-UTC: 2026-08-23T00:11:25Z
+UTC: 2026-08-23T00:12:58Z
 COVERAGE: browser smoke + 320/375/390/430 mobile + coach ops + accessibility + v48 profile/macro safety
 --- TEST OUTPUT (tail) ---
 
@@ -13,7 +13,7 @@ Running 14 tests using 2 workers
 [3/14] qa/browser-smoke.spec.js:4:1 › trainer can create a client, record check-in and keep recommendation auditable
   1) qa/accessibility.spec.js:5:1 › FitCoach has unique ids, labelled controls and usable touch targets 
 
-    Error: unnamed controls after nav 4
+    Error: unnamed controls after nav 6
 
     expect(received).toEqual(expected) // deep equality
 
@@ -22,7 +22,7 @@ Running 14 tests using 2 workers
 
     - Array []
     + Array [
-    +   "<input id=\"md\" type=\"date\">",
+    +   "<select id=\"cwGoal\"><option value=\"recomp\">Recomposición</option><option value=\"loss\">Pérdida de grasa</option><option value=\"gain\">Ganancia muscular</option><option value=\"maintai",
     + ]
 
       26 |       return !(el.getAttribute('aria-label')||el.getAttribute('title')||el.textContent||'').trim();
@@ -50,4 +50,4 @@ Running 14 tests using 2 workers
 [14/14] qa/mobile-layout.spec.js:7:1 › FitCoach professional mobile CSS forbids word-by-word collapse
   1 failed
     qa/accessibility.spec.js:5:1 › FitCoach has unique ids, labelled controls and usable touch targets 
-  13 passed (15.2s)
+  13 passed (16.1s)
