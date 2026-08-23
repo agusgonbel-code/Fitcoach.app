@@ -1,3 +1,4 @@
+@import url('./professional-v51.css?v=5.1.0');
 /* FitCoach v5 — premium adaptive fitness layer */
 :root{--v5-bg:#07111f;--v5-panel:#0d1a2a;--v5-soft:#13253a;--v5-text:#f7fbff;--v5-muted:#8fa6bd;--v5-accent:#67f0b5;--v5-warn:#ffd166;--v5-danger:#ff7a90;--v5-line:rgba(255,255,255,.08);--v5-radius:22px}
 body{background:linear-gradient(180deg,#07111f 0%,#091522 100%);color:var(--v5-text)}
