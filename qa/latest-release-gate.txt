@@ -1,8 +1,8 @@
 FITCOACH FAST RELEASE GATE
-SOURCE_COMMIT: 5a388ea018e63c6acec44d9ec1940f5e72ee43d5
+SOURCE_COMMIT: b4adc9bf3eec8f3830c927b677e76ee5159de018
 RESULT: PASS
 EXIT_CODE: 0
-UTC: 2026-08-23T15:44:58Z
+UTC: 2026-08-23T15:46:17Z
 COVERAGE: browser smoke + 320/375/390/430 mobile + coach ops + accessibility + v48 profile/macro safety
 --- TEST OUTPUT (tail) ---
 
