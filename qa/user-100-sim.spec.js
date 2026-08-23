@@ -10,6 +10,7 @@ async function ready(page){
       for(let i=0;i<3;i++) await page.locator('#fcNext').click();
       await page.locator('#fcGenerate').click();
       await page.waitForFunction(()=>localStorage.getItem('fitcoach_client_profile_v35')!==null,null,{timeout:7000});
+      await page.waitForLoadState('domcontentloaded').catch(()=>{});
       await modal.waitFor({state:'hidden',timeout:5000}).catch(()=>{});
     }
   }
@@ -26,6 +27,7 @@ test('usuario cambia objetivo del plan',async({page})=>{await ready(page);await 
 test('usuario cambia días del plan',async({page})=>{await ready(page);await page.locator('nav [data-go="plan"]').click();await page.locator('#days').selectOption('3');await expect(page.locator('#days')).toHaveValue('3')});
 test('usuario cambia duración del plan',async({page})=>{await ready(page);await page.locator('nav [data-go="plan"]').click();await page.locator('#minutes').selectOption('45');await expect(page.locator('#minutes')).toHaveValue('45')});
 test('usuario introduce fecha de inicio',async({page})=>{await ready(page);await page.locator('nav [data-go="plan"]').click();await page.locator('#start').fill('2026-09-01');await expect(page.locator('#start')).toHaveValue('2026-09-01')});
+test('onboarding no interrumpe una navegación inmediata con una recarga tardía',async({page})=>{await ready(page);await page.locator('nav [data-go="nutrition"]').click();await expect(page.locator('#nutrition')).toBeVisible();await page.waitForTimeout(1200);await expect(page.locator('#nutrition')).toBeVisible();await expect(page.locator('#home')).toBeHidden()});
 test('nutrición nunca queda en blanco tras onboarding',async({page})=>{await nutrition(page);expect((await page.locator('#nutrition').innerText()).trim().length).toBeGreaterThan(20)});
 test('nutrición ofrece una acción visible',async({page})=>{await nutrition(page);expect(await page.locator('#nutrition button:visible').count()).toBeGreaterThan(0)});
 test('nutrición ofrece datos o controles interactivos',async({page})=>{await nutrition(page);const count=await page.locator('#nutrition input:visible,#nutrition select:visible,#nutrition button:visible').count();expect(count).toBeGreaterThan(0)});
