@@ -1,15 +1,15 @@
 FITCOACH FAST RELEASE GATE
-SOURCE_COMMIT: 1c283a9dc8f952dedf617b5ec30c5b9e2901cd8e
+SOURCE_COMMIT: 506151ff550d799089aab888cb63dca45251a90d
 RESULT: FAIL
 EXIT_CODE: 1
-UTC: 2026-08-23T18:54:27Z
+UTC: 2026-08-23T18:59:20Z
 COVERAGE: browser smoke + 320/375/390/430 mobile + coach ops + accessibility + v48 profile/macro safety + 26 user-behavior scenarios
 --- TEST OUTPUT (tail) ---
 
 Running 44 tests using 2 workers
 
-[1/44] qa/accessibility.spec.js:5:1 › FitCoach has unique ids, labelled controls and usable touch targets
-[2/44] qa/browser-smoke.spec.js:3:1 › unified intake opens, generates and persists without page errors
+[1/44] qa/browser-smoke.spec.js:3:1 › unified intake opens, generates and persists without page errors
+[2/44] qa/accessibility.spec.js:5:1 › FitCoach has unique ids, labelled controls and usable touch targets
 [3/44] qa/browser-smoke.spec.js:4:1 › trainer can create a client, record check-in and keep recommendation auditable
 [4/44] qa/accessibility.spec.js:33:1 › FitCoach exposes keyboard focus indication and reduced-motion-safe CSS
 [5/44] qa/coach-ops-v47.spec.js:3:1 › coach operations runtime loads and ranks an urgent client
@@ -18,100 +18,68 @@ Running 44 tests using 2 workers
 [8/44] qa/quality-v48.spec.js:7:1 › fresh FitCoach launch never injects personal identity or anthropometrics
 [9/44] qa/quality-v48.spec.js:20:1 › FitCoach rejects unsupported low calorie calculations before persisting targets
 [10/44] qa/quality-v48.spec.js:38:1 › FitCoach accepts normal macro inputs and labels form controls for assistive tech
-[11/44] qa/user-100-sim.spec.js:6:161 › usuario navega a Inicio sin romper estado
-[12/44] qa/user-100-sim.spec.js:6:161 › usuario navega a Plan sin romper estado
-[13/44] qa/mobile-layout.spec.js:5:39 › FitCoach fits 375px without horizontal overflow
-[14/44] qa/user-100-sim.spec.js:6:161 › usuario navega a Entrenar sin romper estado
-[15/44] qa/user-100-sim.spec.js:6:161 › usuario navega a Nutrición sin romper estado
-[16/44] qa/user-100-sim.spec.js:6:161 › usuario navega a Progreso sin romper estado
-[17/44] qa/user-100-sim.spec.js:6:161 › usuario navega a Ajustes sin romper estado
-[18/44] qa/user-100-sim.spec.js:7:38 › usuario usa FitCoach a 320px sin scroll horizontal
-[19/44] qa/user-100-sim.spec.js:7:38 › usuario usa FitCoach a 375px sin scroll horizontal
-[20/44] qa/user-100-sim.spec.js:7:38 › usuario usa FitCoach a 390px sin scroll horizontal
-[21/44] qa/user-100-sim.spec.js:7:38 › usuario usa FitCoach a 430px sin scroll horizontal
-[22/44] qa/user-100-sim.spec.js:8:1 › usuario cambia objetivo del plan
-[23/44] qa/user-100-sim.spec.js:9:1 › usuario cambia días del plan
-[24/44] qa/mobile-layout.spec.js:5:39 › FitCoach fits 390px without horizontal overflow
-[25/44] qa/user-100-sim.spec.js:10:1 › usuario cambia duración del plan
-[26/44] qa/user-100-sim.spec.js:11:1 › usuario introduce fecha de inicio
-[27/44] qa/user-100-sim.spec.js:12:1 › nutrición nunca queda en blanco tras onboarding
-[28/44] qa/user-100-sim.spec.js:13:1 › nutrición ofrece una acción visible
-[29/44] qa/user-100-sim.spec.js:14:1 › nutrición ofrece datos o controles interactivos
-[30/44] qa/user-100-sim.spec.js:15:1 › nutrición sigue operativa al recargar
-[31/44] qa/user-100-sim.spec.js:16:1 › nutrición cabe en iPhone pequeño
-[32/44] qa/user-100-sim.spec.js:17:1 › usuario guarda un nombre de perfil
-[33/44] qa/user-100-sim.spec.js:18:1 › usuario ve controles táctiles suficientemente grandes
-[34/44] qa/user-100-sim.spec.js:19:1 › usuario puede usar teclado para enfocar navegación
-[35/44] qa/user-100-sim.spec.js:20:1 › usuario con reducir movimiento mantiene la app operativa
-[36/44] qa/user-100-sim.spec.js:21:1 › usuario vuelve Inicio tras visitar varias áreas
-[37/44] qa/mobile-layout.spec.js:5:39 › FitCoach fits 430px without horizontal overflow
-[38/44] qa/user-100-sim.spec.js:22:1 › usuario recarga y conserva el perfil unificado
-  1) qa/user-100-sim.spec.js:22:1 › usuario recarga y conserva el perfil unificado ─────────────────
+[11/44] qa/user-100-sim.spec.js:23:161 › usuario navega a Inicio sin romper estado
+[12/44] qa/mobile-layout.spec.js:5:39 › FitCoach fits 375px without horizontal overflow
+[13/44] qa/user-100-sim.spec.js:23:161 › usuario navega a Plan sin romper estado
+[14/44] qa/mobile-layout.spec.js:5:39 › FitCoach fits 390px without horizontal overflow
+[15/44] qa/user-100-sim.spec.js:23:161 › usuario navega a Entrenar sin romper estado
+[16/44] qa/mobile-layout.spec.js:5:39 › FitCoach fits 430px without horizontal overflow
+[17/44] qa/user-100-sim.spec.js:23:161 › usuario navega a Nutrición sin romper estado
+[18/44] qa/mobile-layout.spec.js:6:120 › FitCoach iPhone landscape stays usable without horizontal overflow
+[19/44] qa/mobile-layout.spec.js:6:120 › FitCoach iPad portrait stays usable without horizontal overflow
+[20/44] qa/mobile-layout.spec.js:6:120 › FitCoach iPad landscape stays usable without horizontal overflow
+  1) qa/user-100-sim.spec.js:23:161 › usuario navega a Nutrición sin romper estado ─────────────────
 
-    Error: expect(received).toBeTruthy()
+    Error: expect(locator).toBeVisible() failed
 
-    Received: null
+    Locator:  locator('#nutrition')
+    Expected: visible
+    Received: hidden
+    Timeout:  5000ms
 
-      20 | test('usuario con reducir movimiento mantiene la app operativa',async({page})=>{await page.emulateMedia({reducedMotion:'reduce'});await ready(page);await expect(page.locator('#home')).toBeVisible()});
-      21 | test('usuario vuelve Inicio tras visitar varias áreas',async({page})=>{await ready(page);for(const t of ['training','nutrition','progress','home'])await page.locator(`nav [data-go="${t}"]`).click();await expect(page.locator('#home')).toBeVisible()});
-    > 22 | test('usuario recarga y conserva el perfil unificado',async({page})=>{await ready(page);const before=await page.evaluate(()=>localStorage.getItem('fitcoach_client_profile_v35'));expect(before).toBeTruthy();await page.reload({waitUntil:'domcontentloaded'});expect(await page.evaluate(()=>localStorage.getItem('fitcoach_client_profile_v35'))).toBe(before)});
-         |                                                                                                                                                                                                  ^
-      23 | test('usuario no recibe errores de página al recorrer navegación completa',async({page})=>{const e=errors(page);await ready(page);for(const t of ['plan','training','nutrition','progress','settings','home'])await page.locator(`nav [data-go="${t}"]`).click();expect(e).toEqual([])});
-      24 |
-        at /home/runner/work/Fitcoach.app/Fitcoach.app/qa/user-100-sim.spec.js:22:194
-
-    Error Context: test-results/qa-user-100-sim-usuario-re-38ace-onserva-el-perfil-unificado/error-context.md
-
-
-[39/44] qa/user-100-sim.spec.js:23:1 › usuario no recibe errores de página al recorrer navegación completa
-[40/44] qa/mobile-layout.spec.js:6:120 › FitCoach iPhone landscape stays usable without horizontal overflow
-[41/44] qa/mobile-layout.spec.js:6:120 › FitCoach iPad portrait stays usable without horizontal overflow
-[42/44] qa/mobile-layout.spec.js:6:120 › FitCoach iPad landscape stays usable without horizontal overflow
-[43/44] qa/mobile-layout.spec.js:7:1 › FitCoach mobile layer includes safe areas and reduced overflow policy
-[44/44] qa/mobile-layout.spec.js:8:1 › FitCoach professional mobile CSS forbids word-by-word collapse
-  2) qa/user-100-sim.spec.js:23:1 › usuario no recibe errores de página al recorrer navegación completa 
-
-    Test timeout of 30000ms exceeded.
-
-    Error: locator.click: Test timeout of 30000ms exceeded.
     Call log:
-      - waiting for locator('nav [data-go="nutrition"]')
-        - locator resolved to <button data-go="nutrition">Nutrición</button>
-      - attempting click action
-        2 × waiting for element to be visible, enabled and stable
-          - element is visible, enabled and stable
-          - scrolling into view if needed
-          - done scrolling
-          - <div class="fcIntake">…</div> from <div class="fcModal" id="fcIntakeModal">…</div> subtree intercepts pointer events
-        - retrying click action
-        - waiting 20ms
-        2 × waiting for element to be visible, enabled and stable
-          - element is visible, enabled and stable
-          - scrolling into view if needed
-          - done scrolling
-          - <div class="fcIntake">…</div> from <div class="fcModal" id="fcIntakeModal">…</div> subtree intercepts pointer events
-        - retrying click action
-          - waiting 100ms
-        57 × waiting for element to be visible, enabled and stable
-           - element is visible, enabled and stable
-           - scrolling into view if needed
-           - done scrolling
-           - <div class="fcIntake">…</div> from <div class="fcModal" id="fcIntakeModal">…</div> subtree intercepts pointer events
-         - retrying click action
-           - waiting 500ms
+      - Expect "toBeVisible" with timeout 5000ms
+      - waiting for locator('#nutrition')
+        14 × locator resolved to <section class="page" id="nutrition">…</section>
+           - unexpected value "hidden"
 
 
-      21 | test('usuario vuelve Inicio tras visitar varias áreas',async({page})=>{await ready(page);for(const t of ['training','nutrition','progress','home'])await page.locator(`nav [data-go="${t}"]`).click();await expect(page.locator('#home')).toBeVisible()});
-      22 | test('usuario recarga y conserva el perfil unificado',async({page})=>{await ready(page);const before=await page.evaluate(()=>localStorage.getItem('fitcoach_client_profile_v35'));expect(before).toBeTruthy();await page.reload({waitUntil:'domcontentloaded'});expect(await page.evaluate(()=>localStorage.getItem('fitcoach_client_profile_v35'))).toBe(before)});
-    > 23 | test('usuario no recibe errores de página al recorrer navegación completa',async({page})=>{const e=errors(page);await ready(page);for(const t of ['plan','training','nutrition','progress','settings','home'])await page.locator(`nav [data-go="${t}"]`).click();expect(e).toEqual([])});
-         |                                                                                                                                                                                                                                                          ^
-      24 |
-        at /home/runner/work/Fitcoach.app/Fitcoach.app/qa/user-100-sim.spec.js:23:250
+      21 | async function nutrition(page){await ready(page);await page.locator('nav [data-go="nutrition"]').click();await expect(page.locator('#nutrition')).toBeVisible();}
+      22 | function errors(page){const a=[];page.on('pageerror',e=>a.push(e.message));return a}
+    > 23 | for(const [name,target] of [['Inicio','home'],['Plan','plan'],['Entrenar','training'],['Nutrición','nutrition'],['Progreso','progress'],['Ajustes','settings']])test(`usuario navega a ${name} sin romper estado`,async({page})=>{const e=errors(page);await ready(page);await page.locator(`nav [data-go="${target}"]`).click();await expect(page.locator(`#${target}`)).toBeVisible();expect(e).toEqual([])});
+         |                                                                                                                                                                                                                                                                                                                                                                           ^
+      24 | for(const width of [320,375,390,430])test(`usuario usa FitCoach a ${width}px sin scroll horizontal`,async({page})=>{await page.setViewportSize({width,height:760});await ready(page);expect(await page.evaluate(()=>document.documentElement.scrollWidth<=document.documentElement.clientWidth+2)).toBeTruthy()});
+      25 | test('usuario cambia objetivo del plan',async({page})=>{await ready(page);await page.locator('nav [data-go="plan"]').click();await page.locator('#goal').selectOption('strength');await expect(page.locator('#goal')).toHaveValue('strength')});
+      26 | test('usuario cambia días del plan',async({page})=>{await ready(page);await page.locator('nav [data-go="plan"]').click();await page.locator('#days').selectOption('3');await expect(page.locator('#days')).toHaveValue('3')});
+        at /home/runner/work/Fitcoach.app/Fitcoach.app/qa/user-100-sim.spec.js:23:363
 
-    Error Context: test-results/qa-user-100-sim-usuario-no-027c2-ecorrer-navegación-completa/error-context.md
+    Error Context: test-results/qa-user-100-sim-usuario-navega-a-Nutrición-sin-romper-estado/error-context.md
 
 
-  2 failed
-    qa/user-100-sim.spec.js:22:1 › usuario recarga y conserva el perfil unificado ──────────────────
-    qa/user-100-sim.spec.js:23:1 › usuario no recibe errores de página al recorrer navegación completa 
-  42 passed (46.1s)
+[21/44] qa/user-100-sim.spec.js:23:161 › usuario navega a Progreso sin romper estado
+[22/44] qa/mobile-layout.spec.js:7:1 › FitCoach mobile layer includes safe areas and reduced overflow policy
+[23/44] qa/mobile-layout.spec.js:8:1 › FitCoach professional mobile CSS forbids word-by-word collapse
+[24/44] qa/user-100-sim.spec.js:23:161 › usuario navega a Ajustes sin romper estado
+[25/44] qa/user-100-sim.spec.js:24:38 › usuario usa FitCoach a 320px sin scroll horizontal
+[26/44] qa/user-100-sim.spec.js:24:38 › usuario usa FitCoach a 375px sin scroll horizontal
+[27/44] qa/user-100-sim.spec.js:24:38 › usuario usa FitCoach a 390px sin scroll horizontal
+[28/44] qa/user-100-sim.spec.js:24:38 › usuario usa FitCoach a 430px sin scroll horizontal
+[29/44] qa/user-100-sim.spec.js:25:1 › usuario cambia objetivo del plan
+[30/44] qa/user-100-sim.spec.js:26:1 › usuario cambia días del plan
+[31/44] qa/user-100-sim.spec.js:27:1 › usuario cambia duración del plan
+[32/44] qa/user-100-sim.spec.js:28:1 › usuario introduce fecha de inicio
+[33/44] qa/user-100-sim.spec.js:29:1 › nutrición nunca queda en blanco tras onboarding
+[34/44] qa/user-100-sim.spec.js:30:1 › nutrición ofrece una acción visible
+[35/44] qa/user-100-sim.spec.js:31:1 › nutrición ofrece datos o controles interactivos
+[36/44] qa/user-100-sim.spec.js:32:1 › nutrición sigue operativa al recargar
+[37/44] qa/user-100-sim.spec.js:33:1 › nutrición cabe en iPhone pequeño
+[38/44] qa/user-100-sim.spec.js:34:1 › usuario guarda un nombre de perfil
+[39/44] qa/user-100-sim.spec.js:35:1 › usuario ve controles táctiles suficientemente grandes
+[40/44] qa/user-100-sim.spec.js:36:1 › usuario puede usar teclado para enfocar navegación
+[41/44] qa/user-100-sim.spec.js:37:1 › usuario con reducir movimiento mantiene la app operativa
+[42/44] qa/user-100-sim.spec.js:38:1 › usuario vuelve Inicio tras visitar varias áreas
+[43/44] qa/user-100-sim.spec.js:39:1 › usuario recarga y conserva el perfil unificado
+[44/44] qa/user-100-sim.spec.js:40:1 › usuario no recibe errores de página al recorrer navegación completa
+  1 failed
+    qa/user-100-sim.spec.js:23:161 › usuario navega a Nutrición sin romper estado ──────────────────
+  43 passed (1.2m)
