@@ -1,41 +1,41 @@
 FITCOACH FAST RELEASE GATE
-SOURCE_COMMIT: b0f2032773f597233aa5960f26221f901ee5a6dd
+SOURCE_COMMIT: 7901945c2835f1ca38d80b2c5fb6b6ead3d9408f
 RESULT: PASS
 EXIT_CODE: 0
-UTC: 2026-08-24T19:09:52Z
+UTC: 2026-08-24T21:12:55Z
 COVERAGE: browser smoke + 320/375/390/430 mobile + coach ops + accessibility + v48 profile/macro safety + 26 user-behavior scenarios
 --- TEST OUTPUT (tail) ---
 
 Running 45 tests using 2 workers
 
-[1/45] qa/browser-smoke.spec.js:3:1 › unified intake opens, generates and persists without page errors
-[2/45] qa/accessibility.spec.js:5:1 › FitCoach has unique ids, labelled controls and usable touch targets
+[1/45] qa/accessibility.spec.js:5:1 › FitCoach has unique ids, labelled controls and usable touch targets
+[2/45] qa/browser-smoke.spec.js:3:1 › unified intake opens, generates and persists without page errors
 [3/45] qa/browser-smoke.spec.js:4:1 › trainer can create a client, record check-in and keep recommendation auditable
-[4/45] qa/coach-ops-v47.spec.js:3:1 › coach operations runtime loads and ranks an urgent client
-[5/45] qa/coach-ops-v47.spec.js:5:1 › adaptive review respects real spacing between weekly weigh-ins
-[6/45] qa/accessibility.spec.js:33:1 › FitCoach exposes keyboard focus indication and reduced-motion-safe CSS
+[4/45] qa/accessibility.spec.js:33:1 › FitCoach exposes keyboard focus indication and reduced-motion-safe CSS
+[5/45] qa/coach-ops-v47.spec.js:3:1 › coach operations runtime loads and ranks an urgent client
+[6/45] qa/coach-ops-v47.spec.js:5:1 › adaptive review respects real spacing between weekly weigh-ins
 [7/45] qa/mobile-layout.spec.js:5:39 › FitCoach fits 320px without horizontal overflow
 [8/45] qa/quality-v48.spec.js:7:1 › fresh FitCoach launch never injects personal identity or anthropometrics
-[9/45] qa/quality-v48.spec.js:20:1 › FitCoach rejects unsupported low calorie calculations before persisting targets
-[10/45] qa/quality-v48.spec.js:38:1 › FitCoach accepts normal macro inputs and labels form controls for assistive tech
-[11/45] qa/user-100-sim.spec.js:24:161 › usuario navega a Inicio sin romper estado
-[12/45] qa/mobile-layout.spec.js:5:39 › FitCoach fits 375px without horizontal overflow
-[13/45] qa/user-100-sim.spec.js:24:161 › usuario navega a Plan sin romper estado
-[14/45] qa/mobile-layout.spec.js:5:39 › FitCoach fits 390px without horizontal overflow
+[9/45] qa/mobile-layout.spec.js:5:39 › FitCoach fits 375px without horizontal overflow
+[10/45] qa/quality-v48.spec.js:20:1 › FitCoach rejects unsupported low calorie calculations before persisting targets
+[11/45] qa/quality-v48.spec.js:38:1 › FitCoach accepts normal macro inputs and labels form controls for assistive tech
+[12/45] qa/user-100-sim.spec.js:24:161 › usuario navega a Inicio sin romper estado
+[13/45] qa/mobile-layout.spec.js:5:39 › FitCoach fits 390px without horizontal overflow
+[14/45] qa/user-100-sim.spec.js:24:161 › usuario navega a Plan sin romper estado
 [15/45] qa/user-100-sim.spec.js:24:161 › usuario navega a Entrenar sin romper estado
-[16/45] qa/user-100-sim.spec.js:24:161 › usuario navega a Nutrición sin romper estado
-[17/45] qa/mobile-layout.spec.js:5:39 › FitCoach fits 430px without horizontal overflow
-[18/45] qa/user-100-sim.spec.js:24:161 › usuario navega a Progreso sin romper estado
-[19/45] qa/mobile-layout.spec.js:6:120 › FitCoach iPhone landscape stays usable without horizontal overflow
+[16/45] qa/mobile-layout.spec.js:5:39 › FitCoach fits 430px without horizontal overflow
+[17/45] qa/user-100-sim.spec.js:24:161 › usuario navega a Nutrición sin romper estado
+[18/45] qa/mobile-layout.spec.js:6:120 › FitCoach iPhone landscape stays usable without horizontal overflow
+[19/45] qa/user-100-sim.spec.js:24:161 › usuario navega a Progreso sin romper estado
 [20/45] qa/user-100-sim.spec.js:24:161 › usuario navega a Ajustes sin romper estado
-[21/45] qa/user-100-sim.spec.js:25:38 › usuario usa FitCoach a 320px sin scroll horizontal
-[22/45] qa/mobile-layout.spec.js:6:120 › FitCoach iPad portrait stays usable without horizontal overflow
-[23/45] qa/user-100-sim.spec.js:25:38 › usuario usa FitCoach a 375px sin scroll horizontal
-[24/45] qa/user-100-sim.spec.js:25:38 › usuario usa FitCoach a 390px sin scroll horizontal
-[25/45] qa/mobile-layout.spec.js:6:120 › FitCoach iPad landscape stays usable without horizontal overflow
-[26/45] qa/user-100-sim.spec.js:25:38 › usuario usa FitCoach a 430px sin scroll horizontal
-[27/45] qa/mobile-layout.spec.js:7:1 › FitCoach mobile layer includes safe areas and reduced overflow policy
-[28/45] qa/mobile-layout.spec.js:8:1 › FitCoach professional mobile CSS forbids word-by-word collapse
+[21/45] qa/mobile-layout.spec.js:6:120 › FitCoach iPad portrait stays usable without horizontal overflow
+[22/45] qa/user-100-sim.spec.js:25:38 › usuario usa FitCoach a 320px sin scroll horizontal
+[23/45] qa/mobile-layout.spec.js:6:120 › FitCoach iPad landscape stays usable without horizontal overflow
+[24/45] qa/user-100-sim.spec.js:25:38 › usuario usa FitCoach a 375px sin scroll horizontal
+[25/45] qa/user-100-sim.spec.js:25:38 › usuario usa FitCoach a 390px sin scroll horizontal
+[26/45] qa/mobile-layout.spec.js:7:1 › FitCoach mobile layer includes safe areas and reduced overflow policy
+[27/45] qa/mobile-layout.spec.js:8:1 › FitCoach professional mobile CSS forbids word-by-word collapse
+[28/45] qa/user-100-sim.spec.js:25:38 › usuario usa FitCoach a 430px sin scroll horizontal
 [29/45] qa/user-100-sim.spec.js:26:1 › usuario cambia objetivo del plan
 [30/45] qa/user-100-sim.spec.js:27:1 › usuario cambia días del plan
 [31/45] qa/user-100-sim.spec.js:28:1 › usuario cambia duración del plan
@@ -53,4 +53,4 @@ Running 45 tests using 2 workers
 [43/45] qa/user-100-sim.spec.js:40:1 › usuario vuelve Inicio tras visitar varias áreas
 [44/45] qa/user-100-sim.spec.js:41:1 › usuario recarga y conserva el perfil unificado
 [45/45] qa/user-100-sim.spec.js:42:1 › usuario no recibe errores de página al recorrer navegación completa
-  45 passed (33.9s)
+  45 passed (34.7s)
