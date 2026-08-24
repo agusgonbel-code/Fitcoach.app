@@ -1,15 +1,15 @@
 FITCOACH FAST RELEASE GATE
-SOURCE_COMMIT: b5f2531aa2e24c7b0d50cbc69e83c93191bda8dc
+SOURCE_COMMIT: b0f2032773f597233aa5960f26221f901ee5a6dd
 RESULT: PASS
 EXIT_CODE: 0
-UTC: 2026-08-24T17:42:43Z
+UTC: 2026-08-24T19:09:52Z
 COVERAGE: browser smoke + 320/375/390/430 mobile + coach ops + accessibility + v48 profile/macro safety + 26 user-behavior scenarios
 --- TEST OUTPUT (tail) ---
 
 Running 45 tests using 2 workers
 
-[1/45] qa/accessibility.spec.js:5:1 › FitCoach has unique ids, labelled controls and usable touch targets
-[2/45] qa/browser-smoke.spec.js:3:1 › unified intake opens, generates and persists without page errors
+[1/45] qa/browser-smoke.spec.js:3:1 › unified intake opens, generates and persists without page errors
+[2/45] qa/accessibility.spec.js:5:1 › FitCoach has unique ids, labelled controls and usable touch targets
 [3/45] qa/browser-smoke.spec.js:4:1 › trainer can create a client, record check-in and keep recommendation auditable
 [4/45] qa/coach-ops-v47.spec.js:3:1 › coach operations runtime loads and ranks an urgent client
 [5/45] qa/coach-ops-v47.spec.js:5:1 › adaptive review respects real spacing between weekly weigh-ins
@@ -35,8 +35,8 @@ Running 45 tests using 2 workers
 [25/45] qa/mobile-layout.spec.js:6:120 › FitCoach iPad landscape stays usable without horizontal overflow
 [26/45] qa/user-100-sim.spec.js:25:38 › usuario usa FitCoach a 430px sin scroll horizontal
 [27/45] qa/mobile-layout.spec.js:7:1 › FitCoach mobile layer includes safe areas and reduced overflow policy
-[28/45] qa/user-100-sim.spec.js:26:1 › usuario cambia objetivo del plan
-[29/45] qa/mobile-layout.spec.js:8:1 › FitCoach professional mobile CSS forbids word-by-word collapse
+[28/45] qa/mobile-layout.spec.js:8:1 › FitCoach professional mobile CSS forbids word-by-word collapse
+[29/45] qa/user-100-sim.spec.js:26:1 › usuario cambia objetivo del plan
 [30/45] qa/user-100-sim.spec.js:27:1 › usuario cambia días del plan
 [31/45] qa/user-100-sim.spec.js:28:1 › usuario cambia duración del plan
 [32/45] qa/user-100-sim.spec.js:29:1 › usuario introduce fecha de inicio
@@ -53,4 +53,4 @@ Running 45 tests using 2 workers
 [43/45] qa/user-100-sim.spec.js:40:1 › usuario vuelve Inicio tras visitar varias áreas
 [44/45] qa/user-100-sim.spec.js:41:1 › usuario recarga y conserva el perfil unificado
 [45/45] qa/user-100-sim.spec.js:42:1 › usuario no recibe errores de página al recorrer navegación completa
-  45 passed (35.3s)
+  45 passed (33.9s)
