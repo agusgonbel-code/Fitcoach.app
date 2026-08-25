@@ -54,6 +54,7 @@ function loadReleaseModules(){
     .then(()=>loadScript('client-quality-v41.js?v=6.0.0','client-quality'))
     .then(()=>loadScript('mobile-quality-v41.js?v=6.0.0','mobile-quality'))
     .then(()=>loadScript('unified-intake-v35.js?v=6.0.0','unified-intake'))
+    .then(()=>loadScript('coach-page-v6.js?v=6.0.0','coach-page'))
     .catch(error=>console.error('[FitCoach release modules]',error));
 }
 loadReleaseModules();
