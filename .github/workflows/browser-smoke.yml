@@ -25,26 +25,34 @@ jobs:
           npx playwright install --with-deps chromium
       - name: Start app
         run: python3 -m http.server 4173 >/tmp/fitcoach-http.log 2>&1 &
-      - name: Run smoke, mobile, coach, accessibility, v48 and user-behavior gates
+      - name: Run unit, smoke, mobile, coach, accessibility, v48 and user-behavior gates
         id: gate
         shell: bash
         run: |
           set +e
-          npx playwright test qa/browser-smoke.spec.js qa/mobile-layout.spec.js qa/coach-ops-v47.spec.js qa/accessibility.spec.js qa/quality-v48.spec.js qa/user-100-sim.spec.js --reporter=line > /tmp/fitcoach-gate.log 2>&1
-          code=$?
+          npm test > /tmp/fitcoach-unit.log 2>&1
+          unit_code=$?
+          npx playwright test qa/browser-smoke.spec.js qa/mobile-layout.spec.js qa/coach-ops-v47.spec.js qa/accessibility.spec.js qa/quality-v48.spec.js qa/user-100-sim.spec.js --reporter=line > /tmp/fitcoach-browser.log 2>&1
+          browser_code=$?
           set -e
+          overall_code=0
+          if [ "$unit_code" -ne 0 ] || [ "$browser_code" -ne 0 ]; then overall_code=1; fi
           mkdir -p qa
           {
             echo 'FITCOACH FAST RELEASE GATE'
             echo "SOURCE_COMMIT: $GITHUB_SHA"
-            if [ "$code" -eq 0 ]; then echo 'RESULT: PASS'; else echo 'RESULT: FAIL'; fi
-            echo "EXIT_CODE: $code"
+            if [ "$overall_code" -eq 0 ]; then echo 'RESULT: PASS'; else echo 'RESULT: FAIL'; fi
+            echo "EXIT_CODE: $overall_code"
+            echo "UNIT_EXIT_CODE: $unit_code"
+            echo "BROWSER_EXIT_CODE: $browser_code"
             echo "UTC: $(date -u +'%Y-%m-%dT%H:%M:%SZ')"
-            echo 'COVERAGE: browser smoke + 320/375/390/430 mobile + coach ops + accessibility + v48 profile/macro safety + 26 user-behavior scenarios'
-            echo '--- TEST OUTPUT (tail) ---'
-            tail -n 420 /tmp/fitcoach-gate.log
+            echo 'COVERAGE: unit regressions + browser smoke + 320/375/390/430 mobile + coach ops + accessibility + v48 profile/macro safety + 26 user-behavior scenarios'
+            echo '--- UNIT OUTPUT (tail) ---'
+            tail -n 220 /tmp/fitcoach-unit.log
+            echo '--- BROWSER OUTPUT (tail) ---'
+            tail -n 420 /tmp/fitcoach-browser.log
           } > qa/latest-release-gate.txt
-          echo "code=$code" >> "$GITHUB_OUTPUT"
+          echo "code=$overall_code" >> "$GITHUB_OUTPUT"
       - name: Persist gate evidence
         if: ${{ always() && github.event_name == 'push' && github.ref == 'refs/heads/main' }}
         shell: bash
