@@ -27,6 +27,25 @@
   }
   function filterAllergyUnsafeRecipes(profile,recipes=[],ingredients=[]){return filterPreferenceUnsafeRecipes({...profile,dislikes:''},recipes,ingredients);}
   function validMacros(macros){if(macros==null)return true;if(typeof macros!=='object')return false;return ['kcal','p','c','f'].every(key=>Number.isFinite(Number(macros[key]))&&Number(macros[key])>=0);}
+  function reconcileTargets(targets={}){
+    const kcal=Math.max(0,Math.round(Number(targets.kcal)||0));
+    let protein=Math.max(0,Math.round(Number(targets.protein)||0));
+    let fat=Math.max(0,Math.round(Number(targets.fat)||0));
+    let carbs=Math.max(0,Math.round(Number(targets.carbs)||0));
+    const baseEnergy=protein*4+fat*9;
+    if(baseEnergy>kcal&&baseEnergy>0){
+      const scale=kcal/baseEnergy;
+      protein=Math.floor(protein*scale);
+      fat=Math.floor(fat*scale);
+      carbs=0;
+    }else{
+      carbs=Math.max(0,Math.round((kcal-protein*4-fat*9)/4));
+    }
+    while(protein*4+fat*9+carbs*4>kcal&&carbs>0)carbs-=1;
+    while(protein*4+fat*9+carbs*4>kcal&&fat>0)fat-=1;
+    while(protein*4+fat*9+carbs*4>kcal&&protein>0)protein-=1;
+    return{kcal,protein,carbs,fat};
+  }
   function validateMenuStructure(result,profile={},requestedDays=30){
     const expectedMeals=Math.min(6,Math.max(3,Math.round(Number(profile.meals)||4))),expectedDays=Math.min(30,Math.max(1,Math.round(Number(requestedDays)||30))),days=Array.isArray(result?.days)?result.days:[];
     if(days.length!==expectedDays)throw new Error(`El menú está incompleto: se solicitaron ${expectedDays} días y se generaron ${days.length}.`);
@@ -43,11 +62,11 @@
   }
   function install(engine){
     if(!engine||engine.__qualityV41)return engine;
-    const originalPlan=engine.buildTrainingPlan?.bind(engine),originalMenu=engine.generateMenu?.bind(engine);
+    const originalNutrition=engine.calculateNutrition?.bind(engine),originalPlan=engine.buildTrainingPlan?.bind(engine),originalMenu=engine.generateMenu?.bind(engine);
+    if(typeof originalNutrition==='function')engine.calculateNutrition=input=>{const result=originalNutrition(input);return{...result,targets:reconcileTargets(result.targets),quality:{...(result.quality||{}),macroEnergyReconciled:true}};};
     if(typeof originalPlan==='function')engine.buildTrainingPlan=(input,exercises)=>{const profile=engine.normalizeProfile?engine.normalizeProfile(input):input||{},plan=validateTrainingStructure(originalPlan(input,exercises),profile),start=new Date(),end=new Date(start);end.setDate(end.getDate()+(Number(plan.weeks)||8)*7-1);return{...plan,start:localDateKey(start),end:localDateKey(end),quality:{...(plan.quality||{}),trainingCompleteness:'strict-v45'}};};
     if(typeof originalMenu==='function')engine.generateMenu=(input,targets,recipes=[],ingredients=[],days=30)=>{const profile=engine.normalizeProfile?engine.normalizeProfile(input):input||{},safeRecipes=filterPreferenceUnsafeRecipes(profile,recipes,ingredients);let result=originalMenu(input,targets,safeRecipes,ingredients,days);try{result=validateMenuStructure(result,profile,days);}catch(error){if(allergyTerms(profile).length&&/recetas/.test(String(error?.message||'')))throw new Error('No hay suficientes recetas compatibles con las alergias indicadas para completar todas las comidas. Revisa las restricciones o amplía la biblioteca.');throw error;}return{...result,quality:{...(result.quality||{}),allergyScreening:'ingredient-aware-fail-closed-v44',preferenceScreening:'ingredient-aware-v46',menuCompleteness:'strict-v42',macroPayloadValidation:'strict-v43',localPlanDates:true}};};
     engine.__qualityV41=true;return engine;
   }
-  return{install,localDateKey,allergyTerms,dislikeTerms,filterAllergyUnsafeRecipes,filterPreferenceUnsafeRecipes,hasUnknownIngredients,validMacros,validateMenuStructure,validateTrainingStructure};
+  return{install,localDateKey,allergyTerms,dislikeTerms,filterAllergyUnsafeRecipes,filterPreferenceUnsafeRecipes,hasUnknownIngredients,validMacros,reconcileTargets,validateMenuStructure,validateTrainingStructure};
 });
-

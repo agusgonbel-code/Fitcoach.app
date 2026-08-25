@@ -27,24 +27,37 @@ function installFreshGuard(){
   observer.observe(document.documentElement,{childList:true,subtree:true});
   window.addEventListener('load',()=>{clearFreshDefaults(document);setTimeout(()=>{clearFreshDefaults(document);observer.disconnect();},250);},{once:true});
 }
-function installOnboardingReloadGuard(){
-  document.addEventListener('click',event=>{
-    if(!event.target.closest?.('#fcGenerate'))return;
-    queueMicrotask(()=>{
-      try{
-        if(localStorage.getItem('fitcoach_client_profile_v35')!==null)location.reload();
-      }catch{}
-    });
+function loadScript(src,key){
+  return new Promise((resolve,reject)=>{
+    if(document.querySelector(`script[data-fitcoach-module="${key}"]`)){resolve();return;}
+    const s=document.createElement('script');
+    s.src=src;
+    s.dataset.fitcoachModule=key;
+    s.onload=resolve;
+    s.onerror=()=>reject(new Error(`No se pudo cargar ${src}`));
+    document.head.appendChild(s);
   });
 }
-function loadPrecisionNutrition(){
-  if(document.querySelector('script[data-fitcoach-precision]'))return;
-  const s=document.createElement('script');
-  s.src='nutrition-precision-v6.js?v=6.0.0';
-  s.defer=true;
-  s.dataset.fitcoachPrecision='true';
-  document.head.appendChild(s);
+async function loadReleaseModules(){
+  try{
+    await loadScript('nutrition-precision-v6.js?v=6.0.2','precision');
+    await loadScript('client-engine-v35.js?v=6.0.2','client-engine');
+    await loadScript('client-quality-v41.js?v=6.0.2','client-quality');
+    await loadScript('mobile-quality-v41.js?v=6.0.2','mobile-quality');
+    await loadScript('intake-singleton-v6.js?v=6.0.2','intake-singleton');
+    await loadScript('unified-intake-v35.js?v=6.0.2','unified-intake');
+    await loadScript('intake-layout-v6.js?v=6.0.2','intake-layout');
+    await loadScript('coach-page-v6.js?v=6.0.2','coach-page');
+    globalThis.FitCoachReleaseModulesReady=true;
+    document.dispatchEvent(new CustomEvent('fitcoach:release-ready'));
+  }catch(error){
+    globalThis.FitCoachReleaseModulesReady=false;
+    console.error('[FitCoach release modules]',error);
+  }
 }
-loadPrecisionNutrition();
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>{installFreshGuard();installOnboardingReloadGuard();},{once:true});else{installFreshGuard();installOnboardingReloadGuard();}
+function bootRelease(){
+  installFreshGuard();
+  loadReleaseModules();
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',bootRelease,{once:true});else bootRelease();
 })();

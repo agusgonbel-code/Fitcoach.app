@@ -52,15 +52,18 @@
     };
   }
 
-  function syncLegacy(profile, nutrition, plan, menu) {
+  function persistProfile(profile) {
     write(KEY, profile);
     write('profile', { ...(read('profile',{})), name: profile.name });
     write('fitcoach_nutrition_profile_v34', { sex:profile.sex, age:profile.age, height:profile.height, weight:profile.weight, bodyFat:profile.bodyFat ?? 20, activity:profile.activity, goal:profile.goal, equation:profile.bodyFat!=null?'katch':'mifflin' });
-    write('targets', nutrition.targets);
-    write('fitcoach_active_plan_v33', plan);
-    write('fitcoach_menu_30_v35', menu);
     const mappings = {calcSex:profile.sex,calcAge:profile.age,calcHeight:profile.height,calcWeight:profile.weight,calcFat:profile.bodyFat??'',calcActivity:profile.activity,calcGoal:profile.goal,days:profile.days,minutes:profile.minutes,menuMeals:profile.meals};
     Object.entries(mappings).forEach(([id,v]) => { if ($(id)) $(id).value = String(v); });
+  }
+
+  function syncGenerated(nutrition, plan, menu) {
+    if (nutrition?.targets) write('targets', nutrition.targets);
+    if (plan) write('fitcoach_active_plan_v33', plan);
+    if (menu) write('fitcoach_menu_30_v35', menu);
   }
 
   function renderMenu(menu) {
@@ -72,23 +75,59 @@
 
   function generate() {
     const engine = globalThis.FitCoachClientEngine;
-    if (!engine) return;
-    const profile = engine.normalizeProfile(collect());
-    const nutrition = engine.calculateNutrition(profile);
-    const plan = engine.buildTrainingPlan(profile, window.FITCOACH_DATA?.exercises || []);
-    const menu = engine.generateMenu(profile, nutrition.targets, window.FITCOACH_NUTRITION?.recipes || [], window.FITCOACH_NUTRITION?.ingredients || [], 30);
-    syncLegacy(profile, nutrition, plan, menu);
-    renderMenu(menu);
-    $('fcIntakeResult').innerHTML = `<strong>${nutrition.targets.kcal} kcal · ${nutrition.targets.protein}P · ${nutrition.targets.carbs}C · ${nutrition.targets.fat}G</strong><ul><li>${profile.meals} comidas con kcal repartidas automáticamente</li><li>${profile.days} días de entrenamiento · máximo ${profile.minutes} min</li><li>Plan guardado como perfil único para usuario/cliente</li></ul><div class="fcEvidence">Base: Mifflin/Katch para estimación energética; entrenamiento con volumen, múltiples series y proximidad al fallo según revisiones sistemáticas. No sustituye valoración médica.</div>`;
+    const result = $('fcIntakeResult');
+    if (!engine) {
+      if (result) result.innerHTML = '<strong>No se pudo iniciar el motor</strong><div class="muted">Cierra y vuelve a abrir el perfil.</div>';
+      return;
+    }
+
+    let profile;
+    try {
+      profile = engine.normalizeProfile(collect());
+      persistProfile(profile);
+    } catch (error) {
+      console.error('[FitCoach onboarding profile]', error);
+      if (result) result.innerHTML = `<strong>No se pudo guardar el perfil</strong><div class="muted">${escapeHtml(error?.message || 'Revisa los datos introducidos.')}</div>`;
+      return;
+    }
+
+    let nutrition = null;
+    let plan = null;
+    let menu = null;
+    const warnings = [];
+
+    try { nutrition = engine.calculateNutrition(profile); }
+    catch (error) { warnings.push('nutrición'); console.warn('[FitCoach nutrition generation]', error); }
+
+    try { plan = engine.buildTrainingPlan(profile, window.FITCOACH_DATA?.exercises || []); }
+    catch (error) { warnings.push('entrenamiento'); console.warn('[FitCoach training generation]', error); }
+
+    if (nutrition?.targets) {
+      try { menu = engine.generateMenu(profile, nutrition.targets, window.FITCOACH_NUTRITION?.recipes || [], window.FITCOACH_NUTRITION?.ingredients || [], 30); }
+      catch (error) { warnings.push('menú'); console.warn('[FitCoach menu generation]', error); }
+    } else {
+      warnings.push('menú');
+    }
+
+    syncGenerated(nutrition, plan, menu);
+    if (menu) renderMenu(menu);
+
+    if (result) {
+      const headline = nutrition?.targets
+        ? `${nutrition.targets.kcal} kcal · ${nutrition.targets.protein}P · ${nutrition.targets.carbs}C · ${nutrition.targets.fat}G`
+        : 'Perfil guardado correctamente';
+      const warningHtml = warnings.length
+        ? `<li>Revisar generación de: ${escapeHtml([...new Set(warnings)].join(', '))}</li>`
+        : '<li>Nutrición, entrenamiento y menú generados correctamente</li>';
+      result.innerHTML = `<strong>${headline}</strong><ul><li>${profile.meals} comidas configuradas</li><li>${profile.days} días de entrenamiento · máximo ${profile.minutes} min</li>${warningHtml}<li>Perfil guardado como fuente única</li></ul><div class="fcEvidence">Base: Mifflin/Katch para estimación energética; entrenamiento con volumen, múltiples series y proximidad al fallo según revisiones sistemáticas. No sustituye valoración médica.</div>`;
+    }
+
     setTimeout(() => {
       if ($('fcIntakeModal')) $('fcIntakeModal').hidden = true;
-      document.querySelectorAll('main .page').forEach(page=>page.classList.toggle('active',page.id==='nutrition'));
-      document.querySelectorAll('nav [data-go]').forEach(button=>button.classList.toggle('active',button.dataset.go==='nutrition'));
-      document.querySelectorAll('#nutrition .nut').forEach(panel=>panel.hidden=panel.id!=='menus');
-      document.querySelectorAll('#nutrition [data-tab]').forEach(button=>button.classList.toggle('active',button.dataset.tab==='menus'));
-      renderMenu(menu);
-      setTimeout(()=>renderMenu(menu),250);
-    }, 350);
+      document.querySelectorAll('main .page').forEach(page=>page.classList.toggle('active',page.id==='home'));
+      document.querySelectorAll('nav [data-go]').forEach(button=>button.classList.toggle('active',button.dataset.go==='home'));
+      if (menu) { renderMenu(menu); setTimeout(()=>renderMenu(menu),250); }
+    }, 120);
   }
 
   function install() {
@@ -111,5 +150,3 @@
   const boot=()=>{ if(!globalThis.FitCoachClientEngine){setTimeout(boot,50);return;} document.readyState==='loading'?document.addEventListener('DOMContentLoaded',install,{once:true}):install(); };
   boot();
 })();
-
-
