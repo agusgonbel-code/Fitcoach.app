@@ -49,6 +49,8 @@ jobs:
             echo 'COVERAGE: unit regressions + browser smoke + 320/375/390/430 mobile + coach ops + accessibility + v48 profile/macro safety + 26 user-behavior scenarios'
             echo '--- UNIT OUTPUT (tail) ---'
             tail -n 220 /tmp/fitcoach-unit.log
+            echo '--- BROWSER OUTPUT (head) ---'
+            head -n 360 /tmp/fitcoach-browser.log
             echo '--- BROWSER OUTPUT (tail) ---'
             tail -n 420 /tmp/fitcoach-browser.log
           } > qa/latest-release-gate.txt
