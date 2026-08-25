@@ -45,6 +45,6 @@ if(root){
     queueMicrotask(()=>{scheduled=false;dedupeIntake();});
   });
   observer.observe(root,{childList:true,subtree:true});
-  setTimeout(()=>{dedupeIntake();observer.disconnect();},1500);
+  globalThis.FitCoachIntakeDedupeObserver=observer;
 }
 })();
