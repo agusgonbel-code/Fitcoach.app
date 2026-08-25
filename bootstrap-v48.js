@@ -37,6 +37,14 @@ function installOnboardingReloadGuard(){
     });
   });
 }
+function loadPrecisionNutrition(){
+  if(document.querySelector('script[data-fitcoach-precision]'))return;
+  const s=document.createElement('script');
+  s.src='nutrition-precision-v6.js?v=6.0.0';
+  s.defer=true;
+  s.dataset.fitcoachPrecision='true';
+  document.head.appendChild(s);
+}
+loadPrecisionNutrition();
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>{installFreshGuard();installOnboardingReloadGuard();},{once:true});else{installFreshGuard();installOnboardingReloadGuard();}
 })();
-
