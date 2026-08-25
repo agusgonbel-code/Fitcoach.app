@@ -1,9 +1,9 @@
 FITCOACH USER SIMULATION
-SOURCE_COMMIT: db709dff2a55f1c6f862160d23804f80f7e1553a
+SOURCE_COMMIT: 1d1d3a9c36c87668a285bc37988b1c7315866dcc
 RESULT: PASS
 EXIT_CODE: 0
 SCENARIOS: 26
-UTC: 2026-08-25T09:16:35Z
+UTC: 2026-08-25T15:07:21Z
 
 Running 27 tests using 1 worker
 
@@ -34,4 +34,4 @@ Running 27 tests using 1 worker
 [25/27] qa/user-100-sim.spec.js:40:1 › usuario vuelve Inicio tras visitar varias áreas
 [26/27] qa/user-100-sim.spec.js:41:1 › usuario recarga y conserva el perfil unificado
 [27/27] qa/user-100-sim.spec.js:42:1 › usuario no recibe errores de página al recorrer navegación completa
-  27 passed (27.7s)
+  27 passed (28.9s)
