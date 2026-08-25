@@ -45,6 +45,7 @@ async function loadReleaseModules(){
     await loadScript('client-quality-v41.js?v=6.0.1','client-quality');
     await loadScript('mobile-quality-v41.js?v=6.0.1','mobile-quality');
     await loadScript('unified-intake-v35.js?v=6.0.1','unified-intake');
+    await loadScript('intake-layout-v6.js?v=6.0.1','intake-layout');
     await loadScript('coach-page-v6.js?v=6.0.1','coach-page');
     globalThis.FitCoachReleaseModulesReady=true;
     document.dispatchEvent(new CustomEvent('fitcoach:release-ready'));
