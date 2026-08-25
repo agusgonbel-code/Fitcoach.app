@@ -4,8 +4,9 @@ globalThis.FitCoachIntakeSingletonV6=true;
 
 const originalAppend=Element.prototype.append;
 const originalPrepend=Element.prototype.prepend;
+const originalAppendChild=Node.prototype.appendChild;
 
-function filterNodes(target,nodes,mode){
+function filterNodes(target,nodes){
   return nodes.filter(node=>{
     if(!(node instanceof Element))return true;
     if(node.id==='fcIntakeModal'&&document.getElementById('fcIntakeModal'))return false;
@@ -18,13 +19,29 @@ function filterNodes(target,nodes,mode){
   });
 }
 
+function isUnifiedIntakeScript(node){
+  return node instanceof HTMLScriptElement && /(?:^|\/)unified-intake-v35\.js(?:\?|$)/.test(node.src||'');
+}
+
+function existingUnifiedScript(exclude){
+  return [...document.scripts].find(script=>script!==exclude&&/(?:^|\/)unified-intake-v35\.js(?:\?|$)/.test(script.src||''));
+}
+
+Node.prototype.appendChild=function(node){
+  if(isUnifiedIntakeScript(node)&&existingUnifiedScript(node)){
+    queueMicrotask(()=>node.dispatchEvent(new Event('load')));
+    return node;
+  }
+  return originalAppendChild.call(this,node);
+};
+
 Element.prototype.append=function(...nodes){
-  const allowed=filterNodes(this,nodes,'append');
+  const allowed=filterNodes(this,nodes);
   if(allowed.length)return originalAppend.apply(this,allowed);
 };
 
 Element.prototype.prepend=function(...nodes){
-  const allowed=filterNodes(this,nodes,'prepend');
+  const allowed=filterNodes(this,nodes);
   if(allowed.length)return originalPrepend.apply(this,allowed);
 };
 })();
