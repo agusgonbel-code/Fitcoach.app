@@ -1,265 +1,265 @@
 FITCOACH FAST RELEASE GATE
-SOURCE_COMMIT: e014309945bd12838335432a9278028348a26031
+SOURCE_COMMIT: c36236ed56861cf94bd8c2ef554741a990837c0f
 RESULT: PASS
 EXIT_CODE: 0
 UNIT_EXIT_CODE: 0
 BROWSER_EXIT_CODE: 0
-UTC: 2026-08-25T01:28:23Z
+UTC: 2026-08-25T01:30:00Z
 COVERAGE: unit regressions + browser smoke + 320/375/390/430 mobile + coach ops + accessibility + v48 profile/macro safety + 26 user-behavior scenarios
 --- UNIT OUTPUT (tail) ---
-# Subtest: applies accepted volume decision without dropping exercises
-ok 23 - applies accepted volume decision without dropping exercises
-  ---
-  duration_ms: 1.035113
-  type: 'test'
-  ...
 # Subtest: trainer can manage a roster and due check-ins
 ok 24 - trainer can manage a roster and due check-ins
   ---
-  duration_ms: 13.940868
+  duration_ms: 9.421486
   type: 'test'
   ...
 # Subtest: check-in produces an auditable recommendation and accepted decision
 ok 25 - check-in produces an auditable recommendation and accepted decision
   ---
-  duration_ms: 2.756326
+  duration_ms: 1.778498
   type: 'test'
   ...
 # Subtest: rejected recommendation never changes targets
 ok 26 - rejected recommendation never changes targets
   ---
-  duration_ms: 1.268168
+  duration_ms: 0.652605
   type: 'test'
   ...
 # Daily coach tests passed
 # Subtest: tests/daily-coach.test.mjs
 ok 7 - tests/daily-coach.test.mjs
   ---
-  duration_ms: 583.927506
+  duration_ms: 91.72799
   type: 'test'
   ...
 # Subtest: crea cuatro sesiones consecutivas de lunes a jueves
 ok 28 - crea cuatro sesiones consecutivas de lunes a jueves
   ---
-  duration_ms: 2.382758
+  duration_ms: 1.608317
   type: 'test'
   ...
 # Subtest: todas las sesiones respetan el límite temporal
 ok 29 - todas las sesiones respetan el límite temporal
   ---
-  duration_ms: 0.379478
+  duration_ms: 0.262055
   type: 'test'
   ...
 # Subtest: prescribe volumen, RIR, descanso y alternativa en cada ejercicio
 ok 30 - prescribe volumen, RIR, descanso y alternativa en cada ejercicio
   ---
-  duration_ms: 0.403313
+  duration_ms: 0.273773
   type: 'test'
   ...
 # Subtest: incluye progresión y respaldo científico
 ok 31 - incluye progresión y respaldo científico
   ---
-  duration_ms: 0.408914
+  duration_ms: 0.275655
   type: 'test'
   ...
 # Subtest: recarga la aplicación tras activar para sincronizar el estado interno
 ok 32 - recarga la aplicación tras activar para sincronizar el estado interno
   ---
-  duration_ms: 0.285563
+  duration_ms: 0.186522
   type: 'test'
   ...
 # Subtest: el observador se limita al entrenamiento y no observa todo body
 ok 33 - el observador se limita al entrenamiento y no observa todo body
   ---
-  duration_ms: 0.235059
+  duration_ms: 0.150638
   type: 'test'
   ...
 # Subtest: personaliza nutrición y entrenamiento desde un perfil completo
 ok 34 - personaliza nutrición y entrenamiento desde un perfil completo
   ---
-  duration_ms: 3.960184
+  duration_ms: 2.907307
   type: 'test'
   ...
 # Subtest: normaliza límites y conserva información libre
 ok 35 - normaliza límites y conserva información libre
   ---
-  duration_ms: 0.241801
+  duration_ms: 0.158238
   type: 'test'
   ...
 # Subtest: reconcilia macros en perfiles extremos sin superar las kcal objetivo
 ok 36 - reconcilia macros en perfiles extremos sin superar las kcal objetivo
   ---
-  duration_ms: 0.527975
+  duration_ms: 0.325682
   type: 'test'
   ...
 # Subtest: escapa entradas del perfil antes de interpolarlas en HTML
 ok 37 - escapa entradas del perfil antes de interpolarlas en HTML
   ---
-  duration_ms: 0.291354
+  duration_ms: 0.179841
   type: 'test'
   ...
 # Local date tests passed
 # Subtest: tests/local-date.test.mjs
 ok 10 - tests/local-date.test.mjs
   ---
-  duration_ms: 63.891517
+  duration_ms: 34.287308
   type: 'test'
   ...
 # Subtest: la distribución nativa conserva identidad, privacidad y compilación verificable
 ok 39 - la distribución nativa conserva identidad, privacidad y compilación verificable
   ---
-  duration_ms: 1.578647
+  duration_ms: 1.607095
   type: 'test'
   ...
 # Subtest: tests/nutrition-log.test.mjs
 ok 12 - tests/nutrition-log.test.mjs
   ---
-  duration_ms: 55.435242
+  duration_ms: 51.882072
   type: 'test'
   ...
 # Nutrition profile tests passed
 # Subtest: tests/nutrition-profile.test.mjs
 ok 13 - tests/nutrition-profile.test.mjs
   ---
-  duration_ms: 42.058508
+  duration_ms: 31.758862
   type: 'test'
   ...
 # Photo storage tests passed
 # Subtest: tests/photo-storage.test.mjs
 ok 14 - tests/photo-storage.test.mjs
   ---
-  duration_ms: 42.419328
+  duration_ms: 38.555868
   type: 'test'
   ...
 # Subtest: FitCoach v5 loads the professional presentation layer
 ok 43 - FitCoach v5 loads the professional presentation layer
   ---
-  duration_ms: 0.88394
+  duration_ms: 0.791294
   type: 'test'
   ...
 # Subtest: professional layer keeps mobile, focus and reduced-motion protections
 ok 44 - professional layer keeps mobile, focus and reduced-motion protections
   ---
-  duration_ms: 0.229459
+  duration_ms: 0.182525
   type: 'test'
   ...
 # Evidence-based progression tests passed
 # Subtest: tests/progression-engine.test.mjs
 ok 16 - tests/progression-engine.test.mjs
   ---
-  duration_ms: 48.867597
+  duration_ms: 36.295893
   type: 'test'
   ...
 # Subtest: fast release gate includes unit regressions and browser coverage in one verdict
 ok 46 - fast release gate includes unit regressions and browser coverage in one verdict
   ---
-  duration_ms: 0.948501
+  duration_ms: 0.861419
+  type: 'test'
+  ...
+# Subtest: release stress workflow remains dispatchable and keeps the 1000x matrix
+ok 47 - release stress workflow remains dispatchable and keeps the 1000x matrix
+  ---
+  duration_ms: 1.012418
   type: 'test'
   ...
 # Subtest: service worker no se activa con un app shell offline incompleto
-ok 47 - service worker no se activa con un app shell offline incompleto
+ok 48 - service worker no se activa con un app shell offline incompleto
   ---
-  duration_ms: 1.374265
+  duration_ms: 0.869182
   type: 'test'
   ...
 # Subtest: navegación offline conserva fallback al index cacheado
-ok 48 - navegación offline conserva fallback al index cacheado
+ok 49 - navegación offline conserva fallback al index cacheado
   ---
-  duration_ms: 0.269804
+  duration_ms: 0.15849
   type: 'test'
   ...
 # Subtest: stable week recommends maintaining
-ok 49 - stable week recommends maintaining
+ok 50 - stable week recommends maintaining
   ---
-  duration_ms: 1.373083
+  duration_ms: 1.421685
   type: 'test'
   ...
 # Subtest: high effort plus falling performance triggers deload
-ok 50 - high effort plus falling performance triggers deload
+ok 51 - high effort plus falling performance triggers deload
   ---
-  duration_ms: 0.480627
+  duration_ms: 0.460445
   type: 'test'
   ...
 # Subtest: high RIR with stable performance permits conservative load increase
-ok 51 - high RIR with stable performance permits conservative load increase
+ok 52 - high RIR with stable performance permits conservative load increase
   ---
-  duration_ms: 1.041554
+  duration_ms: 1.532513
   type: 'test'
   ...
 # Subtest: nutrition adherence sums meals by day instead of comparing one meal with daily calories
-ok 52 - nutrition adherence sums meals by day instead of comparing one meal with daily calories
+ok 53 - nutrition adherence sums meals by day instead of comparing one meal with daily calories
   ---
-  duration_ms: 0.506075
+  duration_ms: 0.596941
   type: 'test'
   ...
 # Subtest: calorie coaching holds when nutrition or weight evidence is insufficient
-ok 53 - calorie coaching holds when nutrition or weight evidence is insufficient
+ok 54 - calorie coaching holds when nutrition or weight evidence is insufficient
   ---
-  duration_ms: 0.446634
+  duration_ms: 0.386203
   type: 'test'
   ...
 # Subtest: weight trend is normalized per week and enables conservative loss adjustment with enough data
-ok 54 - weight trend is normalized per week and enables conservative loss adjustment with enough data
+ok 55 - weight trend is normalized per week and enables conservative loss adjustment with enough data
   ---
-  duration_ms: 0.490927
+  duration_ms: 0.579574
   type: 'test'
   ...
 # Workout draft tests passed
 # Subtest: tests/workout-draft.test.mjs
-ok 20 - tests/workout-draft.test.mjs
+ok 21 - tests/workout-draft.test.mjs
   ---
-  duration_ms: 58.058795
+  duration_ms: 52.289226
   type: 'test'
   ...
 # Workout save validation tests passed
 # Subtest: tests/workout-save.test.mjs
-ok 21 - tests/workout-save.test.mjs
+ok 22 - tests/workout-save.test.mjs
   ---
-  duration_ms: 35.28557
+  duration_ms: 41.644368
   type: 'test'
   ...
-1..56
-# tests 56
+1..57
+# tests 57
 # suites 0
-# pass 56
+# pass 57
 # fail 0
 # cancelled 0
 # skipped 0
 # todo 0
-# duration_ms 748.588215
+# duration_ms 399.134192
 --- BROWSER OUTPUT (tail) ---
 
 Running 45 tests using 2 workers
 
-[1/45] qa/browser-smoke.spec.js:3:1 › unified intake opens, generates and persists without page errors
-[2/45] qa/accessibility.spec.js:5:1 › FitCoach has unique ids, labelled controls and usable touch targets
+[1/45] qa/accessibility.spec.js:5:1 › FitCoach has unique ids, labelled controls and usable touch targets
+[2/45] qa/browser-smoke.spec.js:3:1 › unified intake opens, generates and persists without page errors
 [3/45] qa/browser-smoke.spec.js:4:1 › trainer can create a client, record check-in and keep recommendation auditable
 [4/45] qa/accessibility.spec.js:33:1 › FitCoach exposes keyboard focus indication and reduced-motion-safe CSS
 [5/45] qa/coach-ops-v47.spec.js:3:1 › coach operations runtime loads and ranks an urgent client
-[6/45] qa/mobile-layout.spec.js:5:39 › FitCoach fits 320px without horizontal overflow
-[7/45] qa/coach-ops-v47.spec.js:5:1 › adaptive review respects real spacing between weekly weigh-ins
+[6/45] qa/coach-ops-v47.spec.js:5:1 › adaptive review respects real spacing between weekly weigh-ins
+[7/45] qa/mobile-layout.spec.js:5:39 › FitCoach fits 320px without horizontal overflow
 [8/45] qa/quality-v48.spec.js:7:1 › fresh FitCoach launch never injects personal identity or anthropometrics
 [9/45] qa/quality-v48.spec.js:20:1 › FitCoach rejects unsupported low calorie calculations before persisting targets
 [10/45] qa/quality-v48.spec.js:38:1 › FitCoach accepts normal macro inputs and labels form controls for assistive tech
-[11/45] qa/mobile-layout.spec.js:5:39 › FitCoach fits 375px without horizontal overflow
-[12/45] qa/user-100-sim.spec.js:24:161 › usuario navega a Inicio sin romper estado
+[11/45] qa/user-100-sim.spec.js:24:161 › usuario navega a Inicio sin romper estado
+[12/45] qa/mobile-layout.spec.js:5:39 › FitCoach fits 375px without horizontal overflow
 [13/45] qa/user-100-sim.spec.js:24:161 › usuario navega a Plan sin romper estado
-[14/45] qa/mobile-layout.spec.js:5:39 › FitCoach fits 390px without horizontal overflow
-[15/45] qa/user-100-sim.spec.js:24:161 › usuario navega a Entrenar sin romper estado
-[16/45] qa/mobile-layout.spec.js:5:39 › FitCoach fits 430px without horizontal overflow
-[17/45] qa/user-100-sim.spec.js:24:161 › usuario navega a Nutrición sin romper estado
+[14/45] qa/user-100-sim.spec.js:24:161 › usuario navega a Entrenar sin romper estado
+[15/45] qa/mobile-layout.spec.js:5:39 › FitCoach fits 390px without horizontal overflow
+[16/45] qa/user-100-sim.spec.js:24:161 › usuario navega a Nutrición sin romper estado
+[17/45] qa/mobile-layout.spec.js:5:39 › FitCoach fits 430px without horizontal overflow
 [18/45] qa/user-100-sim.spec.js:24:161 › usuario navega a Progreso sin romper estado
-[19/45] qa/mobile-layout.spec.js:6:120 › FitCoach iPhone landscape stays usable without horizontal overflow
-[20/45] qa/user-100-sim.spec.js:24:161 › usuario navega a Ajustes sin romper estado
-[21/45] qa/mobile-layout.spec.js:6:120 › FitCoach iPad portrait stays usable without horizontal overflow
-[22/45] qa/user-100-sim.spec.js:25:38 › usuario usa FitCoach a 320px sin scroll horizontal
+[19/45] qa/user-100-sim.spec.js:24:161 › usuario navega a Ajustes sin romper estado
+[20/45] qa/mobile-layout.spec.js:6:120 › FitCoach iPhone landscape stays usable without horizontal overflow
+[21/45] qa/user-100-sim.spec.js:25:38 › usuario usa FitCoach a 320px sin scroll horizontal
+[22/45] qa/mobile-layout.spec.js:6:120 › FitCoach iPad portrait stays usable without horizontal overflow
 [23/45] qa/user-100-sim.spec.js:25:38 › usuario usa FitCoach a 375px sin scroll horizontal
-[24/45] qa/mobile-layout.spec.js:6:120 › FitCoach iPad landscape stays usable without horizontal overflow
-[25/45] qa/user-100-sim.spec.js:25:38 › usuario usa FitCoach a 390px sin scroll horizontal
+[24/45] qa/user-100-sim.spec.js:25:38 › usuario usa FitCoach a 390px sin scroll horizontal
+[25/45] qa/mobile-layout.spec.js:6:120 › FitCoach iPad landscape stays usable without horizontal overflow
 [26/45] qa/user-100-sim.spec.js:25:38 › usuario usa FitCoach a 430px sin scroll horizontal
-[27/45] qa/mobile-layout.spec.js:7:1 › FitCoach mobile layer includes safe areas and reduced overflow policy
-[28/45] qa/mobile-layout.spec.js:8:1 › FitCoach professional mobile CSS forbids word-by-word collapse
-[29/45] qa/user-100-sim.spec.js:26:1 › usuario cambia objetivo del plan
+[27/45] qa/user-100-sim.spec.js:26:1 › usuario cambia objetivo del plan
+[28/45] qa/mobile-layout.spec.js:7:1 › FitCoach mobile layer includes safe areas and reduced overflow policy
+[29/45] qa/mobile-layout.spec.js:8:1 › FitCoach professional mobile CSS forbids word-by-word collapse
 [30/45] qa/user-100-sim.spec.js:27:1 › usuario cambia días del plan
 [31/45] qa/user-100-sim.spec.js:28:1 › usuario cambia duración del plan
 [32/45] qa/user-100-sim.spec.js:29:1 › usuario introduce fecha de inicio
@@ -276,4 +276,4 @@ Running 45 tests using 2 workers
 [43/45] qa/user-100-sim.spec.js:40:1 › usuario vuelve Inicio tras visitar varias áreas
 [44/45] qa/user-100-sim.spec.js:41:1 › usuario recarga y conserva el perfil unificado
 [45/45] qa/user-100-sim.spec.js:42:1 › usuario no recibe errores de página al recorrer navegación completa
-  45 passed (35.2s)
+  45 passed (30.0s)
