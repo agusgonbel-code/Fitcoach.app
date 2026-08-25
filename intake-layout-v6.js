@@ -19,4 +19,32 @@ style.textContent=`
 }
 `;
 document.head.appendChild(style);
+
+function keepSingle(selector){
+  const nodes=[...document.querySelectorAll(selector)];
+  if(nodes.length<2)return;
+  nodes.slice(1).forEach(node=>node.remove());
+}
+function dedupeIntake(){
+  keepSingle('#fcIntakeModal');
+  keepSingle('#fcIntakeStyle');
+  ['#home','#settings'].forEach(scope=>{
+    const root=document.querySelector(scope);
+    if(!root)return;
+    const launches=[...root.querySelectorAll('.fcIntakeLaunch')];
+    launches.slice(1).forEach(node=>node.remove());
+  });
+}
+dedupeIntake();
+const root=document.body||document.documentElement;
+if(root){
+  let scheduled=false;
+  const observer=new MutationObserver(()=>{
+    if(scheduled)return;
+    scheduled=true;
+    queueMicrotask(()=>{scheduled=false;dedupeIntake();});
+  });
+  observer.observe(root,{childList:true,subtree:true});
+  setTimeout(()=>{dedupeIntake();observer.disconnect();},1500);
+}
 })();
