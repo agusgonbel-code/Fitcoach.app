@@ -52,6 +52,7 @@ jobs:
             echo '--- BROWSER OUTPUT (tail) ---'
             tail -n 420 /tmp/fitcoach-browser.log
           } > qa/latest-release-gate.txt
+          cat qa/latest-release-gate.txt
           echo "code=$overall_code" >> "$GITHUB_OUTPUT"
       - name: Persist gate evidence
         if: ${{ always() && github.event_name == 'push' && github.ref == 'refs/heads/main' }}
