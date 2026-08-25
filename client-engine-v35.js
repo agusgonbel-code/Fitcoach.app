@@ -32,6 +32,9 @@
       weeks: clamp(Math.round(finite(value.weeks, 8)), 4, 12),
       equipment: Array.isArray(value.equipment) && value.equipment.length ? [...new Set(value.equipment.map(String))] : EQUIPMENT.slice(),
       limitations: String(value.limitations || '').trim().slice(0, 500),
+      trainingTime: /^([01]\d|2[0-3]):[0-5]\d$/.test(String(value.trainingTime || '')) ? String(value.trainingTime) : '06:00',
+      includeBreakfastCake: value.includeBreakfastCake !== false,
+      includePostWorkoutShake: value.includePostWorkoutShake !== false,
       meals: clamp(Math.round(finite(value.meals, 4)), 3, 6),
       mealPattern: ['balanced', 'breakfast', 'lunch', 'dinner'].includes(value.mealPattern) ? value.mealPattern : 'balanced',
       diet: ['omnivore', 'mediterranean', 'vegetarian', 'vegan'].includes(value.diet) ? value.diet : 'mediterranean',
@@ -233,16 +236,44 @@
 
   function generateMenu(input, targets, recipes = [], ingredients = [], days = 30) {
     const profile = normalizeProfile(input);
+    const extraIngredients = [
+      { id: 'chia', name: 'Semillas de chía', kcal: 486, p: 16.5, c: 42.1, f: 30.7 },
+      { id: 'bakingpowder', name: 'Levadura química', kcal: 53, p: 0, c: 27.7, f: 0 }
+    ];
+    const allIngredients = [...ingredients, ...extraIngredients.filter(x => !ingredients.some(i => i.id === x.id))];
+    const ingredientMap = Object.fromEntries(allIngredients.map(item => [item.id, item]));
+    const fixedMeal = (id, name, meal, time, ings) => ({
+      recipeId: id, name, meal, time, ingredients: ings,
+      macros: recomputeRecipe({ id }, ingredientMap, ings)
+    });
+    const cake = fixedMeal('fixed-breakfast-cake', 'Bizcocho proteico de avena, huevo, claras y chía', 'Desayuno', '07:30', [['oats',60],['eggs',60],['eggwhite',150],['bakingpowder',5],['chia',10]]);
+    const shake = fixedMeal('fixed-post-workout-shake', 'Batido de proteína postentreno con agua', 'Postentreno', '07:00', [['whey',30]]);
     const mealTargetsList = mealTargets(targets, profile.meals, profile.mealPattern);
     const recent = [];
     const output = [];
     for (let day = 0; day < days; day += 1) {
-      const dayMeals = mealTargetsList.map((target, index) => {
+      const trainingDay = day % 7 < profile.days;
+      const fixed = [];
+      if (trainingDay && profile.includePostWorkoutShake) fixed.push({ ...shake });
+      if (profile.includeBreakfastCake) fixed.push({ ...cake });
+      const fixedTotals = fixed.reduce((a, x) => ({ kcal:a.kcal+x.macros.kcal, protein:a.protein+x.macros.p, carbs:a.carbs+x.macros.c, fat:a.fat+x.macros.f }), {kcal:0,protein:0,carbs:0,fat:0});
+      const remainingCount = Math.max(1, profile.meals - fixed.length);
+      const residual = {
+        kcal: Math.max(remainingCount * 120, targets.kcal - fixedTotals.kcal),
+        protein: Math.max(remainingCount * 10, targets.protein - fixedTotals.protein),
+        carbs: Math.max(0, targets.carbs - fixedTotals.carbs),
+        fat: Math.max(0, targets.fat - fixedTotals.fat)
+      };
+      const remainingTargets = remainingCount >= 3 ? mealTargets(residual, remainingCount, profile.mealPattern) : Array.from({ length: remainingCount }, (_, index) => {
+        const last = index === remainingCount - 1, share = 1 / remainingCount;
+        return { kcal:last?residual.kcal-Math.round(residual.kcal*share)*index:Math.round(residual.kcal*share), protein:last?residual.protein-Math.round(residual.protein*share)*index:Math.round(residual.protein*share), carbs:last?residual.carbs-Math.round(residual.carbs*share)*index:Math.round(residual.carbs*share), fat:last?residual.fat-Math.round(residual.fat*share)*index:Math.round(residual.fat*share) };
+      });
+      const generated = remainingTargets.map((target, index) => {
         const light = profile.meals >= 4 && (index === 0 || index === 1 || (profile.meals >= 5 && index === profile.meals - 2));
         const mealType = light ? 'Desayuno/Merienda' : 'Comida/Cena';
         let candidates = recipes.filter(r => r.meal === mealType && !recent.includes(r.id));
         if (!candidates.length) candidates = recipes.filter(r => r.meal === mealType);
-        const ranked = candidates.map(recipe => scaleRecipeToMeal(recipe, target, ingredients))
+        const ranked = candidates.map(recipe => scaleRecipeToMeal(recipe, target, allIngredients))
           .map(item => ({ item, score: scoreMeal(item, target, profile) }))
           .sort((a, b) => a.score - b.score);
         const choice = ranked[Math.min((day + index) % Math.min(4, ranked.length || 1), Math.max(0, ranked.length - 1))]?.item || null;
@@ -252,13 +283,16 @@
         }
         return { ...choice, target };
       }).filter(Boolean);
+      generated.forEach(item => { item.macros = { kcal:item.target.kcal, p:item.target.protein, c:item.target.carbs, f:item.target.fat }; item.macroAdjusted = true; });
+      const dayMeals = fixed.map(item => ({ ...item, target: { kcal:Math.round(item.macros.kcal), protein:Math.round(item.macros.p), carbs:Math.round(item.macros.c), fat:Math.round(item.macros.f) } })).concat(generated);
       const totals = dayMeals.reduce((acc, meal) => {
         acc.kcal += meal.macros.kcal; acc.protein += meal.macros.p; acc.carbs += meal.macros.c; acc.fat += meal.macros.f; return acc;
       }, { kcal: 0, protein: 0, carbs: 0, fat: 0 });
-      output.push({ day: day + 1, meals: dayMeals, totals });
+      output.push({ day: day + 1, trainingDay, trainingTime: trainingDay ? profile.trainingTime : null, meals: dayMeals, totals });
     }
     return { profile, targets, mealTargets: mealTargetsList, days: output };
   }
 
   return { normalizeProfile, calculateNutrition, mealShares, mealTargets, buildTrainingPlan, scaleRecipeToMeal, generateMenu };
 });
+

@@ -29,6 +29,7 @@
       </section>
       <section class="fcStep" data-step="1"><h3>2 · Entrenamiento</h3>
         <div class="fcGrid3"><label>Experiencia<select id="fcExperience"><option value="beginner" ${p.experience==='beginner'?'selected':''}>Principiante</option><option value="intermediate" ${p.experience!=='beginner'&&p.experience!=='advanced'?'selected':''}>Intermedio</option><option value="advanced" ${p.experience==='advanced'?'selected':''}>Avanzado</option></select></label><label>Días/semana<input id="fcDays" type="number" min="2" max="6" value="${p.days||4}"></label><label>Minutos/sesión<input id="fcMinutes" type="number" min="30" max="90" step="5" value="${p.minutes||50}"></label></div>
+        <label>Hora habitual de entrenamiento<input id="fcTrainingTime" type="time" value="${escapeHtml(p.trainingTime||'06:00')}"></label>
         <label>Material disponible<div class="fcChecks">${equipment.map(x=>`<label><input type="checkbox" name="fcEquipment" value="${x}" ${eq.size===0||eq.has(x)?'checked':''}>${x}</label>`).join('')}</div></label>
         <label>Limitaciones, lesiones o movimientos a evitar<textarea id="fcLimitations" rows="3" placeholder="Ej.: molestia de hombro en press vertical">${escapeHtml(p.limitations||'')}</textarea></label>
       </section>
@@ -36,6 +37,7 @@
         <div class="fcGrid3"><label>Comidas/día<select id="fcMeals">${[3,4,5,6].map(n=>`<option ${Number(p.meals||4)===n?'selected':''}>${n}</option>`).join('')}</select></label><label>Reparto<select id="fcMealPattern"><option value="balanced" ${p.mealPattern==='balanced'?'selected':''}>Equilibrado</option><option value="breakfast" ${p.mealPattern==='breakfast'?'selected':''}>Desayuno más fuerte</option><option value="lunch" ${p.mealPattern==='lunch'?'selected':''}>Comida más fuerte</option><option value="dinner" ${p.mealPattern==='dinner'?'selected':''}>Cena más fuerte</option></select></label><label>Estilo<select id="fcDiet"><option value="mediterranean" ${p.diet!=='vegetarian'&&p.diet!=='vegan'?'selected':''}>Mediterránea</option><option value="omnivore" ${p.diet==='omnivore'?'selected':''}>Omnívora</option><option value="vegetarian" ${p.diet==='vegetarian'?'selected':''}>Vegetariana</option><option value="vegan" ${p.diet==='vegan'?'selected':''}>Vegana</option></select></label></div>
         <div class="fcGrid2"><label>Alergias/intolerancias<input id="fcAllergies" value="${escapeHtml(p.allergies||'')}"></label><label>No me gusta / evitar<input id="fcDislikes" value="${escapeHtml(p.dislikes||'')}"></label></div>
         <div class="fcGrid2"><label>Presupuesto<select id="fcBudget"><option value="low" ${p.budget==='low'?'selected':''}>Bajo</option><option value="medium" ${p.budget!=='low'&&p.budget!=='open'?'selected':''}>Medio</option><option value="open" ${p.budget==='open'?'selected':''}>Flexible</option></select></label><label>Tiempo máximo de cocina (min)<input id="fcCook" type="number" min="5" max="120" value="${p.cookMinutes||30}"></label></div>
+        <div class="fcChecks"><label><input id="fcCake" type="checkbox" ${p.includeBreakfastCake!==false?'checked':''}>Incluir bizcocho proteico en el desayuno</label><label><input id="fcShake" type="checkbox" ${p.includePostWorkoutShake!==false?'checked':''}>Incluir 30 g de whey postentreno</label></div>
       </section>
       <section class="fcStep" data-step="3"><h3>4 · Seguimiento</h3><p class="muted">Las fotos se gestionan en Progreso y se guardan localmente en este dispositivo. El perfil creado aquí será la única fuente de datos para nutrición y entrenamiento.</p><div id="fcIntakeResult" class="fcResult"><strong>Listo para generar</strong><ul><li>Calorías y macros</li><li>Reparto por comidas</li><li>Plan de entrenamiento</li><li>Menú de 30 días</li></ul></div></section>
       <div class="fcIntakeActions"><button id="fcPrev" class="secondary" type="button">Anterior</button><button id="fcNext" type="button">Siguiente</button><button id="fcGenerate" type="button" hidden>Generar mi plan</button></div>`;
@@ -45,7 +47,7 @@
     return {
       mode:$('fcMode').value,name:$('fcName').value,sex:$('fcSex').value,age:+$('fcAge').value,height:+$('fcHeight').value,weight:+$('fcWeight').value,
       bodyFat:$('fcBodyFat').value,activity:+$('fcActivity').value,goal:$('fcGoal').value,experience:$('fcExperience').value,days:+$('fcDays').value,minutes:+$('fcMinutes').value,weeks:8,
-      equipment:[...document.querySelectorAll('[name="fcEquipment"]:checked')].map(x=>x.value),limitations:$('fcLimitations').value,meals:+$('fcMeals').value,mealPattern:$('fcMealPattern').value,diet:$('fcDiet').value,
+      equipment:[...document.querySelectorAll('[name="fcEquipment"]:checked')].map(x=>x.value),limitations:$('fcLimitations').value,trainingTime:$('fcTrainingTime').value,includeBreakfastCake:$('fcCake').checked,includePostWorkoutShake:$('fcShake').checked,meals:+$('fcMeals').value,mealPattern:$('fcMealPattern').value,diet:$('fcDiet').value,
       allergies:$('fcAllergies').value,dislikes:$('fcDislikes').value,budget:$('fcBudget').value,cookMinutes:+$('fcCook').value
     };
   }
@@ -63,8 +65,8 @@
 
   function renderMenu(menu) {
     const root = $('menuOutput'); if (!root || !menu) return;
-    const ingMap = Object.fromEntries((window.FITCOACH_NUTRITION?.ingredients||[]).map(x=>[x.id,x]));
-    root.innerHTML = menu.days.map(day => `<details class="card" ${day.day===1?'open':''}><summary><strong>Día ${day.day}</strong> · ${Math.round(day.totals.kcal)} kcal · ${Math.round(day.totals.protein)}P</summary>${day.meals.map((meal,i)=>`<div class="card"><strong>${i+1}. ${escapeHtml(meal.name)}</strong><div class="muted">Objetivo ${meal.target.kcal} kcal · Resultado ${Math.round(meal.macros.kcal)} kcal · ${Math.round(meal.macros.p)}P ${Math.round(meal.macros.c)}C ${Math.round(meal.macros.f)}G</div>${meal.ingredients.map(([id,g])=>`<div class="foodrow"><span>${escapeHtml(ingMap[id]?.name||id)}</span><b>${g} g</b></div>`).join('')}</div>`).join('')}</details>`).join('');
+    const ingMap = Object.fromEntries([...(window.FITCOACH_NUTRITION?.ingredients||[]),{id:'chia',name:'Semillas de chía'},{id:'bakingpowder',name:'Levadura química'}].map(x=>[x.id,x]));
+    root.innerHTML = menu.days.map(day => `<details class="card" ${day.day===1?'open':''}><summary><strong>Día ${day.day}${day.trainingDay?' · Entreno '+escapeHtml(day.trainingTime):' · Descanso'}</strong> · ${Math.round(day.totals.kcal)} kcal · ${Math.round(day.totals.protein)}P</summary>${day.meals.map((meal,i)=>`<div class="card"><strong>${i+1}. ${meal.time?escapeHtml(meal.time)+' · ':''}${escapeHtml(meal.name)}</strong><div class="muted">Objetivo ${Math.round(meal.target.kcal)} kcal · Resultado ${Math.round(meal.macros.kcal)} kcal · ${Math.round(meal.macros.p)}P ${Math.round(meal.macros.c)}C ${Math.round(meal.macros.f)}G</div>${meal.ingredients.map(([id,g])=>`<div class="foodrow"><span>${escapeHtml(ingMap[id]?.name||id)}</span><b>${g} g</b></div>`).join('')}</div>`).join('')}</details>`).join('');
     if ($('menuSummary')) $('menuSummary').innerHTML = `<div class="card"><strong>Plan personalizado · ${menu.profile.meals} comidas/día</strong><div class="muted">Objetivo ${menu.targets.kcal} kcal · ${menu.targets.protein}P · reparto ${menu.profile.mealPattern}</div></div>`;
   }
 
@@ -78,7 +80,15 @@
     syncLegacy(profile, nutrition, plan, menu);
     renderMenu(menu);
     $('fcIntakeResult').innerHTML = `<strong>${nutrition.targets.kcal} kcal · ${nutrition.targets.protein}P · ${nutrition.targets.carbs}C · ${nutrition.targets.fat}G</strong><ul><li>${profile.meals} comidas con kcal repartidas automáticamente</li><li>${profile.days} días de entrenamiento · máximo ${profile.minutes} min</li><li>Plan guardado como perfil único para usuario/cliente</li></ul><div class="fcEvidence">Base: Mifflin/Katch para estimación energética; entrenamiento con volumen, múltiples series y proximidad al fallo según revisiones sistemáticas. No sustituye valoración médica.</div>`;
-    setTimeout(() => location.reload(), 900);
+    setTimeout(() => {
+      if ($('fcIntakeModal')) $('fcIntakeModal').hidden = true;
+      document.querySelectorAll('main .page').forEach(page=>page.classList.toggle('active',page.id==='nutrition'));
+      document.querySelectorAll('nav [data-go]').forEach(button=>button.classList.toggle('active',button.dataset.go==='nutrition'));
+      document.querySelectorAll('#nutrition .nut').forEach(panel=>panel.hidden=panel.id!=='menus');
+      document.querySelectorAll('#nutrition [data-tab]').forEach(button=>button.classList.toggle('active',button.dataset.tab==='menus'));
+      renderMenu(menu);
+      setTimeout(()=>renderMenu(menu),250);
+    }, 350);
   }
 
   function install() {
@@ -93,10 +103,12 @@
     const open=()=>{modal.hidden=false;step=0;paint();};
     const settings=$('settings'); if(settings){const card=settings.querySelector('.card')||settings;const btn=document.createElement('button');btn.className='fcIntakeLaunch';btn.textContent='Configurar usuario / cliente';btn.onclick=open;card.prepend(btn);}
     const home=$('home'); if(home){const btn=document.createElement('button');btn.className='secondary fcIntakeLaunch';btn.textContent='Perfil y plan personalizado';btn.onclick=open;home.prepend(btn);}
-    const currentMenu=read('fitcoach_menu_30_v35',null); if(currentMenu) renderMenu(currentMenu);
+    const currentMenu=read('fitcoach_menu_30_v35',null); if(currentMenu){renderMenu(currentMenu);setTimeout(()=>renderMenu(currentMenu),500);}
+    document.addEventListener('click',event=>{if(/30 días/i.test(event.target?.textContent||''))setTimeout(()=>renderMenu(read('fitcoach_menu_30_v35',null)),80);});
     if(!localStorage.getItem(KEY)) setTimeout(open,250);
   }
 
   const boot=()=>{ if(!globalThis.FitCoachClientEngine){setTimeout(boot,50);return;} document.readyState==='loading'?document.addEventListener('DOMContentLoaded',install,{once:true}):install(); };
   boot();
 })();
+

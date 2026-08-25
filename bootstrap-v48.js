@@ -39,3 +39,4 @@ function installOnboardingReloadGuard(){
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>{installFreshGuard();installOnboardingReloadGuard();},{once:true});else{installFreshGuard();installOnboardingReloadGuard();}
 })();
+
