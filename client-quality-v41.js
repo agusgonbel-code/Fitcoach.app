@@ -30,7 +30,7 @@
   function validateMenuStructure(result,profile={},requestedDays=30){
     const expectedMeals=Math.min(6,Math.max(3,Math.round(Number(profile.meals)||4))),expectedDays=Math.min(30,Math.max(1,Math.round(Number(requestedDays)||30))),days=Array.isArray(result?.days)?result.days:[];
     if(days.length!==expectedDays)throw new Error(`El menú está incompleto: se solicitaron ${expectedDays} días y se generaron ${days.length}.`);
-    const bad=days.find(day=>!Array.isArray(day.meals)||day.meals.length!==expectedMeals||day.meals.some(meal=>!meal||!meal.recipeId));if(bad)throw new Error(`No hay suficientes recetas para completar ${expectedMeals} comidas al día. Amplía la biblioteca o revisa las preferencias antes de generar el menú.`);
+    const bad=days.find(day=>{const shakeExtra=Boolean(day?.trainingDay&&profile.includePostWorkoutShake),expectedForDay=expectedMeals+(shakeExtra?1:0);return!Array.isArray(day.meals)||day.meals.length!==expectedForDay||day.meals.some(meal=>!meal||!meal.recipeId)});if(bad)throw new Error(`No hay suficientes recetas para completar ${expectedMeals} comidas al día y las tomas de entrenamiento. Amplía la biblioteca o revisa las preferencias antes de generar el menú.`);
     const corrupt=days.find(day=>day.meals.some(meal=>!validMacros(meal.macros)));if(corrupt)throw new Error('El menú contiene datos nutricionales no válidos. Vuelve a generarlo antes de guardarlo o usarlo.');
     return result;
   }
@@ -50,3 +50,4 @@
   }
   return{install,localDateKey,allergyTerms,dislikeTerms,filterAllergyUnsafeRecipes,filterPreferenceUnsafeRecipes,hasUnknownIngredients,validMacros,validateMenuStructure,validateTrainingStructure};
 });
+
