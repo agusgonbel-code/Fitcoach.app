@@ -37,14 +37,25 @@ function installOnboardingReloadGuard(){
     });
   });
 }
-function loadPrecisionNutrition(){
-  if(document.querySelector('script[data-fitcoach-precision]'))return;
-  const s=document.createElement('script');
-  s.src='nutrition-precision-v6.js?v=6.0.0';
-  s.defer=true;
-  s.dataset.fitcoachPrecision='true';
-  document.head.appendChild(s);
+function loadScript(src,key){
+  return new Promise((resolve,reject)=>{
+    if(document.querySelector(`script[data-fitcoach-module="${key}"]`)){resolve();return;}
+    const s=document.createElement('script');
+    s.src=src;
+    s.dataset.fitcoachModule=key;
+    s.onload=resolve;
+    s.onerror=()=>reject(new Error(`No se pudo cargar ${src}`));
+    document.head.appendChild(s);
+  });
 }
-loadPrecisionNutrition();
+function loadReleaseModules(){
+  loadScript('nutrition-precision-v6.js?v=6.0.0','precision')
+    .then(()=>loadScript('client-engine-v35.js?v=6.0.0','client-engine'))
+    .then(()=>loadScript('client-quality-v41.js?v=6.0.0','client-quality'))
+    .then(()=>loadScript('mobile-quality-v41.js?v=6.0.0','mobile-quality'))
+    .then(()=>loadScript('unified-intake-v35.js?v=6.0.0','unified-intake'))
+    .catch(error=>console.error('[FitCoach release modules]',error));
+}
+loadReleaseModules();
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>{installFreshGuard();installOnboardingReloadGuard();},{once:true});else{installFreshGuard();installOnboardingReloadGuard();}
 })();
