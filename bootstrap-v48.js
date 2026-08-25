@@ -38,15 +38,24 @@ function loadScript(src,key){
     document.head.appendChild(s);
   });
 }
-function loadReleaseModules(){
-  loadScript('nutrition-precision-v6.js?v=6.0.0','precision')
-    .then(()=>loadScript('client-engine-v35.js?v=6.0.0','client-engine'))
-    .then(()=>loadScript('client-quality-v41.js?v=6.0.0','client-quality'))
-    .then(()=>loadScript('mobile-quality-v41.js?v=6.0.0','mobile-quality'))
-    .then(()=>loadScript('unified-intake-v35.js?v=6.0.0','unified-intake'))
-    .then(()=>loadScript('coach-page-v6.js?v=6.0.0','coach-page'))
-    .catch(error=>console.error('[FitCoach release modules]',error));
+async function loadReleaseModules(){
+  try{
+    await loadScript('nutrition-precision-v6.js?v=6.0.1','precision');
+    await loadScript('client-engine-v35.js?v=6.0.1','client-engine');
+    await loadScript('client-quality-v41.js?v=6.0.1','client-quality');
+    await loadScript('mobile-quality-v41.js?v=6.0.1','mobile-quality');
+    await loadScript('unified-intake-v35.js?v=6.0.1','unified-intake');
+    await loadScript('coach-page-v6.js?v=6.0.1','coach-page');
+    globalThis.FitCoachReleaseModulesReady=true;
+    document.dispatchEvent(new CustomEvent('fitcoach:release-ready'));
+  }catch(error){
+    globalThis.FitCoachReleaseModulesReady=false;
+    console.error('[FitCoach release modules]',error);
+  }
 }
-loadReleaseModules();
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>{installFreshGuard();},{once:true});else{installFreshGuard();}
+function bootRelease(){
+  installFreshGuard();
+  loadReleaseModules();
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',bootRelease,{once:true});else bootRelease();
 })();
