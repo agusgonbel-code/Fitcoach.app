@@ -40,13 +40,14 @@ function loadScript(src,key){
 }
 async function loadReleaseModules(){
   try{
-    await loadScript('nutrition-precision-v6.js?v=6.0.1','precision');
-    await loadScript('client-engine-v35.js?v=6.0.1','client-engine');
-    await loadScript('client-quality-v41.js?v=6.0.1','client-quality');
-    await loadScript('mobile-quality-v41.js?v=6.0.1','mobile-quality');
-    await loadScript('unified-intake-v35.js?v=6.0.1','unified-intake');
-    await loadScript('intake-layout-v6.js?v=6.0.1','intake-layout');
-    await loadScript('coach-page-v6.js?v=6.0.1','coach-page');
+    await loadScript('nutrition-precision-v6.js?v=6.0.2','precision');
+    await loadScript('client-engine-v35.js?v=6.0.2','client-engine');
+    await loadScript('client-quality-v41.js?v=6.0.2','client-quality');
+    await loadScript('mobile-quality-v41.js?v=6.0.2','mobile-quality');
+    await loadScript('intake-singleton-v6.js?v=6.0.2','intake-singleton');
+    await loadScript('unified-intake-v35.js?v=6.0.2','unified-intake');
+    await loadScript('intake-layout-v6.js?v=6.0.2','intake-layout');
+    await loadScript('coach-page-v6.js?v=6.0.2','coach-page');
     globalThis.FitCoachReleaseModulesReady=true;
     document.dispatchEvent(new CustomEvent('fitcoach:release-ready'));
   }catch(error){
