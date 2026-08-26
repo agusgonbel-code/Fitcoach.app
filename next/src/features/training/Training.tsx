@@ -71,7 +71,10 @@ export function Training({ sessions, onSaved }: { sessions: WorkoutSession[]; on
   ])), [sessions]);
 
   useEffect(() => {
-    if (!hasDraftContent(values)) return;
+    if (!hasDraftContent(values)) {
+      clearWorkoutDraft();
+      return;
+    }
     saveWorkoutDraft({
       version: 1,
       workoutId: workoutTemplate.id,
