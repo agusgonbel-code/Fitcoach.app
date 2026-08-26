@@ -3,6 +3,7 @@ import type { FoodLogEntry, UserProfile } from '../../domain/models';
 import { localDate, removeFoodEntry, saveFoodEntry } from '../../data/localRepository';
 import { calculateNutrition } from '../../domain/nutrition/calculateTarget';
 import { CORE_INGREDIENTS, CORE_RECIPES } from '../../domain/nutrition/library';
+import { findMealSwap } from '../../domain/nutrition/mealSwap';
 import { recipeMacros } from '../../domain/nutrition/recipePlanner';
 import { generateWeek } from '../../domain/nutrition/weeklyPlanner';
 
@@ -12,7 +13,13 @@ interface NutritionProps {
   onChange: () => void;
 }
 
+interface MealOverride {
+  recipeId: string;
+  scale: number;
+}
+
 const recipeById = new Map(CORE_RECIPES.map((recipe) => [recipe.id, recipe]));
+const ingredientById = new Map(CORE_INGREDIENTS.map((ingredient) => [ingredient.id, ingredient]));
 
 export function Nutrition({ profile, log, onChange }: NutritionProps) {
   const calculation = calculateNutrition(profile);
@@ -33,6 +40,7 @@ export function Nutrition({ profile, log, onChange }: NutritionProps) {
   }), [target.kcal, target.proteinG, target.carbsG, target.fatG]);
 
   const [selectedDay, setSelectedDay] = useState(1);
+  const [mealOverrides, setMealOverrides] = useState<Record<string, MealOverride>>({});
   const [name, setName] = useState('');
   const [kcal, setKcal] = useState('');
   const [protein, setProtein] = useState('');
@@ -40,6 +48,24 @@ export function Nutrition({ profile, log, onChange }: NutritionProps) {
   const [fat, setFat] = useState('');
   const [error, setError] = useState('');
   const planDay = weeklyPlan[selectedDay - 1];
+
+  const resolveMeal = (index: number) => {
+    const planned = planDay.plan.meals[index];
+    return mealOverrides[`${selectedDay}-${index}`] ?? planned;
+  };
+
+  const selectedDayMacros = planDay.plan.meals.reduce((sum, _meal, index) => {
+    const resolved = resolveMeal(index);
+    const recipe = recipeById.get(resolved.recipeId);
+    if (!recipe) return sum;
+    const macros = recipeMacros(recipe, CORE_INGREDIENTS, resolved.scale);
+    return {
+      kcal: sum.kcal + macros.kcal,
+      proteinG: sum.proteinG + macros.proteinG,
+      carbsG: sum.carbsG + macros.carbsG,
+      fatG: sum.fatG + macros.fatG,
+    };
+  }, { kcal: 0, proteinG: 0, carbsG: 0, fatG: 0 });
 
   const persist = (entry: FoodLogEntry) => {
     try {
@@ -81,6 +107,24 @@ export function Nutrition({ profile, log, onChange }: NutritionProps) {
     });
   };
 
+  const swapMeal = (index: number) => {
+    const current = resolveMeal(index);
+    try {
+      const candidate = findMealSwap(current.recipeId, current.scale, CORE_RECIPES, CORE_INGREDIENTS);
+      if (!candidate) {
+        setError('No hay una alternativa que conserve los macros dentro de tolerancia.');
+        return;
+      }
+      setMealOverrides((previous) => ({
+        ...previous,
+        [`${selectedDay}-${index}`]: { recipeId: candidate.recipe.id, scale: candidate.scale },
+      }));
+      setError('');
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : 'No se pudo sustituir esta comida.');
+    }
+  };
+
   return <section>
     <p className="eyebrow">NUTRICIÓN</p>
     <h1>Tu estrategia</h1>
@@ -93,23 +137,39 @@ export function Nutrition({ profile, log, onChange }: NutritionProps) {
     <p className="secondary">Objetivo calculado con Mifflin-St Jeor · TDEE estimado {calculation.tdee} kcal · ajuste {Math.round(calculation.adjustmentPct * 100)}%.</p>
 
     <article className="form-card">
-      <div className="hero-row"><div><p className="eyebrow">PLAN SEMANAL</p><h2>Día {selectedDay}</h2></div><strong>{Math.round(planDay.macros.kcal)} kcal</strong></div>
+      <div className="hero-row"><div><p className="eyebrow">PLAN SEMANAL</p><h2>Día {selectedDay}</h2></div><strong>{Math.round(selectedDayMacros.kcal)} kcal</strong></div>
       <div className="day-selector" aria-label="Seleccionar día del plan">
         {weeklyPlan.map((day) => <button key={day.day} className={day.day === selectedDay ? 'active' : ''} onClick={() => setSelectedDay(day.day)}>{day.day}</button>)}
       </div>
-      <p className="secondary">{Math.round(planDay.macros.proteinG)}P · {Math.round(planDay.macros.carbsG)}C · {Math.round(planDay.macros.fatG)}G. Las cantidades se optimizan desde los gramos reales de cada ingrediente.</p>
-      {planDay.plan.meals.map((meal, index) => {
+      <p className="secondary">{Math.round(selectedDayMacros.proteinG)}P · {Math.round(selectedDayMacros.carbsG)}C · {Math.round(selectedDayMacros.fatG)}G. Las cantidades se calculan desde los gramos reales y se actualizan al sustituir una comida.</p>
+      {planDay.plan.meals.map((_meal, index) => {
+        const meal = resolveMeal(index);
         const recipe = recipeById.get(meal.recipeId);
         if (!recipe) return null;
         const macros = recipeMacros(recipe, CORE_INGREDIENTS, meal.scale);
-        return <div className="planned-meal" key={`${selectedDay}-${meal.recipeId}-${index}`}>
-          <div><strong>{index + 1}. {recipe.name}</strong><p className="secondary">{Math.round(meal.scale * 100)}% ración · {Math.round(macros.kcal)} kcal · {Math.round(macros.proteinG)}P · {Math.round(macros.carbsG)}C · {Math.round(macros.fatG)}G</p></div>
-          <button className="secondary-action" onClick={() => addPlannedMeal(meal.recipeId, meal.scale)}>Registrar hoy</button>
-        </div>;
+        return <article className="planned-meal" key={`${selectedDay}-${index}`}>
+          <div className="planned-meal-heading">
+            <div><strong>{index + 1}. {recipe.name}</strong><p className="secondary">{Math.round(meal.scale * 100)}% ración · {Math.round(macros.kcal)} kcal · {Math.round(macros.proteinG)}P · {Math.round(macros.carbsG)}C · {Math.round(macros.fatG)}G</p></div>
+          </div>
+          <details className="recipe-detail">
+            <summary>Ingredientes y cantidades</summary>
+            <div className="ingredient-list">
+              {recipe.ingredients.map((item) => <div className="ingredient-row" key={item.ingredientId}>
+                <span>{ingredientById.get(item.ingredientId)?.name ?? item.ingredientId}</span>
+                <strong>{Math.round(item.grams * meal.scale)} g</strong>
+              </div>)}
+            </div>
+          </details>
+          <div className="meal-actions">
+            <button className="secondary-action" onClick={() => swapMeal(index)}>Sustituir</button>
+            <button className="secondary-action" onClick={() => addPlannedMeal(meal.recipeId, meal.scale)}>Registrar hoy</button>
+          </div>
+        </article>;
       })}
+      {error && <p className="error" role="alert">{error}</p>}
     </article>
 
-    <div className="form-card"><h2>Añadir comida manual</h2><label>Nombre<input value={name} onChange={(event) => setName(event.target.value)} placeholder="Ej. yogur con avena" /></label><div className="form-grid"><label>Kcal<input inputMode="numeric" value={kcal} onChange={(event) => setKcal(event.target.value)} /></label><label>Proteína g<input inputMode="decimal" value={protein} onChange={(event) => setProtein(event.target.value)} /></label><label>Carbos g<input inputMode="decimal" value={carbs} onChange={(event) => setCarbs(event.target.value)} /></label><label>Grasas g<input inputMode="decimal" value={fat} onChange={(event) => setFat(event.target.value)} /></label></div>{error && <p className="error" role="alert">{error}</p>}<button className="primary-action" onClick={addManual}>Guardar comida</button></div>
+    <div className="form-card"><h2>Añadir comida manual</h2><label>Nombre<input value={name} onChange={(event) => setName(event.target.value)} placeholder="Ej. yogur con avena" /></label><div className="form-grid"><label>Kcal<input inputMode="numeric" value={kcal} onChange={(event) => setKcal(event.target.value)} /></label><label>Proteína g<input inputMode="decimal" value={protein} onChange={(event) => setProtein(event.target.value)} /></label><label>Carbos g<input inputMode="decimal" value={carbs} onChange={(event) => setCarbs(event.target.value)} /></label><label>Grasas g<input inputMode="decimal" value={fat} onChange={(event) => setFat(event.target.value)} /></label></div><button className="primary-action" onClick={addManual}>Guardar comida</button></div>
 
     {today.map((item) => <article className="exercise-card" key={item.id}><div className="hero-row"><div><h2>{item.name}</h2><p className="secondary">{Math.round(item.kcal)} kcal · {Math.round(item.proteinG)}P · {Math.round(item.carbsG)}C · {Math.round(item.fatG)}G</p></div><button className="icon-button" aria-label={`Eliminar ${item.name}`} onClick={() => { removeFoodEntry(item.id); onChange(); }}>×</button></div></article>)}
   </section>;
