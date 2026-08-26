@@ -1,11 +1,16 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import type { FoodLogEntry, UserProfile } from '../../domain/models';
 import { localDate, removeFoodEntry, saveFoodEntry } from '../../data/localRepository';
+import {
+  readNutritionPlan,
+  writeNutritionPlan,
+  type PersistedNutritionPlan,
+} from '../../data/nutritionPlanRepository';
 import { calculateNutrition } from '../../domain/nutrition/calculateTarget';
 import { CORE_INGREDIENTS, CORE_RECIPES } from '../../domain/nutrition/library';
 import { findMealSwap } from '../../domain/nutrition/mealSwap';
 import { generateMonth } from '../../domain/nutrition/monthlyPlanner';
-import { recipeMacros } from '../../domain/nutrition/recipePlanner';
+import { recipeMacros, type MacroVector } from '../../domain/nutrition/recipePlanner';
 import { generateWeek } from '../../domain/nutrition/weeklyPlanner';
 
 interface NutritionProps {
@@ -14,15 +19,28 @@ interface NutritionProps {
   onChange: () => void;
 }
 
-interface MealOverride {
-  recipeId: string;
-  scale: number;
-}
-
-type PlanHorizon = 'week' | 'month';
-
 const recipeById = new Map(CORE_RECIPES.map((recipe) => [recipe.id, recipe]));
 const ingredientById = new Map(CORE_INGREDIENTS.map((ingredient) => [ingredient.id, ingredient]));
+
+function buildPlanState(profileId: string, target: MacroVector): PersistedNutritionPlan {
+  const stored = readNutritionPlan(localStorage, profileId, target);
+  if (stored) return stored;
+  return {
+    version: 1,
+    profileId,
+    target,
+    week: generateWeek(target),
+    month: generateMonth(target),
+    overrides: {},
+    horizon: 'week',
+    selectedDay: 1,
+    updatedAt: new Date().toISOString(),
+  };
+}
+
+function targetIdentity(profileId: string, target: MacroVector): string {
+  return [profileId, target.kcal, target.proteinG, target.carbsG, target.fatG].join(':');
+}
 
 export function Nutrition({ profile, log, onChange }: NutritionProps) {
   const calculation = calculateNutrition(profile);
@@ -35,37 +53,48 @@ export function Nutrition({ profile, log, onChange }: NutritionProps) {
     fatG: sum.fatG + item.fatG,
   }), { kcal: 0, proteinG: 0, carbsG: 0, fatG: 0 });
 
-  const planTarget = useMemo(() => ({
+  const planTarget = useMemo<MacroVector>(() => ({
     kcal: target.kcal,
     proteinG: target.proteinG,
     carbsG: target.carbsG,
     fatG: target.fatG,
   }), [target.kcal, target.proteinG, target.carbsG, target.fatG]);
-  const weeklyPlan = useMemo(() => generateWeek(planTarget), [planTarget]);
-  const monthlyPlan = useMemo(() => generateMonth(planTarget), [planTarget]);
+  const identity = targetIdentity(profile.id, planTarget);
+  const [planState, setPlanState] = useState<PersistedNutritionPlan>(() => buildPlanState(profile.id, planTarget));
 
-  const [horizon, setHorizon] = useState<PlanHorizon>('week');
-  const [selectedDay, setSelectedDay] = useState(1);
-  const [mealOverrides, setMealOverrides] = useState<Record<string, MealOverride>>({});
+  useEffect(() => {
+    if (targetIdentity(planState.profileId, planState.target) !== identity) {
+      setPlanState(buildPlanState(profile.id, planTarget));
+    }
+  }, [identity, planState.profileId, planState.target, profile.id, planTarget]);
+
+  useEffect(() => {
+    if (targetIdentity(planState.profileId, planState.target) !== identity) return;
+    try {
+      writeNutritionPlan(localStorage, { ...planState, updatedAt: new Date().toISOString() });
+    } catch (cause) {
+      console.warn('FitCoach Next nutrition plan persistence', cause);
+    }
+  }, [identity, planState]);
+
   const [name, setName] = useState('');
   const [kcal, setKcal] = useState('');
   const [protein, setProtein] = useState('');
   const [carbs, setCarbs] = useState('');
   const [fat, setFat] = useState('');
   const [error, setError] = useState('');
-  const activePlan = horizon === 'week' ? weeklyPlan : monthlyPlan;
-  const planDay = activePlan[selectedDay - 1] ?? activePlan[0];
+  const activePlan = planState.horizon === 'week' ? planState.week : planState.month;
+  const safeSelectedDay = Math.min(Math.max(planState.selectedDay, 1), activePlan.length);
+  const planDay = activePlan[safeSelectedDay - 1] ?? activePlan[0];
 
-  const changeHorizon = (next: PlanHorizon) => {
-    setHorizon(next);
-    setSelectedDay(1);
-    setMealOverrides({});
+  const changeHorizon = (next: 'week' | 'month') => {
+    setPlanState((previous) => ({ ...previous, horizon: next, selectedDay: 1 }));
     setError('');
   };
 
   const resolveMeal = (index: number) => {
     const planned = planDay.plan.meals[index];
-    return mealOverrides[`${horizon}-${selectedDay}-${index}`] ?? planned;
+    return planState.overrides[`${planState.horizon}-${safeSelectedDay}-${index}`] ?? planned;
   };
 
   const selectedDayMacros = planDay.plan.meals.reduce((sum, _meal, index) => {
@@ -129,9 +158,12 @@ export function Nutrition({ profile, log, onChange }: NutritionProps) {
         setError('No hay una alternativa que conserve los macros dentro de tolerancia.');
         return;
       }
-      setMealOverrides((previous) => ({
+      setPlanState((previous) => ({
         ...previous,
-        [`${horizon}-${selectedDay}-${index}`]: { recipeId: candidate.recipe.id, scale: candidate.scale },
+        overrides: {
+          ...previous.overrides,
+          [`${previous.horizon}-${safeSelectedDay}-${index}`]: { recipeId: candidate.recipe.id, scale: candidate.scale },
+        },
       }));
       setError('');
     } catch (cause) {
@@ -151,21 +183,21 @@ export function Nutrition({ profile, log, onChange }: NutritionProps) {
     <p className="secondary">Objetivo calculado con Mifflin-St Jeor · TDEE estimado {calculation.tdee} kcal · ajuste {Math.round(calculation.adjustmentPct * 100)}%.</p>
 
     <article className="form-card">
-      <div className="hero-row"><div><p className="eyebrow">PLAN DE COMIDAS</p><h2>Día {selectedDay}</h2></div><strong>{Math.round(selectedDayMacros.kcal)} kcal</strong></div>
+      <div className="hero-row"><div><p className="eyebrow">PLAN DE COMIDAS</p><h2>Día {safeSelectedDay}</h2></div><strong>{Math.round(selectedDayMacros.kcal)} kcal</strong></div>
       <div className="segmented-control" aria-label="Duración del plan">
-        <button className={horizon === 'week' ? 'active' : ''} onClick={() => changeHorizon('week')}>7 días</button>
-        <button className={horizon === 'month' ? 'active' : ''} onClick={() => changeHorizon('month')}>30 días</button>
+        <button className={planState.horizon === 'week' ? 'active' : ''} onClick={() => changeHorizon('week')}>7 días</button>
+        <button className={planState.horizon === 'month' ? 'active' : ''} onClick={() => changeHorizon('month')}>30 días</button>
       </div>
       <div className="day-selector" aria-label="Seleccionar día del plan">
-        {activePlan.map((day) => <button key={day.day} className={day.day === selectedDay ? 'active' : ''} onClick={() => setSelectedDay(day.day)}>{day.day}</button>)}
+        {activePlan.map((day) => <button key={day.day} className={day.day === safeSelectedDay ? 'active' : ''} onClick={() => setPlanState((previous) => ({ ...previous, selectedDay: day.day }))}>{day.day}</button>)}
       </div>
-      <p className="secondary">{Math.round(selectedDayMacros.proteinG)}P · {Math.round(selectedDayMacros.carbsG)}C · {Math.round(selectedDayMacros.fatG)}G. Las cantidades se calculan desde los gramos reales y se actualizan al sustituir una comida.</p>
+      <p className="secondary">{Math.round(selectedDayMacros.proteinG)}P · {Math.round(selectedDayMacros.carbsG)}C · {Math.round(selectedDayMacros.fatG)}G. El plan y tus sustituciones quedan guardados en este dispositivo y se recalculan solo si cambia tu objetivo.</p>
       {planDay.plan.meals.map((_meal, index) => {
         const meal = resolveMeal(index);
         const recipe = recipeById.get(meal.recipeId);
         if (!recipe) return null;
         const macros = recipeMacros(recipe, CORE_INGREDIENTS, meal.scale);
-        return <article className="planned-meal" key={`${horizon}-${selectedDay}-${index}`}>
+        return <article className="planned-meal" key={`${planState.horizon}-${safeSelectedDay}-${index}`}>
           <div className="planned-meal-heading">
             <div><strong>{index + 1}. {recipe.name}</strong><p className="secondary">{Math.round(meal.scale * 100)}% ración · {Math.round(macros.kcal)} kcal · {Math.round(macros.proteinG)}P · {Math.round(macros.carbsG)}C · {Math.round(macros.fatG)}G</p></div>
           </div>
