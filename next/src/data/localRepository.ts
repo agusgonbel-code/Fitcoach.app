@@ -1,4 +1,5 @@
 import type { FoodLogEntry, UserProfile, WorkoutSession } from '../domain/models';
+import { migrateLegacyProfile } from './legacyMigration';
 
 const PROFILE_KEY = 'fitcoach_next_profile_v1';
 const SESSIONS_KEY = 'fitcoach_next_sessions_v1';
@@ -21,7 +22,11 @@ function readJson<T>(key: string, fallback: T): T {
 }
 
 export function loadProfile(): UserProfile | null {
-  const raw = readJson<Partial<UserProfile> | null>(PROFILE_KEY, null);
+  let raw = readJson<Partial<UserProfile> | null>(PROFILE_KEY, null);
+  if (!raw) {
+    migrateLegacyProfile(localStorage, () => crypto.randomUUID());
+    raw = readJson<Partial<UserProfile> | null>(PROFILE_KEY, null);
+  }
   if (!raw) return null;
   const migrated: UserProfile = {
     id: raw.id || crypto.randomUUID(),
