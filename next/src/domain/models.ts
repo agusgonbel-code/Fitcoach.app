@@ -99,6 +99,15 @@ export interface FoodLogEntry {
   createdAt: string;
 }
 
+export interface BodyMetric {
+  id: string;
+  localDate: string;
+  weightKg: number;
+  waistCm?: number;
+  bodyFatPct?: number;
+  createdAt: string;
+}
+
 export interface CoachInsight {
   id: string;
   title: string;
