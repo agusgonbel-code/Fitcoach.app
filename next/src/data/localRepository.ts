@@ -1,9 +1,10 @@
-import type { FoodLogEntry, UserProfile, WorkoutSession } from '../domain/models';
+import type { BodyMetric, FoodLogEntry, UserProfile, WorkoutSession } from '../domain/models';
 import { migrateLegacyData, migrateLegacyProfile } from './legacyMigration';
 
 const PROFILE_KEY = 'fitcoach_next_profile_v1';
 const SESSIONS_KEY = 'fitcoach_next_sessions_v1';
 const FOOD_LOG_KEY = 'fitcoach_next_food_log_v1';
+const BODY_METRICS_KEY = 'fitcoach_next_body_metrics_v1';
 
 export function localDate(date = new Date()): string {
   const y = date.getFullYear();
@@ -94,4 +95,29 @@ export function saveFoodEntry(entry: FoodLogEntry): void {
 
 export function removeFoodEntry(id: string): void {
   localStorage.setItem(FOOD_LOG_KEY, JSON.stringify(loadFoodLog().filter(item => item.id !== id)));
+}
+
+export function loadBodyMetrics(): BodyMetric[] {
+  return readJson<BodyMetric[]>(BODY_METRICS_KEY, [])
+    .filter(validBodyMetric)
+    .sort((a, b) => a.localDate.localeCompare(b.localDate) || a.createdAt.localeCompare(b.createdAt));
+}
+
+export function validBodyMetric(metric: BodyMetric): boolean {
+  const validWeight = Number.isFinite(metric.weightKg) && metric.weightKg >= 30 && metric.weightKg <= 350;
+  const validWaist = metric.waistCm === undefined || (Number.isFinite(metric.waistCm) && metric.waistCm >= 40 && metric.waistCm <= 250);
+  const validBodyFat = metric.bodyFatPct === undefined || (Number.isFinite(metric.bodyFatPct) && metric.bodyFatPct >= 2 && metric.bodyFatPct <= 70);
+  return Boolean(metric.id && /^\d{4}-\d{2}-\d{2}$/.test(metric.localDate) && metric.createdAt && validWeight && validWaist && validBodyFat);
+}
+
+export function saveBodyMetric(metric: BodyMetric): void {
+  if (!validBodyMetric(metric)) throw new Error('Revisa el peso y las medidas antes de guardar.');
+  const metrics = loadBodyMetrics();
+  const next = [...metrics.filter(item => item.id !== metric.id), metric]
+    .sort((a, b) => a.localDate.localeCompare(b.localDate) || a.createdAt.localeCompare(b.createdAt));
+  localStorage.setItem(BODY_METRICS_KEY, JSON.stringify(next));
+}
+
+export function removeBodyMetric(id: string): void {
+  localStorage.setItem(BODY_METRICS_KEY, JSON.stringify(loadBodyMetrics().filter(item => item.id !== id)));
 }
