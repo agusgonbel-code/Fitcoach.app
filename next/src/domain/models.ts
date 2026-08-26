@@ -1,15 +1,18 @@
 export type Goal = 'hypertrophy' | 'recomp' | 'strength' | 'fatloss' | 'maintain';
 export type Experience = 'beginner' | 'intermediate' | 'advanced';
+export type Sex = 'male' | 'female';
 
 export interface UserProfile {
   id: string;
   name: string;
   goal: Goal;
   experience: Experience;
+  sex: Sex;
   age: number;
   heightCm: number;
   weightKg: number;
   bodyFatPct?: number;
+  activityMultiplier: number;
   trainingDaysPerWeek: number;
   sessionMinutes: number;
   equipment: string[];
@@ -75,6 +78,25 @@ export interface NutritionTarget {
   proteinG: number;
   carbsG: number;
   fatG: number;
+}
+
+export interface NutritionCalculation {
+  equation: 'mifflin-st-jeor';
+  bmr: number;
+  tdee: number;
+  adjustmentPct: number;
+  target: NutritionTarget;
+}
+
+export interface FoodLogEntry {
+  id: string;
+  localDate: string;
+  name: string;
+  kcal: number;
+  proteinG: number;
+  carbsG: number;
+  fatG: number;
+  createdAt: string;
 }
 
 export interface CoachInsight {
