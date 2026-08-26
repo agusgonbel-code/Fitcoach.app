@@ -39,7 +39,7 @@ function Onboarding({ onComplete }: { onComplete: (profile: UserProfile) => void
 function Training({ onSaved }: { onSaved: () => void }) {
   const [values, setValues] = useState<Record<string,{kg:string;reps:string;rir:string}>>({});
   const [error, setError] = useState('');
-  const update=(id:string,key:'kg'|'reps'|'rir',value:string)=>setValues(v=>({...v,[id]:{kg:'',reps:'',rir:'',...v[id],[key]:value}}));
+  const update=(id:string,key:'kg'|'reps'|'rir',value:string)=>setValues(v=>{const current=v[id]??{kg:'',reps:'',rir:''};return {...v,[id]:{...current,[key]:value}};});
   const finish=()=>{
     const startedAt=new Date().toISOString();
     const session: WorkoutSession={id:crypto.randomUUID(),plannedWorkoutId:workoutTemplate.id,localDate:localDate(),startedAt,completedAt:new Date().toISOString(),exercises:workoutTemplate.exercises.map(ex=>{const v=values[ex.id];return {exerciseId:ex.id,sets:v&&v.reps!==''?[{kg:Number(v.kg||0),reps:Number(v.reps),rir:v.rir===''?null:Number(v.rir),completedAt:new Date().toISOString()}]:[]};})};
