@@ -44,10 +44,10 @@ export function ingredientMacros(ingredient: IngredientDefinition, grams: number
   if (!Number.isFinite(grams) || grams < 0) throw new Error('Ingredient grams must be a non-negative number.');
   const factor = grams / 100;
   return {
-    kcal: ingredient.kcal * factor,
-    proteinG: ingredient.proteinG * factor,
-    carbsG: ingredient.carbsG * factor,
-    fatG: ingredient.fatG * factor,
+    kcal: round(ingredient.kcal * factor, 2),
+    proteinG: round(ingredient.proteinG * factor, 2),
+    carbsG: round(ingredient.carbsG * factor, 2),
+    fatG: round(ingredient.fatG * factor, 2),
   };
 }
 
