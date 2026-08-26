@@ -66,6 +66,17 @@ function validOverrides(value: unknown): value is Record<string, PersistedMealOv
   });
 }
 
+function validStateShape(value: Partial<PersistedNutritionPlan>): boolean {
+  if (value.version !== VERSION || typeof value.profileId !== 'string' || !value.profileId || !validTarget(value.target)) return false;
+  if (!Array.isArray(value.week) || value.week.length !== 7 || !value.week.every(validPlanDay)) return false;
+  if (!Array.isArray(value.month) || value.month.length !== 30 || !value.month.every(validPlanDay)) return false;
+  if (!validOverrides(value.overrides)) return false;
+  if (value.horizon !== 'week' && value.horizon !== 'month') return false;
+  const maxDay = value.horizon === 'week' ? 7 : 30;
+  if (!Number.isInteger(value.selectedDay) || Number(value.selectedDay) < 1 || Number(value.selectedDay) > maxDay) return false;
+  return typeof value.updatedAt === 'string' && value.updatedAt.length > 0;
+}
+
 export function readNutritionPlan(
   storage: Pick<Storage, 'getItem'>,
   profileId: string,
@@ -75,14 +86,7 @@ export function readNutritionPlan(
     const raw = storage.getItem(NUTRITION_PLAN_KEY);
     if (!raw) return null;
     const value = JSON.parse(raw) as Partial<PersistedNutritionPlan>;
-    if (value.version !== VERSION || value.profileId !== profileId || !validTarget(value.target)) return null;
-    if (!sameTarget(value.target, target)) return null;
-    if (!Array.isArray(value.week) || value.week.length !== 7 || !value.week.every(validPlanDay)) return null;
-    if (!Array.isArray(value.month) || value.month.length !== 30 || !value.month.every(validPlanDay)) return null;
-    if (!validOverrides(value.overrides)) return null;
-    if (value.horizon !== 'week' && value.horizon !== 'month') return null;
-    if (!Number.isInteger(value.selectedDay) || Number(value.selectedDay) < 1) return null;
-    if (typeof value.updatedAt !== 'string' || !value.updatedAt) return null;
+    if (!validStateShape(value) || value.profileId !== profileId || !value.target || !sameTarget(value.target, target)) return null;
     return value as PersistedNutritionPlan;
   } catch {
     return null;
@@ -93,7 +97,7 @@ export function writeNutritionPlan(
   storage: Pick<Storage, 'setItem'>,
   state: PersistedNutritionPlan,
 ): void {
-  if (!state.profileId || !validTarget(state.target) || state.week.length !== 7 || state.month.length !== 30) {
+  if (!validStateShape(state)) {
     throw new Error('El plan nutricional no es válido y no se puede guardar.');
   }
   storage.setItem(NUTRITION_PLAN_KEY, JSON.stringify(state));
