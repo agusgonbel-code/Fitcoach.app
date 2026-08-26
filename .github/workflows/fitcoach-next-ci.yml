@@ -1,0 +1,30 @@
+name: FitCoach Next CI
+
+on:
+  push:
+    branches: [fitcoach-next]
+    paths:
+      - 'next/**'
+      - '.github/workflows/fitcoach-next-ci.yml'
+  pull_request:
+    paths:
+      - 'next/**'
+      - '.github/workflows/fitcoach-next-ci.yml'
+
+jobs:
+  test-next:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: next
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: next/package-lock.json
+      - run: npm install --package-lock-only
+      - run: npm ci
+      - run: npm test
+      - run: npm run build
