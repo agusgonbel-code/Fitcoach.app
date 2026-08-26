@@ -1,0 +1,95 @@
+.app-shell {
+  width: min(100%, 520px);
+  min-height: 100dvh;
+  margin: 0 auto;
+  padding: max(20px, env(safe-area-inset-top)) 18px calc(92px + env(safe-area-inset-bottom));
+}
+
+.topbar, .hero-row, .section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--fc-space-4);
+}
+
+.topbar { margin-bottom: var(--fc-space-6); }
+h1, h2, p { margin-top: 0; }
+h1 { margin-bottom: 0; font-size: 30px; letter-spacing: -0.8px; }
+h2 { margin-bottom: var(--fc-space-1); font-size: 21px; letter-spacing: -0.35px; }
+.eyebrow { margin-bottom: var(--fc-space-2); font-size: 12px; font-weight: 750; letter-spacing: 0.08em; color: var(--fc-text-secondary); }
+.secondary, .hero-card p, .section-heading span { color: var(--fc-text-secondary); }
+
+.icon-button {
+  width: 44px;
+  border: 1px solid var(--fc-separator);
+  border-radius: 50%;
+  background: var(--fc-surface);
+  color: var(--fc-text);
+  font-weight: 700;
+}
+
+.hero-card, .coach-card {
+  border: 1px solid var(--fc-separator);
+  border-radius: var(--fc-radius-lg);
+  background: var(--fc-surface-raised);
+  box-shadow: var(--fc-shadow-raised);
+}
+.hero-card { padding: var(--fc-space-5); }
+.hero-card h2 { font-size: 27px; }
+.status-pill {
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--fc-success) 14%, transparent);
+  color: var(--fc-success);
+  font-size: 13px;
+  font-weight: 700;
+}
+.primary-action {
+  width: 100%;
+  margin-top: var(--fc-space-4);
+  border: 0;
+  border-radius: var(--fc-radius-md);
+  background: var(--fc-accent);
+  color: white;
+  font-weight: 750;
+}
+
+.section-block { padding: var(--fc-space-8) 2px var(--fc-space-4); }
+.section-heading h2 { margin-bottom: 0; }
+progress {
+  width: 100%;
+  height: 8px;
+  margin-top: var(--fc-space-4);
+  accent-color: var(--fc-accent);
+}
+.section-block .secondary { margin: var(--fc-space-3) 0 0; }
+
+.coach-card { margin-top: var(--fc-space-4); padding: var(--fc-space-5); }
+.coach-card p:last-child { margin-bottom: 0; line-height: 1.45; }
+
+.tabbar {
+  position: fixed;
+  left: 50%;
+  bottom: 0;
+  width: min(100%, 520px);
+  transform: translateX(-50%);
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  padding: 8px 8px max(8px, env(safe-area-inset-bottom));
+  border-top: 1px solid var(--fc-separator);
+  background: color-mix(in srgb, var(--fc-bg) 88%, transparent);
+  backdrop-filter: blur(18px);
+}
+.tabbar button {
+  border: 0;
+  background: transparent;
+  color: var(--fc-text-secondary);
+  font-size: 11px;
+  font-weight: 650;
+}
+.tabbar button.active { color: var(--fc-accent); }
+
+@media (max-width: 360px) {
+  .app-shell { padding-inline: 14px; }
+  .tabbar button { font-size: 10px; }
+}
