@@ -21,7 +21,25 @@ function readJson<T>(key: string, fallback: T): T {
 }
 
 export function loadProfile(): UserProfile | null {
-  return readJson<UserProfile | null>(PROFILE_KEY, null);
+  const raw = readJson<Partial<UserProfile> | null>(PROFILE_KEY, null);
+  if (!raw) return null;
+  const migrated: UserProfile = {
+    id: raw.id || crypto.randomUUID(),
+    name: raw.name || 'Atleta',
+    goal: raw.goal || 'recomp',
+    experience: raw.experience || 'intermediate',
+    sex: raw.sex || 'male',
+    age: Number(raw.age) || 35,
+    heightCm: Number(raw.heightCm) || 170,
+    weightKg: Number(raw.weightKg) || 70,
+    bodyFatPct: raw.bodyFatPct,
+    activityMultiplier: Number(raw.activityMultiplier) || 1.45,
+    trainingDaysPerWeek: Number(raw.trainingDaysPerWeek) || 4,
+    sessionMinutes: Number(raw.sessionMinutes) || 50,
+    equipment: Array.isArray(raw.equipment) ? raw.equipment : ['gym'],
+    restrictions: Array.isArray(raw.restrictions) ? raw.restrictions : []
+  };
+  return migrated;
 }
 
 export function saveProfile(profile: UserProfile): void {
