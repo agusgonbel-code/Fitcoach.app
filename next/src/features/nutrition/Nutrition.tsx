@@ -4,6 +4,7 @@ import { localDate, removeFoodEntry, saveFoodEntry } from '../../data/localRepos
 import { calculateNutrition } from '../../domain/nutrition/calculateTarget';
 import { CORE_INGREDIENTS, CORE_RECIPES } from '../../domain/nutrition/library';
 import { findMealSwap } from '../../domain/nutrition/mealSwap';
+import { generateMonth } from '../../domain/nutrition/monthlyPlanner';
 import { recipeMacros } from '../../domain/nutrition/recipePlanner';
 import { generateWeek } from '../../domain/nutrition/weeklyPlanner';
 
@@ -17,6 +18,8 @@ interface MealOverride {
   recipeId: string;
   scale: number;
 }
+
+type PlanHorizon = 'week' | 'month';
 
 const recipeById = new Map(CORE_RECIPES.map((recipe) => [recipe.id, recipe]));
 const ingredientById = new Map(CORE_INGREDIENTS.map((ingredient) => [ingredient.id, ingredient]));
@@ -32,13 +35,16 @@ export function Nutrition({ profile, log, onChange }: NutritionProps) {
     fatG: sum.fatG + item.fatG,
   }), { kcal: 0, proteinG: 0, carbsG: 0, fatG: 0 });
 
-  const weeklyPlan = useMemo(() => generateWeek({
+  const planTarget = useMemo(() => ({
     kcal: target.kcal,
     proteinG: target.proteinG,
     carbsG: target.carbsG,
     fatG: target.fatG,
   }), [target.kcal, target.proteinG, target.carbsG, target.fatG]);
+  const weeklyPlan = useMemo(() => generateWeek(planTarget), [planTarget]);
+  const monthlyPlan = useMemo(() => generateMonth(planTarget), [planTarget]);
 
+  const [horizon, setHorizon] = useState<PlanHorizon>('week');
   const [selectedDay, setSelectedDay] = useState(1);
   const [mealOverrides, setMealOverrides] = useState<Record<string, MealOverride>>({});
   const [name, setName] = useState('');
@@ -47,11 +53,19 @@ export function Nutrition({ profile, log, onChange }: NutritionProps) {
   const [carbs, setCarbs] = useState('');
   const [fat, setFat] = useState('');
   const [error, setError] = useState('');
-  const planDay = weeklyPlan[selectedDay - 1];
+  const activePlan = horizon === 'week' ? weeklyPlan : monthlyPlan;
+  const planDay = activePlan[selectedDay - 1] ?? activePlan[0];
+
+  const changeHorizon = (next: PlanHorizon) => {
+    setHorizon(next);
+    setSelectedDay(1);
+    setMealOverrides({});
+    setError('');
+  };
 
   const resolveMeal = (index: number) => {
     const planned = planDay.plan.meals[index];
-    return mealOverrides[`${selectedDay}-${index}`] ?? planned;
+    return mealOverrides[`${horizon}-${selectedDay}-${index}`] ?? planned;
   };
 
   const selectedDayMacros = planDay.plan.meals.reduce((sum, _meal, index) => {
@@ -117,7 +131,7 @@ export function Nutrition({ profile, log, onChange }: NutritionProps) {
       }
       setMealOverrides((previous) => ({
         ...previous,
-        [`${selectedDay}-${index}`]: { recipeId: candidate.recipe.id, scale: candidate.scale },
+        [`${horizon}-${selectedDay}-${index}`]: { recipeId: candidate.recipe.id, scale: candidate.scale },
       }));
       setError('');
     } catch (cause) {
@@ -137,9 +151,13 @@ export function Nutrition({ profile, log, onChange }: NutritionProps) {
     <p className="secondary">Objetivo calculado con Mifflin-St Jeor · TDEE estimado {calculation.tdee} kcal · ajuste {Math.round(calculation.adjustmentPct * 100)}%.</p>
 
     <article className="form-card">
-      <div className="hero-row"><div><p className="eyebrow">PLAN SEMANAL</p><h2>Día {selectedDay}</h2></div><strong>{Math.round(selectedDayMacros.kcal)} kcal</strong></div>
+      <div className="hero-row"><div><p className="eyebrow">PLAN DE COMIDAS</p><h2>Día {selectedDay}</h2></div><strong>{Math.round(selectedDayMacros.kcal)} kcal</strong></div>
+      <div className="segmented-control" aria-label="Duración del plan">
+        <button className={horizon === 'week' ? 'active' : ''} onClick={() => changeHorizon('week')}>7 días</button>
+        <button className={horizon === 'month' ? 'active' : ''} onClick={() => changeHorizon('month')}>30 días</button>
+      </div>
       <div className="day-selector" aria-label="Seleccionar día del plan">
-        {weeklyPlan.map((day) => <button key={day.day} className={day.day === selectedDay ? 'active' : ''} onClick={() => setSelectedDay(day.day)}>{day.day}</button>)}
+        {activePlan.map((day) => <button key={day.day} className={day.day === selectedDay ? 'active' : ''} onClick={() => setSelectedDay(day.day)}>{day.day}</button>)}
       </div>
       <p className="secondary">{Math.round(selectedDayMacros.proteinG)}P · {Math.round(selectedDayMacros.carbsG)}C · {Math.round(selectedDayMacros.fatG)}G. Las cantidades se calculan desde los gramos reales y se actualizan al sustituir una comida.</p>
       {planDay.plan.meals.map((_meal, index) => {
@@ -147,18 +165,22 @@ export function Nutrition({ profile, log, onChange }: NutritionProps) {
         const recipe = recipeById.get(meal.recipeId);
         if (!recipe) return null;
         const macros = recipeMacros(recipe, CORE_INGREDIENTS, meal.scale);
-        return <article className="planned-meal" key={`${selectedDay}-${index}`}>
+        return <article className="planned-meal" key={`${horizon}-${selectedDay}-${index}`}>
           <div className="planned-meal-heading">
             <div><strong>{index + 1}. {recipe.name}</strong><p className="secondary">{Math.round(meal.scale * 100)}% ración · {Math.round(macros.kcal)} kcal · {Math.round(macros.proteinG)}P · {Math.round(macros.carbsG)}C · {Math.round(macros.fatG)}G</p></div>
           </div>
           <details className="recipe-detail">
-            <summary>Ingredientes y cantidades</summary>
+            <summary>Receta completa</summary>
+            <p className="secondary">{recipe.prepMinutes ?? '—'} min · {recipe.servings ?? 1} ración base · cantidades ajustadas a tu objetivo</p>
             <div className="ingredient-list">
               {recipe.ingredients.map((item) => <div className="ingredient-row" key={item.ingredientId}>
                 <span>{ingredientById.get(item.ingredientId)?.name ?? item.ingredientId}</span>
                 <strong>{Math.round(item.grams * meal.scale)} g</strong>
               </div>)}
             </div>
+            {!!recipe.steps?.length && <ol className="recipe-steps">
+              {recipe.steps.map((step, stepIndex) => <li key={`${recipe.id}-step-${stepIndex}`}>{step}</li>)}
+            </ol>}
           </details>
           <div className="meal-actions">
             <button className="secondary-action" onClick={() => swapMeal(index)}>Sustituir</button>
