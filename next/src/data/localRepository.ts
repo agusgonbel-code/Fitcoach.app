@@ -1,5 +1,5 @@
 import type { FoodLogEntry, UserProfile, WorkoutSession } from '../domain/models';
-import { migrateLegacyProfile } from './legacyMigration';
+import { migrateLegacyData, migrateLegacyProfile } from './legacyMigration';
 
 const PROFILE_KEY = 'fitcoach_next_profile_v1';
 const SESSIONS_KEY = 'fitcoach_next_sessions_v1';
@@ -19,6 +19,10 @@ function readJson<T>(key: string, fallback: T): T {
   } catch {
     return fallback;
   }
+}
+
+function ensureLegacyActivityMigration(): void {
+  migrateLegacyData(localStorage, () => crypto.randomUUID());
 }
 
 export function loadProfile(): UserProfile | null {
@@ -52,6 +56,7 @@ export function saveProfile(profile: UserProfile): void {
 }
 
 export function loadSessions(): WorkoutSession[] {
+  ensureLegacyActivityMigration();
   return readJson<WorkoutSession[]>(SESSIONS_KEY, []);
 }
 
@@ -71,6 +76,7 @@ export function saveSession(session: WorkoutSession): void {
 }
 
 export function loadFoodLog(): FoodLogEntry[] {
+  ensureLegacyActivityMigration();
   return readJson<FoodLogEntry[]>(FOOD_LOG_KEY, []);
 }
 
