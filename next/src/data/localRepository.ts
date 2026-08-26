@@ -1,7 +1,8 @@
-import type { UserProfile, WorkoutSession } from '../domain/models';
+import type { FoodLogEntry, UserProfile, WorkoutSession } from '../domain/models';
 
 const PROFILE_KEY = 'fitcoach_next_profile_v1';
 const SESSIONS_KEY = 'fitcoach_next_sessions_v1';
+const FOOD_LOG_KEY = 'fitcoach_next_food_log_v1';
 
 export function localDate(date = new Date()): string {
   const y = date.getFullYear();
@@ -44,4 +45,24 @@ export function saveSession(session: WorkoutSession): void {
   const sessions = loadSessions();
   const next = [...sessions.filter(item => item.id !== session.id), session];
   localStorage.setItem(SESSIONS_KEY, JSON.stringify(next));
+}
+
+export function loadFoodLog(): FoodLogEntry[] {
+  return readJson<FoodLogEntry[]>(FOOD_LOG_KEY, []);
+}
+
+export function validFoodEntry(entry: FoodLogEntry): boolean {
+  return entry.name.trim().length > 0 &&
+    [entry.kcal, entry.proteinG, entry.carbsG, entry.fatG].every(value => Number.isFinite(value) && value >= 0) &&
+    entry.kcal > 0;
+}
+
+export function saveFoodEntry(entry: FoodLogEntry): void {
+  if (!validFoodEntry(entry)) throw new Error('Completa una comida válida antes de guardarla.');
+  const log = loadFoodLog();
+  localStorage.setItem(FOOD_LOG_KEY, JSON.stringify([...log.filter(item => item.id !== entry.id), entry]));
+}
+
+export function removeFoodEntry(id: string): void {
+  localStorage.setItem(FOOD_LOG_KEY, JSON.stringify(loadFoodLog().filter(item => item.id !== id)));
 }
