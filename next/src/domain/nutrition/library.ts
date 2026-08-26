@@ -19,22 +19,46 @@ export const CORE_INGREDIENTS: IngredientDefinition[] = [
 ];
 
 export const CORE_RECIPES: RecipeDefinition[] = [
-  { id: 'oat-cake', name: 'Bizcocho de avena, huevo y claras', ingredients: [
-    { ingredientId: 'oats', grams: 60 }, { ingredientId: 'egg', grams: 60 }, { ingredientId: 'eggwhite', grams: 150 }, { ingredientId: 'banana', grams: 80 },
-  ] },
-  { id: 'skyr-bowl', name: 'Skyr con avena y frutos rojos', ingredients: [
-    { ingredientId: 'skyr', grams: 250 }, { ingredientId: 'oats', grams: 40 }, { ingredientId: 'berries', grams: 120 },
-  ] },
-  { id: 'chicken-rice', name: 'Pollo con arroz y brócoli', ingredients: [
-    { ingredientId: 'chicken', grams: 180 }, { ingredientId: 'rice', grams: 250 }, { ingredientId: 'broccoli', grams: 180 }, { ingredientId: 'oliveoil', grams: 10 },
-  ] },
-  { id: 'chicken-potato', name: 'Pollo con patata y brócoli', ingredients: [
-    { ingredientId: 'chicken', grams: 180 }, { ingredientId: 'potato', grams: 320 }, { ingredientId: 'broccoli', grams: 180 }, { ingredientId: 'oliveoil', grams: 10 },
-  ] },
-  { id: 'tuna-toast', name: 'Tostadas integrales con atún y tomate', ingredients: [
-    { ingredientId: 'bread', grams: 100 }, { ingredientId: 'tuna', grams: 120 }, { ingredientId: 'tomato', grams: 150 }, { ingredientId: 'oliveoil', grams: 8 },
-  ] },
-  { id: 'whey-banana', name: 'Batido de whey y plátano', ingredients: [
-    { ingredientId: 'whey', grams: 30 }, { ingredientId: 'banana', grams: 120 },
-  ] },
+  {
+    id: 'oat-cake', name: 'Bizcocho de avena, huevo y claras', servings: 1, prepMinutes: 12,
+    ingredients: [
+      { ingredientId: 'oats', grams: 60 }, { ingredientId: 'egg', grams: 60 }, { ingredientId: 'eggwhite', grams: 150 }, { ingredientId: 'banana', grams: 80 },
+    ],
+    steps: ['Tritura o mezcla la avena con el huevo, las claras y el plátano.', 'Vierte la mezcla en un recipiente apto para microondas o airfryer.', 'Cocina hasta que el centro quede cuajado y deja reposar un minuto antes de comer.'],
+  },
+  {
+    id: 'skyr-bowl', name: 'Skyr con avena y frutos rojos', servings: 1, prepMinutes: 4,
+    ingredients: [
+      { ingredientId: 'skyr', grams: 250 }, { ingredientId: 'oats', grams: 40 }, { ingredientId: 'berries', grams: 120 },
+    ],
+    steps: ['Sirve el skyr en un bol.', 'Añade la avena y mezcla.', 'Termina con los frutos rojos justo antes de comer.'],
+  },
+  {
+    id: 'chicken-rice', name: 'Pollo con arroz y brócoli', servings: 1, prepMinutes: 22,
+    ingredients: [
+      { ingredientId: 'chicken', grams: 180 }, { ingredientId: 'rice', grams: 250 }, { ingredientId: 'broccoli', grams: 180 }, { ingredientId: 'oliveoil', grams: 10 },
+    ],
+    steps: ['Cocina la pechuga de pollo a la plancha hasta que quede completamente hecha.', 'Calienta o cuece el arroz y cocina el brócoli al vapor o salteado.', 'Sirve todo junto y añade el aceite de oliva al final.'],
+  },
+  {
+    id: 'chicken-potato', name: 'Pollo con patata y brócoli', servings: 1, prepMinutes: 28,
+    ingredients: [
+      { ingredientId: 'chicken', grams: 180 }, { ingredientId: 'potato', grams: 320 }, { ingredientId: 'broccoli', grams: 180 }, { ingredientId: 'oliveoil', grams: 10 },
+    ],
+    steps: ['Cocina la patata al microondas, hervida o en airfryer.', 'Cocina la pechuga de pollo hasta que quede completamente hecha.', 'Añade el brócoli cocinado y termina con el aceite de oliva.'],
+  },
+  {
+    id: 'tuna-toast', name: 'Tostadas integrales con atún y tomate', servings: 1, prepMinutes: 8,
+    ingredients: [
+      { ingredientId: 'bread', grams: 100 }, { ingredientId: 'tuna', grams: 120 }, { ingredientId: 'tomato', grams: 150 }, { ingredientId: 'oliveoil', grams: 8 },
+    ],
+    steps: ['Tuesta el pan al gusto.', 'Escurre el atún y repártelo sobre las tostadas.', 'Añade el tomate y el aceite de oliva justo antes de servir.'],
+  },
+  {
+    id: 'whey-banana', name: 'Batido de whey y plátano', servings: 1, prepMinutes: 3,
+    ingredients: [
+      { ingredientId: 'whey', grams: 30 }, { ingredientId: 'banana', grams: 120 },
+    ],
+    steps: ['Añade agua fría al vaso mezclador o batidora.', 'Incorpora la proteína whey y el plátano.', 'Agita o bate hasta obtener una mezcla homogénea.'],
+  },
 ];
