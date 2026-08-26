@@ -19,6 +19,9 @@ export interface RecipeDefinition {
   id: string;
   name: string;
   ingredients: RecipeIngredient[];
+  servings?: number;
+  prepMinutes?: number;
+  steps?: string[];
 }
 
 export interface PlannedMeal {
