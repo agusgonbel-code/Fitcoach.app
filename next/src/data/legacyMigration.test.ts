@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { mapLegacyProfile, migrateLegacyProfile } from './legacyMigration';
+import { mapLegacyProfile, migrateLegacyData, migrateLegacyProfile } from './legacyMigration';
 
 class MemoryStorage {
   private data = new Map<string, string>();
@@ -47,5 +47,60 @@ describe('legacy profile migration', () => {
     storage.setItem('fitcoach_client_profile_v35', JSON.stringify({ age: 4, height: 300, weight: 10 }));
     const result = migrateLegacyProfile(storage, () => 'bad');
     expect(result).toMatchObject({ migrated: false, reason: 'no-valid-legacy-profile' });
+  });
+});
+
+describe('legacy activity migration', () => {
+  it('imports valid workout history and preserves RIR 0', () => {
+    const storage = new MemoryStorage();
+    storage.setItem('workouts', JSON.stringify([{
+      date: '2026-08-25T06:30:00', day: 'Lunes', notes: 'sesión buena',
+      exercises: [{ name: 'Press banca', sets: [
+        { kg: 80, reps: 10, rir: 0 },
+        { kg: 80, reps: 0, rir: 2 }
+      ] }]
+    }]));
+    let id = 0;
+    const result = migrateLegacyData(storage, () => String(++id));
+    const sessions = JSON.parse(storage.getItem('fitcoach_next_sessions_v1') || '[]');
+    expect(result).toMatchObject({ migrated: true, workouts: 1 });
+    expect(sessions).toHaveLength(1);
+    expect(sessions[0].localDate).toBe('2026-08-25');
+    expect(sessions[0].exercises[0].sets).toHaveLength(1);
+    expect(sessions[0].exercises[0].sets[0].rir).toBe(0);
+  });
+
+  it('imports legacy meals with macros and defaults missing fat to zero', () => {
+    const storage = new MemoryStorage();
+    storage.setItem('meals', JSON.stringify([
+      { date: '2026-08-25', name: 'Pollo y arroz', kcal: 650, protein: 55, carbs: 70, fat: 15 },
+      { date: '2026-08-25', name: 'Batido', kcal: 150, protein: 25, carbs: 5 }
+    ]));
+    let id = 0;
+    const result = migrateLegacyData(storage, () => String(++id));
+    const meals = JSON.parse(storage.getItem('fitcoach_next_food_log_v1') || '[]');
+    expect(result).toMatchObject({ migrated: true, meals: 2 });
+    expect(meals[0]).toMatchObject({ name: 'Pollo y arroz', proteinG: 55, carbsG: 70, fatG: 15 });
+    expect(meals[1]).toMatchObject({ name: 'Batido', proteinG: 25, carbsG: 5, fatG: 0 });
+  });
+
+  it('is idempotent and never duplicates imported history', () => {
+    const storage = new MemoryStorage();
+    storage.setItem('meals', JSON.stringify([{ date: '2026-08-25', name: 'Comida', kcal: 500, protein: 40 }]));
+    const first = migrateLegacyData(storage, () => '1');
+    const second = migrateLegacyData(storage, () => '2');
+    expect(first.meals).toBe(1);
+    expect(second).toMatchObject({ migrated: false, reason: 'already-migrated' });
+    expect(JSON.parse(storage.getItem('fitcoach_next_food_log_v1') || '[]')).toHaveLength(1);
+  });
+
+  it('does not import empty or invalid legacy sessions', () => {
+    const storage = new MemoryStorage();
+    storage.setItem('workouts', JSON.stringify([{
+      date: '2026-08-25T06:30:00', day: 'Lunes', exercises: [{ name: 'Press banca', sets: [{ kg: 80, reps: 0, rir: 2 }] }]
+    }]));
+    const result = migrateLegacyData(storage, () => '1');
+    expect(result).toMatchObject({ migrated: false, workouts: 0 });
+    expect(storage.getItem('fitcoach_next_sessions_v1')).toBeNull();
   });
 });
