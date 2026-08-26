@@ -1,16 +1,28 @@
-import type { Goal, Sex, UserProfile } from '../domain/models';
+import type { FoodLogEntry, Goal, Sex, UserProfile, WorkoutSession } from '../domain/models';
 
 type StorageLike = Pick<Storage, 'getItem' | 'setItem'>;
 
 const NEXT_PROFILE_KEY = 'fitcoach_next_profile_v1';
+const NEXT_SESSIONS_KEY = 'fitcoach_next_sessions_v1';
+const NEXT_FOOD_LOG_KEY = 'fitcoach_next_food_log_v1';
+const LEGACY_DATA_MARKER = 'fitcoach_next_legacy_data_migration_v1';
 const LEGACY_CLIENT_KEY = 'fitcoach_client_profile_v35';
 const LEGACY_NUTRITION_KEY = 'fitcoach_nutrition_profile_v34';
+const LEGACY_WORKOUTS_KEY = 'workouts';
+const LEGACY_MEALS_KEY = 'meals';
 
 export interface LegacyMigrationResult {
   migrated: boolean;
   source: 'client-v35' | 'nutrition-v34' | 'none';
   profile: UserProfile | null;
   reason?: 'next-profile-exists' | 'no-valid-legacy-profile';
+}
+
+export interface LegacyDataMigrationResult {
+  migrated: boolean;
+  workouts: number;
+  meals: number;
+  reason?: 'already-migrated';
 }
 
 function parseObject(raw: string | null): Record<string, unknown> | null {
@@ -23,9 +35,30 @@ function parseObject(raw: string | null): Record<string, unknown> | null {
   }
 }
 
+function parseArray(raw: string | null): unknown[] {
+  if (!raw) return [];
+  try {
+    const value = JSON.parse(raw);
+    return Array.isArray(value) ? value : [];
+  } catch {
+    return [];
+  }
+}
+
 function finiteNumber(value: unknown): number | null {
   const number = Number(value);
   return Number.isFinite(number) ? number : null;
+}
+
+function localDateFrom(value: unknown): string | null {
+  if (typeof value !== 'string' || !value.trim()) return null;
+  if (/^\d{4}-\d{2}-\d{2}$/.test(value)) return value;
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return null;
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
 }
 
 function mapGoal(value: unknown): Goal {
@@ -106,4 +139,84 @@ export function migrateLegacyProfile(storage: StorageLike, createId: () => strin
   }
 
   return { migrated: false, source: 'none', profile: null, reason: 'no-valid-legacy-profile' };
+}
+
+function mapLegacyWorkout(value: unknown, createId: () => string): WorkoutSession | null {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return null;
+  const raw = value as Record<string, unknown>;
+  const localDate = localDateFrom(raw.date);
+  if (!localDate || !Array.isArray(raw.exercises)) return null;
+
+  const exercises = raw.exercises.flatMap(item => {
+    if (!item || typeof item !== 'object' || Array.isArray(item)) return [];
+    const exercise = item as Record<string, unknown>;
+    const name = typeof exercise.name === 'string' ? exercise.name.trim() : '';
+    if (!name || !Array.isArray(exercise.sets)) return [];
+    const sets = exercise.sets.flatMap(setValue => {
+      if (!setValue || typeof setValue !== 'object' || Array.isArray(setValue)) return [];
+      const set = setValue as Record<string, unknown>;
+      const kg = finiteNumber(set.kg);
+      const reps = finiteNumber(set.reps);
+      const rirRaw = set.rir;
+      const rir = rirRaw === '' || rirRaw === null || rirRaw === undefined ? null : finiteNumber(rirRaw);
+      if (kg === null || kg < 0 || reps === null || reps <= 0 || (rir !== null && (rir < 0 || rir > 10))) return [];
+      return [{ kg, reps: Math.round(reps), rir, completedAt: typeof raw.date === 'string' ? raw.date : `${localDate}T12:00:00` }];
+    });
+    return sets.length ? [{ exerciseId: `legacy:${name}`, sets }] : [];
+  });
+  if (!exercises.length) return null;
+  const timestamp = typeof raw.date === 'string' ? raw.date : `${localDate}T12:00:00`;
+  return {
+    id: `legacy-workout-${createId()}`,
+    plannedWorkoutId: `legacy:${typeof raw.day === 'string' && raw.day.trim() ? raw.day.trim() : 'workout'}`,
+    localDate,
+    startedAt: timestamp,
+    completedAt: timestamp,
+    exercises,
+    notes: typeof raw.notes === 'string' && raw.notes.trim() ? raw.notes.trim() : undefined
+  };
+}
+
+function mapLegacyMeal(value: unknown, createId: () => string): FoodLogEntry | null {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return null;
+  const raw = value as Record<string, unknown>;
+  const localDate = localDateFrom(raw.date);
+  const name = typeof raw.name === 'string' ? raw.name.trim() : '';
+  const kcal = finiteNumber(raw.kcal);
+  const protein = finiteNumber(raw.protein);
+  const carbs = finiteNumber(raw.carbs ?? raw.c);
+  const fat = finiteNumber(raw.fat ?? raw.f);
+  if (!localDate || !name || kcal === null || kcal <= 0 || protein === null || protein < 0) return null;
+  return {
+    id: `legacy-meal-${createId()}`,
+    localDate,
+    name,
+    kcal,
+    proteinG: protein,
+    carbsG: carbs !== null && carbs >= 0 ? carbs : 0,
+    fatG: fat !== null && fat >= 0 ? fat : 0,
+    createdAt: typeof raw.createdAt === 'string' ? raw.createdAt : `${localDate}T12:00:00`
+  };
+}
+
+export function migrateLegacyData(storage: StorageLike, createId: () => string): LegacyDataMigrationResult {
+  if (storage.getItem(LEGACY_DATA_MARKER) === 'done') {
+    return { migrated: false, workouts: 0, meals: 0, reason: 'already-migrated' };
+  }
+
+  const existingSessions = parseArray(storage.getItem(NEXT_SESSIONS_KEY)) as WorkoutSession[];
+  const existingMeals = parseArray(storage.getItem(NEXT_FOOD_LOG_KEY)) as FoodLogEntry[];
+  const migratedSessions = parseArray(storage.getItem(LEGACY_WORKOUTS_KEY)).flatMap(value => {
+    const session = mapLegacyWorkout(value, createId);
+    return session ? [session] : [];
+  });
+  const migratedMeals = parseArray(storage.getItem(LEGACY_MEALS_KEY)).flatMap(value => {
+    const meal = mapLegacyMeal(value, createId);
+    return meal ? [meal] : [];
+  });
+
+  if (migratedSessions.length) storage.setItem(NEXT_SESSIONS_KEY, JSON.stringify([...existingSessions, ...migratedSessions]));
+  if (migratedMeals.length) storage.setItem(NEXT_FOOD_LOG_KEY, JSON.stringify([...existingMeals, ...migratedMeals]));
+  storage.setItem(LEGACY_DATA_MARKER, 'done');
+  return { migrated: migratedSessions.length > 0 || migratedMeals.length > 0, workouts: migratedSessions.length, meals: migratedMeals.length };
 }
