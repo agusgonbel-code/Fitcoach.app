@@ -135,7 +135,13 @@ test('complete backup restores training, nutrition, metrics and photos after loc
     mimeType: 'image/png',
     buffer: Buffer.from('iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAIAAAD8GO2jAAAALUlEQVR4nGNscFBgoCVgoqnpoxaMWjBqwagFoxaMWjBqwagFoxaMWjBqARUBACt0ASC9fKypAAAAAElFTkSuQmCC', 'base64'),
   });
-  await expect(photoSection.locator('.photo-row')).toHaveCount(1);
+  const photoRow = photoSection.locator('.photo-row');
+  try {
+    await expect(photoRow).toHaveCount(1);
+  } catch (assertionError) {
+    const alertText = await photoSection.getByRole('alert').allTextContents();
+    throw new Error(`La foto no apareció en WebKit. Error visible de la app: ${alertText.join(' | ') || 'ninguno'}`, { cause: assertionError });
+  }
   await expect(photoSection).toContainText('Frontal');
 
   await nav.getByRole('button', { name: 'Perfil', exact: true }).click();
