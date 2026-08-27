@@ -32,6 +32,15 @@ export function validProgressPhotoMeta(meta: ProgressPhotoMeta): boolean {
   return Boolean(meta.id && validDate && validPose && meta.createdAt && ACCEPTED.has(meta.mimeType) && meta.width > 0 && meta.height > 0 && validWeight);
 }
 
+export function isProgressPhotoBlob(value: unknown): value is Blob {
+  if (!value || typeof value !== 'object') return false;
+  const candidate = value as { size?: unknown; type?: unknown; slice?: unknown; arrayBuffer?: unknown };
+  return Number.isFinite(candidate.size) && Number(candidate.size) > 0 &&
+    typeof candidate.type === 'string' &&
+    typeof candidate.slice === 'function' &&
+    typeof candidate.arrayBuffer === 'function';
+}
+
 export function validateProgressPhotoFile(file: FileLike): void {
   if (!file || !Number.isFinite(file.size) || file.size <= 0) throw new Error('Selecciona una fotografía válida.');
   if (file.size > MAX_INPUT_BYTES) throw new Error('La fotografía supera el límite de 25 MB.');
@@ -112,7 +121,7 @@ export async function prepareProgressPhoto(file: File): Promise<{ blob: Blob; mi
 }
 
 export async function saveProgressPhoto(record: ProgressPhotoRecord): Promise<void> {
-  if (!validProgressPhotoMeta(record) || !(record.blob instanceof Blob) || record.blob.size <= 0 || record.blob.size > MAX_OUTPUT_BYTES) {
+  if (!validProgressPhotoMeta(record) || !isProgressPhotoBlob(record.blob) || record.blob.size > MAX_OUTPUT_BYTES) {
     throw new Error('La fotografía preparada no es válida.');
   }
   const db = await openDb();
@@ -129,7 +138,7 @@ export async function loadProgressPhotos(): Promise<ProgressPhotoRecord[]> {
   const db = await openDb();
   const result = await new Promise<ProgressPhotoRecord[]>((resolve, reject) => {
     const request = db.transaction(STORE, 'readonly').objectStore(STORE).getAll();
-    request.onsuccess = () => resolve((request.result as ProgressPhotoRecord[]).filter(item => validProgressPhotoMeta(item) && item.blob instanceof Blob));
+    request.onsuccess = () => resolve((request.result as ProgressPhotoRecord[]).filter(item => validProgressPhotoMeta(item) && isProgressPhotoBlob(item.blob)));
     request.onerror = () => reject(request.error ?? new Error('No se pudieron cargar las fotografías.'));
   });
   db.close();
