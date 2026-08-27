@@ -6,42 +6,79 @@ const KEY = 'fitcoach_next_training_adaptation_v1';
 export type AdaptationDecisionStatus = 'accepted' | 'declined';
 
 export interface AdaptationDecision {
-  version: 1;
+  version: 2;
   proposal: WeeklyTrainingAdaptationProposal;
   status: AdaptationDecisionStatus;
   decidedAt: string;
   effectiveFrom: string;
+  effectiveUntil: string;
 }
 
 function readStorage(): Storage | null {
   try { return typeof localStorage === 'undefined' ? null : localStorage; } catch { return null; }
 }
 
+function parseLocalDate(value: string): Date | null {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return null;
+  const date = new Date(`${value}T12:00:00`);
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
+export function addLocalDays(localDate: string, days: number): string | null {
+  const date = parseLocalDate(localDate);
+  if (!date || !Number.isInteger(days)) return null;
+  date.setDate(date.getDate() + days);
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+}
+
 export function saveAdaptationDecision(proposal: WeeklyTrainingAdaptationProposal, status: AdaptationDecisionStatus, todayLocalDate: string): AdaptationDecision {
+  const effectiveFrom = nextMicrocycleStart(todayLocalDate);
+  const effectiveUntil = addLocalDays(effectiveFrom, 6);
+  if (!effectiveUntil) throw new Error('No se pudo calcular el microciclo de adaptación.');
+
   const decision: AdaptationDecision = {
-    version: 1,
+    version: 2,
     proposal: normalizeAdaptation(proposal),
     status,
     decidedAt: new Date().toISOString(),
-    effectiveFrom: nextMicrocycleStart(todayLocalDate),
+    effectiveFrom,
+    effectiveUntil,
   };
   readStorage()?.setItem(KEY, JSON.stringify(decision));
   return decision;
 }
 
 export function loadAdaptationDecision(): AdaptationDecision | null {
-  const raw = readStorage()?.getItem(KEY);
+  const storage = readStorage();
+  const raw = storage?.getItem(KEY);
   if (!raw) return null;
   try {
-    const parsed = JSON.parse(raw) as Partial<AdaptationDecision>;
-    if (parsed.version !== 1 || !parsed.proposal || (parsed.status !== 'accepted' && parsed.status !== 'declined') || typeof parsed.effectiveFrom !== 'string') return null;
-    return { ...parsed, proposal: normalizeAdaptation(parsed.proposal as WeeklyTrainingAdaptationProposal) } as AdaptationDecision;
+    const parsed = JSON.parse(raw) as Partial<AdaptationDecision> & { version?: number };
+    if ((parsed.version !== 1 && parsed.version !== 2) || !parsed.proposal || (parsed.status !== 'accepted' && parsed.status !== 'declined') || typeof parsed.effectiveFrom !== 'string') return null;
+
+    const effectiveUntil = typeof parsed.effectiveUntil === 'string'
+      ? parsed.effectiveUntil
+      : addLocalDays(parsed.effectiveFrom, 6);
+    if (!effectiveUntil) return null;
+
+    const decision: AdaptationDecision = {
+      version: 2,
+      proposal: normalizeAdaptation(parsed.proposal as WeeklyTrainingAdaptationProposal),
+      status: parsed.status,
+      decidedAt: typeof parsed.decidedAt === 'string' ? parsed.decidedAt : new Date().toISOString(),
+      effectiveFrom: parsed.effectiveFrom,
+      effectiveUntil,
+    };
+
+    if (parsed.version === 1) storage?.setItem(KEY, JSON.stringify(decision));
+    return decision;
   } catch { return null; }
 }
 
 export function activeAcceptedAdaptation(todayLocalDate: string): WeeklyTrainingAdaptationProposal | null {
   const decision = loadAdaptationDecision();
-  if (!decision || decision.status !== 'accepted' || decision.effectiveFrom > todayLocalDate) return null;
+  if (!decision || decision.status !== 'accepted') return null;
+  if (todayLocalDate < decision.effectiveFrom || todayLocalDate > decision.effectiveUntil) return null;
   return decision.proposal;
 }
 
