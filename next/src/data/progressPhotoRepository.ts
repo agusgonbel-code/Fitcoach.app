@@ -119,11 +119,12 @@ export async function prepareProgressPhoto(file: File): Promise<{ blob: Blob; mi
   const decoded = await decodeImage(file);
   try {
     // Small JPEG/PNG/WebP files that already fit the storage/display envelope do
-    // not benefit from a canvas round-trip. Keeping the original avoids needless
-    // quality loss and WebKit-specific canvas encoding failures while still
-    // decoding first so corrupt images cannot enter IndexedDB.
+    // not benefit from a canvas round-trip. Keep their bytes, but normalize File
+    // to a plain Blob before IndexedDB. WKWebView/Safari can reject structured-
+    // cloning File objects in transactions even when the same bytes are valid.
     if (shouldKeepOriginalProgressPhoto(file, decoded.width, decoded.height)) {
-      return { blob: file, mimeType: file.type.toLowerCase(), width: decoded.width, height: decoded.height };
+      const blob = file.slice(0, file.size, file.type.toLowerCase());
+      return { blob, mimeType: file.type.toLowerCase(), width: decoded.width, height: decoded.height };
     }
 
     const scale = Math.min(1, MAX_EDGE / Math.max(decoded.width, decoded.height));
@@ -155,6 +156,7 @@ export async function saveProgressPhoto(record: ProgressPhotoRecord): Promise<vo
     tx.objectStore(STORE).put(record);
     tx.oncomplete = () => resolve();
     tx.onerror = () => reject(tx.error ?? new Error('No se pudo guardar la fotografía.'));
+    tx.onabort = () => reject(tx.error ?? new Error('No se pudo guardar la fotografía.'));
   });
   db.close();
 }
