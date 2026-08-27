@@ -1,0 +1,10 @@
+{
+  "appId": "com.fitcoach.next",
+  "appName": "FitCoach Next",
+  "webDir": "dist",
+  "bundledWebRuntime": false,
+  "ios": {
+    "contentInset": "automatic",
+    "preferredContentMode": "mobile"
+  }
+}
