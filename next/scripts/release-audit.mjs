@@ -21,6 +21,24 @@ if (capacitor.appId !== 'com.fitcoach.next') fail(`unexpected bundle id ${capaci
 if (capacitor.appName !== 'FitCoach Next') fail(`unexpected app name ${capacitor.appName}`);
 if (capacitor.webDir !== 'dist') fail(`unexpected webDir ${capacitor.webDir}`);
 
+const metadata = JSON.parse(readText('release-metadata.json'));
+if (metadata.productName !== capacitor.appName) fail('release metadata product name does not match Capacitor app name');
+if (metadata.bundleId !== capacitor.appId) fail('release metadata bundle id does not match Capacitor app id');
+if (metadata.primaryLocale !== 'es-ES') fail(`unexpected primary locale ${metadata.primaryLocale}`);
+if (metadata.category !== 'Health & Fitness') fail(`unexpected App Store category ${metadata.category}`);
+if (!Array.isArray(metadata.platforms) || metadata.platforms.length !== 1 || metadata.platforms[0] !== 'iPhone') fail('release target must be iPhone-only for this RC');
+if (metadata.orientation !== 'portrait') fail(`unexpected orientation policy ${metadata.orientation}`);
+if (metadata.dataStorage !== 'local-first') fail(`unexpected data storage policy ${metadata.dataStorage}`);
+if (metadata.tracking !== false) fail('release metadata must explicitly disable tracking');
+if (metadata.remoteAnalytics !== false) fail('remote analytics must remain disabled for this RC');
+if (metadata.progressPhotosRemoteByDefault !== false) fail('progress photos must not be remote by default');
+for (const [key, value] of Object.entries({ privacyPolicyUrl: metadata.privacyPolicyUrl, supportUrl: metadata.supportUrl })) {
+  let url;
+  try { url = new URL(value); } catch { fail(`${key} is not a valid URL`); }
+  if (url.protocol !== 'https:') fail(`${key} must use HTTPS`);
+  if (url.hostname !== 'agusgonbel-code.github.io') fail(`${key} must point to the approved public FitCoach site`);
+}
+
 const index = readText('index.html');
 if (!index.includes('viewport-fit=cover')) fail('viewport does not include viewport-fit=cover');
 if (!/<html\s+lang="es"/.test(index)) fail('document language is not Spanish');
@@ -36,4 +54,4 @@ const width = png.readUInt32BE(16);
 const height = png.readUInt32BE(20);
 if (width !== 1024 || height !== 1024) fail(`app icon must be 1024x1024, got ${width}x${height}`);
 
-console.log(`FitCoach Next release audit OK · ${pkg.version} · ${capacitor.appId} · icon ${width}x${height}`);
+console.log(`FitCoach Next release audit OK · ${pkg.version} · ${capacitor.appId} · ${metadata.primaryLocale} · iPhone portrait · icon ${width}x${height}`);
