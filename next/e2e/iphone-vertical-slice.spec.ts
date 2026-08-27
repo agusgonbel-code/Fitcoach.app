@@ -183,3 +183,51 @@ test('complete backup restores training, nutrition, metrics and photos after loc
   await expect(restoredPhotoSection.locator('.photo-row')).toHaveCount(1);
   await expect(restoredPhotoSection).toContainText('Frontal');
 });
+
+test('legacy 3.4.4 profile, workout and meals migrate once and survive an iPhone reload', async ({ page }) => {
+  await page.addInitScript(() => {
+    const now = new Date();
+    const localDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+    localStorage.setItem('fitcoach_client_profile_v35', JSON.stringify({
+      name: 'Legacy QA', sex: 'm', age: 46, height: 181, weight: 81, activity: 1.45,
+      goal: 'recomp', experience: 'intermediate', days: 4, minutes: 50,
+      equipment: ['gym'], limitations: 'Molestia hombro',
+    }));
+    localStorage.setItem('workouts', JSON.stringify([{
+      date: `${localDate}T06:45:00`, day: 'Lunes', notes: 'Migración QA',
+      exercises: [{ name: 'Press banca', sets: [{ kg: 80, reps: 10, rir: 0 }] }],
+    }]));
+    localStorage.setItem('meals', JSON.stringify([{
+      date: localDate, name: 'Comida legacy', kcal: 700, protein: 60, carbs: 80, fat: 16,
+    }]));
+  });
+
+  await page.goto('/');
+  await expect(page.getByRole('heading', { name: 'Hola, Legacy QA' })).toBeVisible();
+
+  const firstPass = await page.evaluate(() => ({
+    profile: JSON.parse(localStorage.getItem('fitcoach_next_profile_v1') || 'null'),
+    sessions: JSON.parse(localStorage.getItem('fitcoach_next_sessions_v1') || '[]'),
+    meals: JSON.parse(localStorage.getItem('fitcoach_next_food_log_v1') || '[]'),
+    marker: localStorage.getItem('fitcoach_next_legacy_data_migration_v1'),
+  }));
+  expect(firstPass.profile).toMatchObject({ name: 'Legacy QA', goal: 'recomp', trainingDaysPerWeek: 4, sessionMinutes: 50 });
+  expect(firstPass.profile.restrictions).toContain('Molestia hombro');
+  expect(firstPass.sessions).toHaveLength(1);
+  expect(firstPass.sessions[0].exercises[0].sets[0]).toMatchObject({ kg: 80, reps: 10, rir: 0 });
+  expect(firstPass.meals).toHaveLength(1);
+  expect(firstPass.meals[0]).toMatchObject({ name: 'Comida legacy', kcal: 700, proteinG: 60, carbsG: 80, fatG: 16 });
+  expect(firstPass.marker).toBe('done');
+
+  await page.reload();
+  await expect(page.getByRole('heading', { name: 'Hola, Legacy QA' })).toBeVisible();
+
+  const afterReload = await page.evaluate(() => ({
+    sessions: JSON.parse(localStorage.getItem('fitcoach_next_sessions_v1') || '[]'),
+    meals: JSON.parse(localStorage.getItem('fitcoach_next_food_log_v1') || '[]'),
+    marker: localStorage.getItem('fitcoach_next_legacy_data_migration_v1'),
+  }));
+  expect(afterReload.sessions).toHaveLength(1);
+  expect(afterReload.meals).toHaveLength(1);
+  expect(afterReload.marker).toBe('done');
+});
