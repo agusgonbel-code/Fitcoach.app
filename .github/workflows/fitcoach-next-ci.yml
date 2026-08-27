@@ -23,6 +23,13 @@ jobs:
         with:
           node-version: 22
       - run: npm install --package-lock-only
+      - name: Capture resolved RC lockfile
+        uses: actions/upload-artifact@v4
+        with:
+          name: fitcoach-next-package-lock
+          path: next/package-lock.json
+          if-no-files-found: error
+          retention-days: 3
       - run: npm ci
       - run: npm test
       - run: npm run build
