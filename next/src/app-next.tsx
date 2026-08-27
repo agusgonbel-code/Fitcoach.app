@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import type { UserProfile } from './domain/models';
 import { loadBodyMetrics, loadFoodLog, loadProfile, loadSessions, localDate, saveProfile } from './data/localRepository';
+import { loadWorkoutDraft } from './data/workoutDraft';
 import { activeAcceptedAdaptation, loadAdaptationDecision, saveAdaptationDecision, type AdaptationDecision } from './data/adaptationRepository';
 import { calculateNutrition } from './domain/nutrition/calculateTarget';
 import { summarizeProgress } from './domain/progress/summarizeProgress';
@@ -72,7 +73,6 @@ function Onboarding({ onComplete }: { onComplete: (profile: UserProfile) => void
 }
 
 function AuthenticatedApp({ profile }: { profile: UserProfile }) {
-  const [tab, setTab] = useState<Tab>('today');
   const [sessions, setSessions] = useState(() => loadSessions());
   const [foodLog, setFoodLog] = useState(() => loadFoodLog());
   const [bodyMetrics, setBodyMetrics] = useState(() => loadBodyMetrics());
@@ -86,6 +86,7 @@ function AuthenticatedApp({ profile }: { profile: UserProfile }) {
   const weekdayIndex = (new Date().getDay() + 6) % 7;
   const todaySlot = weeklySchedule.find(slot => slot.dayIndex === weekdayIndex);
   const todayWorkout = todaySlot?.workout ?? null;
+  const [tab, setTab] = useState<Tab>(() => todayWorkout && loadWorkoutDraft(todayWorkout.id, today) ? 'training' : 'today');
   const completedToday = Boolean(todayWorkout && sessions.some(session => session.localDate === today && session.plannedWorkoutId === todayWorkout.id && Boolean(session.completedAt)));
   const progress = useMemo(() => summarizeProgress(profile, sessions, foodLog, nutrition.target, today), [profile, sessions, foodLog, nutrition.target.kcal, nutrition.target.proteinG, nutrition.target.carbsG, nutrition.target.fatG, today]);
   const insight = useMemo(() => buildCoachInsight(progress, completedToday), [progress, completedToday]);
