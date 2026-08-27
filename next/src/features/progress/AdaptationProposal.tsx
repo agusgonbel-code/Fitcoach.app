@@ -17,16 +17,21 @@ function changeText(proposal: WeeklyTrainingAdaptationProposal): string {
   return parts.length ? parts.join(' · ') : 'Sin cambios de volumen ni carga';
 }
 
+function currentLocalDate(): string {
+  const date = new Date();
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+}
+
 export function AdaptationProposal({
   proposal,
   decision,
-  todayLocalDate,
+  todayLocalDate = currentLocalDate(),
   onAccept,
   onDecline,
 }: {
   proposal: WeeklyTrainingAdaptationProposal;
   decision: AdaptationDecision | null;
-  todayLocalDate: string;
+  todayLocalDate?: string;
   onAccept: () => void;
   onDecline: () => void;
 }) {
