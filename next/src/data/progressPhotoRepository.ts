@@ -64,14 +64,27 @@ async function decodeImage(file: File): Promise<{ source: CanvasImageSource; wid
       return { source: bitmap, width: bitmap.width, height: bitmap.height, close: () => bitmap.close() };
     } catch { /* Safari may decode HEIC through HTMLImageElement instead. */ }
   }
+
   const url = URL.createObjectURL(file);
+  const image = new Image();
+  image.decoding = 'async';
   try {
-    const image = new Image();
-    image.decoding = 'async';
-    await new Promise<void>((resolve, reject) => { image.onload = () => resolve(); image.onerror = () => reject(new Error('El dispositivo no puede decodificar esta fotografía.')); image.src = url; });
-    return { source: image, width: image.naturalWidth, height: image.naturalHeight };
-  } finally {
+    await new Promise<void>((resolve, reject) => {
+      image.onload = () => resolve();
+      image.onerror = () => reject(new Error('El dispositivo no puede decodificar esta fotografía.'));
+      image.src = url;
+    });
+    return {
+      source: image,
+      width: image.naturalWidth,
+      height: image.naturalHeight,
+      // WebKit may still need the object URL while drawImage consumes the decoded
+      // HTMLImageElement. Revoke it only after prepareProgressPhoto finishes.
+      close: () => URL.revokeObjectURL(url),
+    };
+  } catch (error) {
     URL.revokeObjectURL(url);
+    throw error;
   }
 }
 
