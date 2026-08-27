@@ -8,6 +8,7 @@
     "build": "tsc --noEmit && vite build",
     "test": "vitest run src",
     "test:mobile": "playwright test",
+    "release:audit": "node scripts/release-audit.mjs",
     "cap:add:ios": "npm run build && npx cap add ios",
     "cap:sync:ios": "npm run build && npx cap sync ios",
     "ios:privacy": "node scripts/configure-ios-privacy.mjs",
