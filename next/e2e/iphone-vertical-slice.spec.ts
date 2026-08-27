@@ -127,8 +127,9 @@ test('complete backup restores training, nutrition, metrics and photos after loc
 
   const nav = page.getByRole('navigation', { name: 'Navegación principal' });
   await nav.getByRole('button', { name: 'Progreso', exact: true }).click();
-  await expect(page.getByRole('heading', { name: 'Comparación corporal' })).toBeVisible();
-  const photoSection = page.locator('section').filter({ has: page.getByRole('heading', { name: 'Comparación corporal' }) });
+  const photoHeading = page.getByRole('heading', { name: 'Comparación corporal' });
+  await expect(photoHeading).toBeVisible();
+  const photoSection = photoHeading.locator('xpath=ancestor::section[1]');
   const photoInput = photoSection.locator('input[type="file"]');
   await photoInput.setInputFiles({
     name: 'backup-qa.png',
@@ -185,7 +186,9 @@ test('complete backup restores training, nutrition, metrics and photos after loc
 
   const restoredNav = page.getByRole('navigation', { name: 'Navegación principal' });
   await restoredNav.getByRole('button', { name: 'Progreso', exact: true }).click();
-  const restoredPhotoSection = page.locator('section').filter({ has: page.getByRole('heading', { name: 'Comparación corporal' }) });
+  const restoredPhotoHeading = page.getByRole('heading', { name: 'Comparación corporal' });
+  await expect(restoredPhotoHeading).toBeVisible();
+  const restoredPhotoSection = restoredPhotoHeading.locator('xpath=ancestor::section[1]');
   await expect(restoredPhotoSection.locator('.photo-row')).toHaveCount(1);
   await expect(restoredPhotoSection).toContainText('Frontal');
 });
