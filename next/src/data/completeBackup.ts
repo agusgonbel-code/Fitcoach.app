@@ -77,7 +77,8 @@ export function decodeProgressPhoto(value: EncodedProgressPhoto): ProgressPhotoR
   if (bytes.byteLength !== value.byteLength || bytes.byteLength <= 0 || bytes.byteLength > MAX_PHOTO_BYTES) {
     throw new Error('La copia contiene una fotografía dañada.');
   }
-  const blob = new Blob([bytes], { type: value.mimeType });
+  const buffer = bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength) as ArrayBuffer;
+  const blob = new Blob([buffer], { type: value.mimeType });
   const { byteLength: _byteLength, base64: _base64, ...meta } = value;
   return { ...meta, blob };
 }
