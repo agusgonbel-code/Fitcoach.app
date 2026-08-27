@@ -1,19 +1,25 @@
 {
   "name": "fitcoach-next",
-  "version": "0.1.0",
+  "version": "0.2.0-rc.0",
   "private": true,
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
     "test": "vitest run src",
-    "test:mobile": "playwright test"
+    "test:mobile": "playwright test",
+    "cap:add:ios": "npm run build && npx cap add ios",
+    "cap:sync:ios": "npm run build && npx cap sync ios",
+    "ios:prepare": "npm run cap:sync:ios"
   },
   "dependencies": {
+    "@capacitor/core": "8.5.0",
+    "@capacitor/ios": "8.5.0",
     "react": "latest",
     "react-dom": "latest"
   },
   "devDependencies": {
+    "@capacitor/cli": "8.5.0",
     "@playwright/test": "latest",
     "@types/react": "latest",
     "@types/react-dom": "latest",
