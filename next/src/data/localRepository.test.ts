@@ -2,6 +2,24 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { loadProfile, saveProfile, validBodyMetric, validSession } from './localRepository';
 import type { BodyMetric, UserProfile, WorkoutSession } from '../domain/models';
 
+class MemoryStorage {
+  private values = new Map<string, string>();
+
+  get length() { return this.values.size; }
+  clear() { this.values.clear(); }
+  getItem(key: string) { return this.values.has(key) ? this.values.get(key)! : null; }
+  key(index: number) { return Array.from(this.values.keys())[index] ?? null; }
+  removeItem(key: string) { this.values.delete(key); }
+  setItem(key: string, value: string) { this.values.set(String(key), String(value)); }
+}
+
+if (typeof globalThis.localStorage === 'undefined') {
+  Object.defineProperty(globalThis, 'localStorage', {
+    configurable: true,
+    value: new MemoryStorage(),
+  });
+}
+
 const base = (): WorkoutSession => ({
   id: 's1', plannedWorkoutId: 'p1', localDate: '2026-08-26', startedAt: '2026-08-26T08:00:00', exercises: []
 });
