@@ -133,7 +133,7 @@ test('complete backup restores training, nutrition, metrics and photos after loc
   await photoInput.setInputFiles({
     name: 'backup-qa.png',
     mimeType: 'image/png',
-    buffer: Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9Y9Z5xkAAAAASUVORK5CYII=', 'base64'),
+    buffer: Buffer.from('iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAIAAAD8GO2jAAAALUlEQVR4nGNscFBgoCVgoqnpoxaMWjBqwagFoxaMWjBqwagFoxaMWjBqARUBACt0ASC9fKypAAAAAElFTkSuQmCC', 'base64'),
   });
   await expect(photoSection.locator('.photo-row')).toHaveCount(1);
   await expect(photoSection).toContainText('Frontal');
