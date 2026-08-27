@@ -18,6 +18,10 @@ function ComparePhoto({ photo, label }: { photo?: ProgressPhotoRecord; label: st
   return <div className="photo-compare-item"><span className="secondary">{label}</span>{photo && url ? <><img src={url} alt={`${photo.pose} ${photo.localDate}`} /><strong>{photo.localDate}</strong></> : <div className="photo-placeholder">Selecciona una foto</div>}</div>;
 }
 
+function sortPhotos(items: ProgressPhotoRecord[]): ProgressPhotoRecord[] {
+  return [...items].sort((a, b) => a.localDate.localeCompare(b.localDate) || a.createdAt.localeCompare(b.createdAt));
+}
+
 export function PhotoProgress() {
   const [photos, setPhotos] = useState<ProgressPhotoRecord[]>([]);
   const [pose, setPose] = useState<ProgressPose>('front');
@@ -48,7 +52,10 @@ export function PhotoProgress() {
         createdAt: new Date().toISOString(), ...prepared,
       };
       await saveProgressPhoto(entry);
-      await refresh();
+      // The entry is already validated and durably committed at this point. Updating
+      // state from it avoids an unnecessary immediate IndexedDB structured-clone
+      // round trip in WebKit while normal mounts/restores still exercise refresh().
+      setPhotos(current => sortPhotos([...current.filter(photo => photo.id !== entry.id), entry]));
       setError('');
     } catch (cause) { setError(cause instanceof Error ? cause.message : 'No se pudo guardar la fotografía.'); }
     finally { setBusy(false); }
