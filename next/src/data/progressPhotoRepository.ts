@@ -15,6 +15,10 @@ export interface ProgressPhotoRecord extends ProgressPhotoMeta {
   blob: Blob;
 }
 
+interface StoredProgressPhotoRecord extends ProgressPhotoMeta {
+  bytes: ArrayBuffer;
+}
+
 interface FileLike { size: number; type: string; }
 
 const DB_NAME = 'fitcoach-next-media';
@@ -40,6 +44,12 @@ export function isProgressPhotoBlob(value: unknown): value is Blob {
     typeof candidate.type === 'string' &&
     typeof candidate.slice === 'function' &&
     typeof candidate.arrayBuffer === 'function';
+}
+
+function isArrayBufferLike(value: unknown): value is ArrayBuffer {
+  if (!value || typeof value !== 'object') return false;
+  const candidate = value as { byteLength?: unknown; slice?: unknown };
+  return Number.isFinite(candidate.byteLength) && Number(candidate.byteLength) > 0 && typeof candidate.slice === 'function';
 }
 
 export function validateProgressPhotoFile(file: FileLike): void {
@@ -97,9 +107,6 @@ async function decodeWithHtmlImage(file: File): Promise<{ source: CanvasImageSou
 }
 
 async function decodeImage(file: File): Promise<{ source: CanvasImageSource; width: number; height: number; close?: () => void }> {
-  // HTMLImageElement is the most compatible path inside WKWebView/Safari and is
-  // also the path iOS can use for formats such as HEIC. Use createImageBitmap as
-  // a fallback instead of making WebKit depend on it for ordinary camera files.
   try {
     return await decodeWithHtmlImage(file);
   } catch (htmlError) {
@@ -118,12 +125,9 @@ export async function prepareProgressPhoto(file: File): Promise<{ blob: Blob; mi
   validateProgressPhotoFile(file);
   const decoded = await decodeImage(file);
   try {
-    // Small JPEG/PNG/WebP files that already fit the storage/display envelope do
-    // not benefit from a canvas round-trip. Keep their bytes, but normalize File
-    // to a plain Blob before IndexedDB. WKWebView/Safari can reject structured-
-    // cloning File objects in transactions even when the same bytes are valid.
     if (shouldKeepOriginalProgressPhoto(file, decoded.width, decoded.height)) {
-      const blob = file.slice(0, file.size, file.type.toLowerCase());
+      const bytes = await file.arrayBuffer();
+      const blob = new Blob([bytes], { type: file.type.toLowerCase() });
       return { blob, mimeType: file.type.toLowerCase(), width: decoded.width, height: decoded.height };
     }
 
@@ -150,35 +154,90 @@ export async function saveProgressPhoto(record: ProgressPhotoRecord): Promise<vo
   if (!validProgressPhotoMeta(record) || !isProgressPhotoBlob(record.blob) || record.blob.size > MAX_OUTPUT_BYTES) {
     throw new Error('La fotografía preparada no es válida.');
   }
+
+  // Store raw bytes instead of Blob/File objects. WebKit/WKWebView has had
+  // structured-clone edge cases for Blob subclasses inside IndexedDB
+  // transactions. ArrayBuffer is consistently cloneable and we reconstruct the
+  // Blob at the repository boundary, so callers keep the same typed API.
+  const bytes = await record.blob.arrayBuffer();
+  if (!bytes.byteLength || bytes.byteLength > MAX_OUTPUT_BYTES) throw new Error('La fotografía preparada no es válida.');
+  const stored: StoredProgressPhotoRecord = {
+    id: record.id,
+    localDate: record.localDate,
+    pose: record.pose,
+    weightKg: record.weightKg,
+    mimeType: record.mimeType,
+    width: record.width,
+    height: record.height,
+    createdAt: record.createdAt,
+    bytes,
+  };
+
   const db = await openDb();
-  await new Promise<void>((resolve, reject) => {
-    const tx = db.transaction(STORE, 'readwrite');
-    tx.objectStore(STORE).put(record);
-    tx.oncomplete = () => resolve();
-    tx.onerror = () => reject(tx.error ?? new Error('No se pudo guardar la fotografía.'));
-    tx.onabort = () => reject(tx.error ?? new Error('No se pudo guardar la fotografía.'));
-  });
-  db.close();
+  try {
+    await new Promise<void>((resolve, reject) => {
+      const tx = db.transaction(STORE, 'readwrite');
+      try {
+        tx.objectStore(STORE).put(stored);
+      } catch (error) {
+        reject(error instanceof Error ? error : new Error('No se pudo guardar la fotografía.'));
+        return;
+      }
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error ?? new Error('No se pudo guardar la fotografía.'));
+      tx.onabort = () => reject(tx.error ?? new Error('No se pudo guardar la fotografía.'));
+    });
+  } finally {
+    db.close();
+  }
 }
 
 export async function loadProgressPhotos(): Promise<ProgressPhotoRecord[]> {
   const db = await openDb();
-  const result = await new Promise<ProgressPhotoRecord[]>((resolve, reject) => {
-    const request = db.transaction(STORE, 'readonly').objectStore(STORE).getAll();
-    request.onsuccess = () => resolve((request.result as ProgressPhotoRecord[]).filter(item => validProgressPhotoMeta(item) && isProgressPhotoBlob(item.blob)));
-    request.onerror = () => reject(request.error ?? new Error('No se pudieron cargar las fotografías.'));
-  });
-  db.close();
-  return result.sort((a, b) => a.localDate.localeCompare(b.localDate) || a.createdAt.localeCompare(b.createdAt));
+  try {
+    const rows = await new Promise<Array<StoredProgressPhotoRecord | ProgressPhotoRecord>>((resolve, reject) => {
+      const request = db.transaction(STORE, 'readonly').objectStore(STORE).getAll();
+      request.onsuccess = () => resolve(request.result as Array<StoredProgressPhotoRecord | ProgressPhotoRecord>);
+      request.onerror = () => reject(request.error ?? new Error('No se pudieron cargar las fotografías.'));
+    });
+
+    // Backward-compatible read: accept the short-lived Blob schema already used
+    // by development builds, while all new writes use the byte schema above.
+    const result = rows.flatMap(item => {
+      if (!validProgressPhotoMeta(item)) return [];
+      if ('bytes' in item && isArrayBufferLike(item.bytes)) {
+        const blob = new Blob([item.bytes], { type: item.mimeType });
+        return [{
+          id: item.id,
+          localDate: item.localDate,
+          pose: item.pose,
+          weightKg: item.weightKg,
+          mimeType: item.mimeType,
+          width: item.width,
+          height: item.height,
+          createdAt: item.createdAt,
+          blob,
+        } satisfies ProgressPhotoRecord];
+      }
+      if ('blob' in item && isProgressPhotoBlob(item.blob)) return [item];
+      return [];
+    });
+    return result.sort((a, b) => a.localDate.localeCompare(b.localDate) || a.createdAt.localeCompare(b.createdAt));
+  } finally {
+    db.close();
+  }
 }
 
 export async function removeProgressPhoto(id: string): Promise<void> {
   const db = await openDb();
-  await new Promise<void>((resolve, reject) => {
-    const tx = db.transaction(STORE, 'readwrite');
-    tx.objectStore(STORE).delete(id);
-    tx.oncomplete = () => resolve();
-    tx.onerror = () => reject(tx.error ?? new Error('No se pudo eliminar la fotografía.'));
-  });
-  db.close();
+  try {
+    await new Promise<void>((resolve, reject) => {
+      const tx = db.transaction(STORE, 'readwrite');
+      tx.objectStore(STORE).delete(id);
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error ?? new Error('No se pudo eliminar la fotografía.'));
+    });
+  } finally {
+    db.close();
+  }
 }
