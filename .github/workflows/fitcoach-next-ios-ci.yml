@@ -64,14 +64,14 @@ jobs:
         run: npm run ios:prepare
       - name: Validate Capacitor configuration
         run: npx cap doctor ios
-      - name: Compile FitCoach Next for iOS Simulator
+      - name: Compile FitCoach Next Release for iOS Simulator
         shell: bash
         run: |
           set -euo pipefail
           xcodebuild \
             -project ios/App/App.xcodeproj \
             -scheme App \
-            -configuration Debug \
+            -configuration Release \
             -destination 'generic/platform=iOS Simulator' \
             CODE_SIGNING_ALLOWED=NO \
             build
@@ -80,7 +80,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          APP_PATH="$(find "$HOME/Library/Developer/Xcode/DerivedData" -path '*Build/Products/Debug-iphonesimulator/App.app' -print -quit)"
+          APP_PATH="$(find "$HOME/Library/Developer/Xcode/DerivedData" -path '*Build/Products/Release-iphonesimulator/App.app' -print -quit)"
           test -n "$APP_PATH"
           PLIST="$APP_PATH/Info.plist"
           PRIVACY="$APP_PATH/PrivacyInfo.xcprivacy"
@@ -109,6 +109,7 @@ jobs:
           echo "Bundle ID: $BUNDLE_ID"
           echo "Display name: $DISPLAY_NAME"
           echo "Version: $VERSION ($BUILD)"
+          echo "Configuration: Release"
           echo "Target: iPhone portrait"
           echo "path=$APP_PATH" >> "$GITHUB_OUTPUT"
       - name: Stage simulator artifact
@@ -119,7 +120,7 @@ jobs:
       - name: Upload simulator application
         uses: actions/upload-artifact@v4
         with:
-          name: FitCoach-Next-iOS-Simulator-${{ github.sha }}
+          name: FitCoach-Next-iOS-Simulator-Release-${{ github.sha }}
           path: next/artifact/FitCoach-Next.app
           if-no-files-found: error
           retention-days: 14
