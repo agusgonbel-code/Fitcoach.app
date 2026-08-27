@@ -81,7 +81,7 @@ test('active workout draft recovers on iPhone, saves once and appears in Progres
   await firstExercise.getByPlaceholder('reps').first().fill('10');
   await firstExercise.getByPlaceholder('RIR').first().fill('0');
   await firstExercise.getByRole('button', { name: /Completar serie 1 de/ }).click();
-  await expect(page.getByText('DESCANSO')).toBeVisible();
+  await expect(page.getByText('DESCANSO', { exact: true })).toBeVisible();
 
   await page.reload();
   await expect(page.getByText('Sesión recuperada')).toBeVisible();
