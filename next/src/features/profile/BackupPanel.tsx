@@ -4,6 +4,7 @@ import {
   createCompleteBackup,
   restoreCompleteBackup,
 } from '../../data/completeBackup';
+import { deleteAllFitCoachNextData } from '../../data/privacyRepository';
 
 export function BackupPanel() {
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -52,6 +53,26 @@ export function BackupPanel() {
     }
   };
 
+  const deleteLocalData = async () => {
+    if (busy) return;
+    const confirmed = window.confirm('Se borrarán de este dispositivo el perfil, entrenamientos, nutrición, progreso, adaptaciones, borradores y fotografías de FitCoach Next. Esta acción no se puede deshacer. ¿Borrar todo?');
+    if (!confirmed) {
+      setStatus('Borrado cancelado. No se ha modificado ningún dato.');
+      return;
+    }
+
+    setBusy(true); setStatus('Borrando datos locales de FitCoach Next…');
+    try {
+      const deleted = await deleteAllFitCoachNextData();
+      setStatus(`Datos eliminados · ${deleted.removedStorageKeys} registros locales y ${deleted.removedPhotos} foto(s).`);
+      window.location.reload();
+    } catch (error) {
+      setStatus(error instanceof Error ? error.message : 'No se pudieron eliminar todos los datos locales.');
+    } finally {
+      setBusy(false);
+    }
+  };
+
   return <section className="form-card backup-panel" aria-labelledby="backup-title">
     <div>
       <p className="eyebrow">DATOS Y PRIVACIDAD</p>
@@ -61,6 +82,7 @@ export function BackupPanel() {
     <div className="backup-actions">
       <button className="secondary-action" type="button" disabled={busy} onClick={exportBackup}>Exportar copia</button>
       <button className="secondary-action" type="button" disabled={busy} onClick={() => inputRef.current?.click()}>Restaurar copia</button>
+      <button className="secondary-action danger-action backup-delete" type="button" disabled={busy} onClick={() => void deleteLocalData()}>Borrar todos mis datos</button>
       <input
         ref={inputRef}
         className="visually-hidden"
