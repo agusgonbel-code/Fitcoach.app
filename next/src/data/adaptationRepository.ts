@@ -14,6 +14,15 @@ export interface AdaptationDecision {
   effectiveUntil: string;
 }
 
+interface StoredAdaptationDecision {
+  version?: number;
+  proposal?: WeeklyTrainingAdaptationProposal;
+  status?: AdaptationDecisionStatus;
+  decidedAt?: string;
+  effectiveFrom?: string;
+  effectiveUntil?: string;
+}
+
 function readStorage(): Storage | null {
   try { return typeof localStorage === 'undefined' ? null : localStorage; } catch { return null; }
 }
@@ -53,8 +62,9 @@ export function loadAdaptationDecision(): AdaptationDecision | null {
   const raw = storage?.getItem(KEY);
   if (!raw) return null;
   try {
-    const parsed = JSON.parse(raw) as Partial<AdaptationDecision> & { version?: number };
-    if ((parsed.version !== 1 && parsed.version !== 2) || !parsed.proposal || (parsed.status !== 'accepted' && parsed.status !== 'declined') || typeof parsed.effectiveFrom !== 'string') return null;
+    const parsed = JSON.parse(raw) as StoredAdaptationDecision;
+    const legacyVersion = parsed.version === 1;
+    if ((!legacyVersion && parsed.version !== 2) || !parsed.proposal || (parsed.status !== 'accepted' && parsed.status !== 'declined') || typeof parsed.effectiveFrom !== 'string') return null;
 
     const effectiveUntil = typeof parsed.effectiveUntil === 'string'
       ? parsed.effectiveUntil
@@ -63,14 +73,14 @@ export function loadAdaptationDecision(): AdaptationDecision | null {
 
     const decision: AdaptationDecision = {
       version: 2,
-      proposal: normalizeAdaptation(parsed.proposal as WeeklyTrainingAdaptationProposal),
+      proposal: normalizeAdaptation(parsed.proposal),
       status: parsed.status,
       decidedAt: typeof parsed.decidedAt === 'string' ? parsed.decidedAt : new Date().toISOString(),
       effectiveFrom: parsed.effectiveFrom,
       effectiveUntil,
     };
 
-    if (parsed.version === 1) storage?.setItem(KEY, JSON.stringify(decision));
+    if (legacyVersion) storage?.setItem(KEY, JSON.stringify(decision));
     return decision;
   } catch { return null; }
 }
