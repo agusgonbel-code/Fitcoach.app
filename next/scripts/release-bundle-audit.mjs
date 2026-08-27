@@ -31,7 +31,12 @@ const forbidden = [
   { pattern: /0\.0\.0\.0(?::\d+)?/i, label: 'development bind address' },
   { pattern: /\/\/@vite\/client|@vite\/client/i, label: 'Vite development client' },
   { pattern: /sourceMappingURL=/i, label: 'source map directive' },
-  { pattern: /__REACT_DEVTOOLS_GLOBAL_HOOK__/i, label: 'React DevTools hook' },
+  // React production builds intentionally retain the DevTools integration hook so
+  // installed DevTools can inspect a production renderer. Treating that stable
+  // runtime hook as a debug artifact creates a false release failure. The actual
+  // development-only React Refresh signatures below must never ship.
+  { pattern: /@react-refresh|react-refresh\/runtime|__vite_plugin_react_preamble_installed__/i, label: 'React Refresh development runtime' },
+  { pattern: /\$RefreshReg\$|\$RefreshSig\$/i, label: 'React Refresh instrumentation' },
 ];
 
 for (const file of files) {
