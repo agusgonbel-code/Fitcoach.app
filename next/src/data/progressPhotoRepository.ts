@@ -73,14 +73,7 @@ function canvasToBlob(canvas: HTMLCanvasElement, type: string, quality: number):
   return new Promise((resolve, reject) => canvas.toBlob(blob => blob ? resolve(blob) : reject(new Error('No se pudo comprimir la fotografía.')), type, quality));
 }
 
-async function decodeImage(file: File): Promise<{ source: CanvasImageSource; width: number; height: number; close?: () => void }> {
-  if (typeof createImageBitmap === 'function') {
-    try {
-      const bitmap = await createImageBitmap(file);
-      return { source: bitmap, width: bitmap.width, height: bitmap.height, close: () => bitmap.close() };
-    } catch { /* Safari may decode HEIC through HTMLImageElement instead. */ }
-  }
-
+async function decodeWithHtmlImage(file: File): Promise<{ source: CanvasImageSource; width: number; height: number; close?: () => void }> {
   const url = URL.createObjectURL(file);
   const image = new Image();
   image.decoding = 'async';
@@ -90,6 +83,7 @@ async function decodeImage(file: File): Promise<{ source: CanvasImageSource; wid
       image.onerror = () => reject(new Error('El dispositivo no puede decodificar esta fotografía.'));
       image.src = url;
     });
+    if (!image.naturalWidth || !image.naturalHeight) throw new Error('La fotografía no contiene dimensiones válidas.');
     return {
       source: image,
       width: image.naturalWidth,
@@ -99,6 +93,24 @@ async function decodeImage(file: File): Promise<{ source: CanvasImageSource; wid
   } catch (error) {
     URL.revokeObjectURL(url);
     throw error;
+  }
+}
+
+async function decodeImage(file: File): Promise<{ source: CanvasImageSource; width: number; height: number; close?: () => void }> {
+  // HTMLImageElement is the most compatible path inside WKWebView/Safari and is
+  // also the path iOS can use for formats such as HEIC. Use createImageBitmap as
+  // a fallback instead of making WebKit depend on it for ordinary camera files.
+  try {
+    return await decodeWithHtmlImage(file);
+  } catch (htmlError) {
+    if (typeof createImageBitmap === 'function') {
+      try {
+        const bitmap = await createImageBitmap(file);
+        if (!bitmap.width || !bitmap.height) { bitmap.close(); throw htmlError; }
+        return { source: bitmap, width: bitmap.width, height: bitmap.height, close: () => bitmap.close() };
+      } catch { /* Preserve the clearer HTML decoder error below. */ }
+    }
+    throw htmlError;
   }
 }
 
