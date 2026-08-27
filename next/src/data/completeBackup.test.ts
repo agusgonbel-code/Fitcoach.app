@@ -8,12 +8,12 @@ import {
 } from './completeBackup';
 import type { ProgressPhotoRecord } from './progressPhotoRepository';
 
-const core = {
+const core: FitCoachCompleteBackupV1['core'] = {
   schema: 'fitcoach-next-backup',
   version: 1,
   exportedAt: '2026-08-27T10:00:00.000Z',
   data: { profile: null, sessions: [], foodLog: [], bodyMetrics: [] },
-} as const;
+};
 
 const photo: ProgressPhotoRecord = {
   id: 'photo-1',
@@ -47,7 +47,7 @@ describe('FitCoach Next complete backup', () => {
       schema: 'fitcoach-next-complete-backup',
       version: 1,
       exportedAt: '2026-08-27T10:00:00.000Z',
-      core: core as FitCoachCompleteBackupV1['core'],
+      core,
       nutritionPlan: null,
       progressPhotos: [encoded],
     };
