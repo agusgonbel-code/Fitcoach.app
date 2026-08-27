@@ -65,7 +65,13 @@ fieldset.form-card legend { padding: 0 6px; color: var(--fc-text); font-size: 14
 .recipe-steps { margin: 0; padding: 14px 16px 16px 32px; border-top: 1px solid var(--fc-separator); color: var(--fc-text-secondary); font-size: 14px; line-height: 1.5; }
 .recipe-steps li + li { margin-top: 8px; }
 .meal-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.backup-panel { margin-top: var(--fc-space-4); }
+.backup-panel h2 { margin-bottom: var(--fc-space-2); }
+.backup-panel .secondary { margin-bottom: 0; line-height: 1.45; }
+.backup-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.backup-actions .secondary-action:disabled { opacity: 0.55; }
+.visually-hidden { position: absolute !important; width: 1px !important; height: 1px !important; padding: 0 !important; margin: -1px !important; overflow: hidden !important; clip: rect(0, 0, 0, 0) !important; white-space: nowrap !important; border: 0 !important; }
 .tabbar { position: fixed; left: 50%; bottom: 0; width: min(100%, 520px); transform: translateX(-50%); display: grid; grid-template-columns: repeat(5, 1fr); padding: 8px 8px max(8px, env(safe-area-inset-bottom)); border-top: 1px solid var(--fc-separator); background: color-mix(in srgb, var(--fc-bg) 88%, transparent); backdrop-filter: blur(18px); }
 .tabbar button { min-height: 44px; border: 0; background: transparent; color: var(--fc-text-secondary); font-size: 11px; font-weight: 650; }
 .tabbar button.active { color: var(--fc-accent); }
-@media (max-width: 360px) { .app-shell { padding-inline: 14px; } .tabbar button { font-size: 10px; } .form-grid { grid-template-columns: 1fr; } .meal-actions { grid-template-columns: 1fr; } .day-selector, .day-picker { gap: 4px; } .day-chip { font-size: 11px; } }
+@media (max-width: 360px) { .app-shell { padding-inline: 14px; } .tabbar button { font-size: 10px; } .form-grid, .meal-actions, .backup-actions { grid-template-columns: 1fr; } .day-selector, .day-picker { gap: 4px; } .day-chip { font-size: 11px; } }
