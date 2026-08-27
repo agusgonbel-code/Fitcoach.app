@@ -4,7 +4,8 @@ import { loadBodyMetrics, loadFoodLog, loadProfile, loadSessions, localDate, sav
 import { calculateNutrition } from './domain/nutrition/calculateTarget';
 import { summarizeProgress } from './domain/progress/summarizeProgress';
 import { buildCoachInsight } from './domain/coach/buildInsight';
-import { Training, workoutTemplate } from './features/training/Training';
+import { generateTrainingPlan } from './domain/training/planGenerator';
+import { Training } from './features/training/Training';
 import { Nutrition as NutritionPlanner } from './features/nutrition/Nutrition';
 import { BodyProgress } from './features/progress/BodyProgress';
 
@@ -13,6 +14,7 @@ type Tab = 'today' | 'training' | 'nutrition' | 'progress' | 'profile';
 function Onboarding({ onComplete }: { onComplete: (profile: UserProfile) => void }) {
   const [name, setName] = useState('');
   const [goal, setGoal] = useState<UserProfile['goal']>('recomp');
+  const [experience, setExperience] = useState<UserProfile['experience']>('intermediate');
   const [sex, setSex] = useState<UserProfile['sex']>('male');
   const [age, setAge] = useState(35);
   const [height, setHeight] = useState(170);
@@ -20,37 +22,31 @@ function Onboarding({ onComplete }: { onComplete: (profile: UserProfile) => void
   const [activity, setActivity] = useState(1.45);
   const [days, setDays] = useState(4);
   const [minutes, setMinutes] = useState(50);
+  const [equipment, setEquipment] = useState('gym');
+  const [restrictions, setRestrictions] = useState('');
 
   const submit = (event: React.FormEvent) => {
     event.preventDefault();
     const profile: UserProfile = {
-      id: crypto.randomUUID(),
-      name: name.trim() || 'Atleta',
-      goal,
-      experience: 'intermediate',
-      sex,
-      age,
-      heightCm: height,
-      weightKg: weight,
-      activityMultiplier: activity,
-      trainingDaysPerWeek: days,
-      sessionMinutes: minutes,
-      equipment: ['gym'],
-      restrictions: [],
+      id: crypto.randomUUID(), name: name.trim() || 'Atleta', goal, experience, sex, age, heightCm: height, weightKg: weight,
+      activityMultiplier: activity, trainingDaysPerWeek: days, sessionMinutes: minutes,
+      equipment: equipment.split(',').map(item => item.trim().toLowerCase()).filter(Boolean),
+      restrictions: restrictions.split(',').map(item => item.trim().toLowerCase()).filter(Boolean),
     };
-    saveProfile(profile);
-    onComplete(profile);
+    saveProfile(profile); onComplete(profile);
   };
 
   return <main className="app-shell onboarding">
-    <p className="eyebrow">FITCOACH NEXT</p><h1>Tu plan empieza contigo</h1>
-    <p className="secondary">Usaremos estos datos para crear entrenamiento y objetivos nutricionales coherentes.</p>
+    <p className="eyebrow">FITCOACH NEXT</p><h1>Tu plan empieza contigo</h1><p className="secondary">Usaremos estos datos para crear entrenamiento y objetivos nutricionales coherentes.</p>
     <form className="form-card" onSubmit={submit}>
       <label>Nombre<input value={name} onChange={event => setName(event.target.value)} placeholder="Tu nombre" /></label>
       <label>Objetivo<select value={goal} onChange={event => setGoal(event.target.value as UserProfile['goal'])}><option value="recomp">Recomposición</option><option value="hypertrophy">Ganancia muscular</option><option value="strength">Fuerza</option><option value="fatloss">Pérdida de grasa</option><option value="maintain">Mantenimiento</option></select></label>
+      <label>Experiencia<select value={experience} onChange={event => setExperience(event.target.value as UserProfile['experience'])}><option value="beginner">Principiante</option><option value="intermediate">Intermedio</option><option value="advanced">Avanzado</option></select></label>
       <div className="form-grid"><label>Sexo para cálculo<select value={sex} onChange={event => setSex(event.target.value as UserProfile['sex'])}><option value="male">Hombre</option><option value="female">Mujer</option></select></label><label>Edad<input type="number" min="14" max="100" value={age} onChange={event => setAge(Number(event.target.value))} /></label><label>Altura cm<input type="number" min="120" max="230" value={height} onChange={event => setHeight(Number(event.target.value))} /></label><label>Peso kg<input type="number" min="35" max="350" step="0.1" value={weight} onChange={event => setWeight(Number(event.target.value))} /></label></div>
       <label>Actividad<select value={activity} onChange={event => setActivity(Number(event.target.value))}><option value="1.3">Baja</option><option value="1.45">Moderada</option><option value="1.6">Activa</option><option value="1.75">Muy activa</option></select></label>
       <div className="form-grid"><label>Días/semana<input type="number" min="2" max="6" value={days} onChange={event => setDays(Number(event.target.value))} /></label><label>Minutos<input type="number" min="30" max="90" step="5" value={minutes} onChange={event => setMinutes(Number(event.target.value))} /></label></div>
+      <label>Equipamiento<input value={equipment} onChange={event => setEquipment(event.target.value)} placeholder="gym o dumbbells, cable, machine" /></label>
+      <label>Limitaciones<input value={restrictions} onChange={event => setRestrictions(event.target.value)} placeholder="Ej.: knee pain, shoulder" /></label>
       <button className="primary-action" type="submit">Crear mi plan</button>
     </form>
   </main>;
@@ -62,11 +58,11 @@ function AuthenticatedApp({ profile }: { profile: UserProfile }) {
   const [foodLog, setFoodLog] = useState(() => loadFoodLog());
   const [bodyMetrics, setBodyMetrics] = useState(() => loadBodyMetrics());
   const nutrition = calculateNutrition(profile);
-  const completedToday = sessions.some(session => session.localDate === localDate() && Boolean(session.completedAt));
-  const progress = useMemo(
-    () => summarizeProgress(profile, sessions, foodLog, nutrition.target, localDate()),
-    [profile, sessions, foodLog, nutrition.target.kcal, nutrition.target.proteinG, nutrition.target.carbsG, nutrition.target.fatG],
-  );
+  const trainingPlan = useMemo(() => generateTrainingPlan(profile), [profile]);
+  const weekdayIndex = (new Date().getDay() + 6) % 7;
+  const todayWorkout = trainingPlan[weekdayIndex % trainingPlan.length];
+  const completedToday = sessions.some(session => session.localDate === localDate() && session.plannedWorkoutId === todayWorkout.id && Boolean(session.completedAt));
+  const progress = useMemo(() => summarizeProgress(profile, sessions, foodLog, nutrition.target, localDate()), [profile, sessions, foodLog, nutrition.target.kcal, nutrition.target.proteinG, nutrition.target.carbsG, nutrition.target.fatG]);
   const insight = useMemo(() => buildCoachInsight(progress, completedToday), [progress, completedToday]);
   const todayFood = foodLog.filter(item => item.localDate === localDate());
   const consumed = todayFood.reduce((sum, item) => ({ kcal: sum.kcal + item.kcal, protein: sum.protein + item.proteinG }), { kcal: 0, protein: 0 });
@@ -81,27 +77,12 @@ function AuthenticatedApp({ profile }: { profile: UserProfile }) {
 
   return <main className="app-shell">
     <header className="topbar"><div><p className="eyebrow">{tab === 'today' ? 'HOY' : tab.toUpperCase()}</p><h1>{tab === 'today' ? `Hola, ${profile.name}` : 'FitCoach'}</h1></div><button className="icon-button" aria-label="Abrir perfil" onClick={() => setTab('profile')}>{profile.name.slice(0, 2).toUpperCase()}</button></header>
-
-    {tab === 'today' && <>
-      <section className="hero-card"><p className="eyebrow">TU ENTRENAMIENTO</p><div className="hero-row"><div><h2>{workoutTemplate.title}</h2><p>{workoutTemplate.minutes} min · {workoutTemplate.exercises.length} ejercicios · {workoutTemplate.exercises.reduce((sum, exercise) => sum + exercise.sets, 0)} series</p></div><span className="status-pill">{completedToday ? 'Hecho' : 'Listo'}</span></div><button className="primary-action" onClick={() => setTab('training')}>{completedToday ? 'Ver entrenamiento' : 'Empezar entrenamiento'}</button></section>
-      <section className="section-block"><div className="section-heading"><h2>Nutrición</h2><span>{Math.max(0, nutrition.target.kcal - Math.round(consumed.kcal))} kcal restantes</span></div><div className="metric-grid"><article className="metric-card"><strong>{Math.round(consumed.kcal)} / {nutrition.target.kcal}</strong><span>kcal</span></article><article className="metric-card"><strong>{Math.round(consumed.protein)} / {nutrition.target.proteinG} g</strong><span>proteína</span></article></div><button className="secondary-action" onClick={() => setTab('nutrition')}>Registrar comida</button></section>
-      <section className="coach-card"><p className="eyebrow">COACH · {insight.confidence.toUpperCase()}</p><h2>{insight.title}</h2><p>{insight.observation}</p><p><strong>{insight.recommendation}</strong></p>{insight.actionLabel && <button className="secondary-action" onClick={routeCoachAction}>{insight.actionLabel}</button>}</section>
-    </>}
-
-    {tab === 'training' && <Training sessions={sessions} onSaved={saved} />}
-
-    {tab === 'progress' && <section>
-      <p className="eyebrow">PROGRESO · ÚLTIMOS 7 DÍAS</p><h1>Tu evolución</h1>
-      <div className="metric-grid"><article className="metric-card"><strong>{progress.completedWorkouts7d} / {progress.plannedWorkouts7d}</strong><span>sesiones</span></article><article className="metric-card"><strong>{Math.round(progress.trainingAdherence * 100)}%</strong><span>adherencia</span></article><article className="metric-card"><strong>{progress.totalSets7d}</strong><span>series</span></article><article className="metric-card"><strong>{Math.round(progress.volumeLoad7d).toLocaleString('es-ES')}</strong><span>kg × reps</span></article></div>
-      <article className="coach-card"><p className="eyebrow">ESFUERZO</p><h2>{progress.averageRir7d === null ? 'Aún sin datos' : `${progress.averageRir7d.toFixed(1)} RIR medio`}</h2><p>{progress.averageRir7d === null ? 'Registra RIR en tus series para interpretar esfuerzo y fatiga.' : 'Calculado únicamente con series válidas de los últimos 7 días.'}</p></article>
-      <article className="coach-card"><p className="eyebrow">NUTRICIÓN</p><h2>{progress.nutritionAdherence === null ? 'Datos insuficientes' : `${Math.round(progress.nutritionAdherence * 100)}% adherencia energética`}</h2><p>{progress.nutritionLoggingDays7d} día(s) registrados. FitCoach exige al menos 4 días antes de juzgar adherencia nutricional.</p></article>
-      <BodyProgress metrics={bodyMetrics} onChange={refreshBodyMetrics} />
-    </section>}
-
+    {tab === 'today' && <><section className="hero-card"><p className="eyebrow">TU ENTRENAMIENTO</p><div className="hero-row"><div><h2>{todayWorkout.title}</h2><p>{todayWorkout.minutes} min · {todayWorkout.exercises.length} ejercicios · {todayWorkout.exercises.reduce((sum, exercise) => sum + exercise.sets, 0)} series</p></div><span className="status-pill">{completedToday ? 'Hecho' : 'Listo'}</span></div><button className="primary-action" onClick={() => setTab('training')}>{completedToday ? 'Ver entrenamiento' : 'Empezar entrenamiento'}</button></section><section className="section-block"><div className="section-heading"><h2>Nutrición</h2><span>{Math.max(0, nutrition.target.kcal - Math.round(consumed.kcal))} kcal restantes</span></div><div className="metric-grid"><article className="metric-card"><strong>{Math.round(consumed.kcal)} / {nutrition.target.kcal}</strong><span>kcal</span></article><article className="metric-card"><strong>{Math.round(consumed.protein)} / {nutrition.target.proteinG} g</strong><span>proteína</span></article></div><button className="secondary-action" onClick={() => setTab('nutrition')}>Registrar comida</button></section><section className="coach-card"><p className="eyebrow">COACH · {insight.confidence.toUpperCase()}</p><h2>{insight.title}</h2><p>{insight.observation}</p><p><strong>{insight.recommendation}</strong></p>{insight.actionLabel && <button className="secondary-action" onClick={routeCoachAction}>{insight.actionLabel}</button>}</section></>}
+    {tab === 'training' && <Training workout={todayWorkout} sessions={sessions} onSaved={saved} />}
+    {tab === 'progress' && <section><p className="eyebrow">PROGRESO · ÚLTIMOS 7 DÍAS</p><h1>Tu evolución</h1><div className="metric-grid"><article className="metric-card"><strong>{progress.completedWorkouts7d} / {progress.plannedWorkouts7d}</strong><span>sesiones</span></article><article className="metric-card"><strong>{Math.round(progress.trainingAdherence * 100)}%</strong><span>adherencia</span></article><article className="metric-card"><strong>{progress.totalSets7d}</strong><span>series</span></article><article className="metric-card"><strong>{Math.round(progress.volumeLoad7d).toLocaleString('es-ES')}</strong><span>kg × reps</span></article></div><article className="coach-card"><p className="eyebrow">ESFUERZO</p><h2>{progress.averageRir7d === null ? 'Aún sin datos' : `${progress.averageRir7d.toFixed(1)} RIR medio`}</h2><p>{progress.averageRir7d === null ? 'Registra RIR en tus series para interpretar esfuerzo y fatiga.' : 'Calculado únicamente con series válidas de los últimos 7 días.'}</p></article><article className="coach-card"><p className="eyebrow">NUTRICIÓN</p><h2>{progress.nutritionAdherence === null ? 'Datos insuficientes' : `${Math.round(progress.nutritionAdherence * 100)}% adherencia energética`}</h2><p>{progress.nutritionLoggingDays7d} día(s) registrados. FitCoach exige al menos 4 días antes de juzgar adherencia nutricional.</p></article><BodyProgress metrics={bodyMetrics} onChange={refreshBodyMetrics} /></section>}
     {tab === 'nutrition' && <NutritionPlanner profile={profile} log={foodLog} onChange={refreshFood} />}
-    {tab === 'profile' && <section><p className="eyebrow">PERFIL</p><h1>{profile.name}</h1><div className="form-card"><p><strong>Objetivo:</strong> {profile.goal}</p><p><strong>Entrenamiento:</strong> {profile.trainingDaysPerWeek} días · {profile.sessionMinutes} min</p><p><strong>Nutrición:</strong> {nutrition.target.kcal} kcal · {nutrition.target.proteinG}P · {nutrition.target.carbsG}C · {nutrition.target.fatG}G</p></div></section>}
-
-    <nav className="tabbar" aria-label="Navegación principal">{([['today', 'Hoy'], ['training', 'Entrenar'], ['nutrition', 'Nutrición'], ['progress', 'Progreso'], ['profile', 'Perfil']] as [Tab, string][]).map(([id, label]) => <button key={id} className={tab === id ? 'active' : ''} onClick={() => setTab(id)}>{label}</button>)}</nav>
+    {tab === 'profile' && <section><p className="eyebrow">PERFIL</p><h1>{profile.name}</h1><div className="form-card"><p><strong>Objetivo:</strong> {profile.goal}</p><p><strong>Entrenamiento:</strong> {profile.trainingDaysPerWeek} días · {profile.sessionMinutes} min · {trainingPlan.length} sesiones generadas</p><p><strong>Nutrición:</strong> {nutrition.target.kcal} kcal · {nutrition.target.proteinG}P · {nutrition.target.carbsG}C · {nutrition.target.fatG}G</p></div></section>}
+    <nav className="tabbar" aria-label="Navegación principal">{([['today','Hoy'],['training','Entrenar'],['nutrition','Nutrición'],['progress','Progreso'],['profile','Perfil']] as [Tab,string][]).map(([id,label]) => <button key={id} className={tab === id ? 'active' : ''} onClick={() => setTab(id)}>{label}</button>)}</nav>
   </main>;
 }
 
