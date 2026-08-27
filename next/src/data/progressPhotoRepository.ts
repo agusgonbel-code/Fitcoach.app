@@ -24,6 +24,7 @@ const MAX_INPUT_BYTES = 25 * 1024 * 1024;
 const MAX_OUTPUT_BYTES = 2.5 * 1024 * 1024;
 const MAX_EDGE = 1800;
 const ACCEPTED = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/heif']);
+const ORIGINAL_SAFE = new Set(['image/jpeg', 'image/png', 'image/webp']);
 
 export function validProgressPhotoMeta(meta: ProgressPhotoMeta): boolean {
   const validDate = /^\d{4}-\d{2}-\d{2}$/.test(meta.localDate);
@@ -45,6 +46,12 @@ export function validateProgressPhotoFile(file: FileLike): void {
   if (!file || !Number.isFinite(file.size) || file.size <= 0) throw new Error('Selecciona una fotografía válida.');
   if (file.size > MAX_INPUT_BYTES) throw new Error('La fotografía supera el límite de 25 MB.');
   if (!ACCEPTED.has(file.type.toLowerCase())) throw new Error('Formato no compatible. Usa JPG, PNG, WebP, HEIC o HEIF.');
+}
+
+export function shouldKeepOriginalProgressPhoto(file: FileLike, width: number, height: number): boolean {
+  return ORIGINAL_SAFE.has(file.type.toLowerCase()) && file.size <= MAX_OUTPUT_BYTES &&
+    Number.isFinite(width) && Number.isFinite(height) && width > 0 && height > 0 &&
+    Math.max(width, height) <= MAX_EDGE;
 }
 
 function openDb(): Promise<IDBDatabase> {
@@ -87,8 +94,6 @@ async function decodeImage(file: File): Promise<{ source: CanvasImageSource; wid
       source: image,
       width: image.naturalWidth,
       height: image.naturalHeight,
-      // WebKit may still need the object URL while drawImage consumes the decoded
-      // HTMLImageElement. Revoke it only after prepareProgressPhoto finishes.
       close: () => URL.revokeObjectURL(url),
     };
   } catch (error) {
@@ -101,6 +106,14 @@ export async function prepareProgressPhoto(file: File): Promise<{ blob: Blob; mi
   validateProgressPhotoFile(file);
   const decoded = await decodeImage(file);
   try {
+    // Small JPEG/PNG/WebP files that already fit the storage/display envelope do
+    // not benefit from a canvas round-trip. Keeping the original avoids needless
+    // quality loss and WebKit-specific canvas encoding failures while still
+    // decoding first so corrupt images cannot enter IndexedDB.
+    if (shouldKeepOriginalProgressPhoto(file, decoded.width, decoded.height)) {
+      return { blob: file, mimeType: file.type.toLowerCase(), width: decoded.width, height: decoded.height };
+    }
+
     const scale = Math.min(1, MAX_EDGE / Math.max(decoded.width, decoded.height));
     const width = Math.max(1, Math.round(decoded.width * scale));
     const height = Math.max(1, Math.round(decoded.height * scale));
