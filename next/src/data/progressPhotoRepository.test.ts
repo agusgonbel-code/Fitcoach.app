@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { validProgressPhotoMeta, validateProgressPhotoFile } from './progressPhotoRepository';
+import { isProgressPhotoBlob, validProgressPhotoMeta, validateProgressPhotoFile } from './progressPhotoRepository';
 
 describe('progress photo safety', () => {
   it('accepts valid local metadata', () => {
@@ -17,5 +17,16 @@ describe('progress photo safety', () => {
   it('accepts iPhone HEIC metadata and rejects unrelated files', () => {
     expect(() => validateProgressPhotoFile({ size: 4_000_000, type: 'image/heic' })).not.toThrow();
     expect(() => validateProgressPhotoFile({ size: 1000, type: 'application/pdf' })).toThrow('Formato no compatible');
+  });
+
+  it('accepts a blob-shaped IndexedDB clone without relying on instanceof', () => {
+    const clonedBlob = Object.assign(Object.create(null), {
+      size: 1024,
+      type: 'image/jpeg',
+      slice: () => clonedBlob,
+      arrayBuffer: async () => new ArrayBuffer(1024),
+    });
+    expect(isProgressPhotoBlob(clonedBlob)).toBe(true);
+    expect(isProgressPhotoBlob({ size: 1024, type: 'image/jpeg' })).toBe(false);
   });
 });
