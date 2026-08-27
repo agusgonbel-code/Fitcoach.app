@@ -9,9 +9,10 @@ if (!/^\d+\.\d+\.\d+$/.test(marketingVersion)) throw new Error(`Versión App Sto
 if (!/^\d+$/.test(buildNumber) || Number(buildNumber) < 1) throw new Error(`Build iOS inválido: ${buildNumber}`);
 
 const projectPath = path.join(root, 'ios', 'App', 'App.xcodeproj', 'project.pbxproj');
+const infoPlistPath = path.join(root, 'ios', 'App', 'App', 'Info.plist');
 const iconSource = path.join(root, 'assets', 'app-icon-1024.png');
 const iconDestination = path.join(root, 'ios', 'App', 'App', 'Assets.xcassets', 'AppIcon.appiconset', 'AppIcon-512@2x.png');
-for (const file of [projectPath, iconSource, iconDestination]) {
+for (const file of [projectPath, infoPlistPath, iconSource, iconDestination]) {
   await stat(file).catch(() => { throw new Error(`Falta ${path.relative(root, file)}. Ejecuta primero npm run cap:add:ios.`); });
 }
 
@@ -25,5 +26,16 @@ const replaceSetting = (source, key, value) => {
 project = replaceSetting(project, 'MARKETING_VERSION', marketingVersion);
 project = replaceSetting(project, 'CURRENT_PROJECT_VERSION', buildNumber);
 project = replaceSetting(project, 'PRODUCT_BUNDLE_IDENTIFIER', 'com.fitcoach.next');
+project = replaceSetting(project, 'TARGETED_DEVICE_FAMILY', '1');
 await writeFile(projectPath, project, 'utf8');
-console.log(`FitCoach Next iOS preparado: ${marketingVersion} (${buildNumber}), icono 1024 px instalado.`);
+
+let info = await readFile(infoPlistPath, 'utf8');
+const orientationPattern = /(<key>UISupportedInterfaceOrientations<\/key>\s*<array>)[\s\S]*?(<\/array>)/;
+if (!orientationPattern.test(info)) throw new Error('No se encontró UISupportedInterfaceOrientations en Info.plist.');
+info = info.replace(
+  orientationPattern,
+  '$1\n\t\t<string>UIInterfaceOrientationPortrait</string>\n\t$2',
+);
+await writeFile(infoPlistPath, info, 'utf8');
+
+console.log(`FitCoach Next iOS preparado: ${marketingVersion} (${buildNumber}), iPhone portrait, icono 1024 px instalado.`);
