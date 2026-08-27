@@ -10,7 +10,8 @@
     "test:mobile": "playwright test",
     "cap:add:ios": "npm run build && npx cap add ios",
     "cap:sync:ios": "npm run build && npx cap sync ios",
-    "ios:prepare": "npm run cap:sync:ios"
+    "ios:privacy": "node scripts/configure-ios-privacy.mjs",
+    "ios:prepare": "npm run cap:sync:ios && npm run ios:privacy"
   },
   "dependencies": {
     "@capacitor/core": "8.5.0",
