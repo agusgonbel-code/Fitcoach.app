@@ -33,6 +33,9 @@ export function loadProfile(): UserProfile | null {
     raw = readJson<Partial<UserProfile> | null>(PROFILE_KEY, null);
   }
   if (!raw) return null;
+  const preferredTrainingDays = Array.isArray(raw.preferredTrainingDays)
+    ? [...new Set(raw.preferredTrainingDays.map(Number).filter(day => Number.isInteger(day) && day >= 0 && day <= 6))]
+    : undefined;
   const migrated: UserProfile = {
     id: raw.id || crypto.randomUUID(),
     name: raw.name || 'Atleta',
@@ -46,6 +49,7 @@ export function loadProfile(): UserProfile | null {
     activityMultiplier: Number(raw.activityMultiplier) || 1.45,
     trainingDaysPerWeek: Number(raw.trainingDaysPerWeek) || 4,
     sessionMinutes: Number(raw.sessionMinutes) || 50,
+    preferredTrainingDays,
     equipment: Array.isArray(raw.equipment) ? raw.equipment : ['gym'],
     restrictions: Array.isArray(raw.restrictions) ? raw.restrictions : []
   };
