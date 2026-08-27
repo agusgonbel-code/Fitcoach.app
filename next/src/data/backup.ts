@@ -31,7 +31,7 @@ function validProfile(profile: UserProfile | null): boolean {
   if (profile === null) return true;
   return Boolean(
     profile.id && profile.name?.trim() &&
-    ['loss', 'gain', 'recomp', 'maintain', 'strength'].includes(profile.goal) &&
+    ['hypertrophy', 'recomp', 'strength', 'fatloss', 'maintain'].includes(profile.goal) &&
     ['beginner', 'intermediate', 'advanced'].includes(profile.experience) &&
     ['male', 'female'].includes(profile.sex) &&
     Number.isFinite(profile.age) && profile.age >= 14 && profile.age <= 100 &&
