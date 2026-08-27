@@ -9,8 +9,9 @@
     "test": "vitest run src",
     "test:mobile": "playwright test",
     "release:audit": "node scripts/release-audit.mjs",
-    "cap:add:ios": "npm run build && npx cap add ios",
-    "cap:sync:ios": "npm run build && npx cap sync ios",
+    "release:bundle:audit": "node scripts/release-bundle-audit.mjs",
+    "cap:add:ios": "npm run build && npm run release:bundle:audit && npx cap add ios",
+    "cap:sync:ios": "npm run build && npm run release:bundle:audit && npx cap sync ios",
     "ios:privacy": "node scripts/configure-ios-privacy.mjs",
     "ios:release": "node scripts/configure-ios-release.mjs",
     "ios:prepare": "npm run cap:sync:ios && npm run ios:privacy && npm run ios:release"
