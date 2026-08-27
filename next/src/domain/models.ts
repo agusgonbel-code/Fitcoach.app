@@ -15,6 +15,8 @@ export interface UserProfile {
   activityMultiplier: number;
   trainingDaysPerWeek: number;
   sessionMinutes: number;
+  /** Monday = 0 ... Sunday = 6. Optional for backwards-compatible migrated profiles. */
+  preferredTrainingDays?: number[];
   equipment: string[];
   restrictions: string[];
 }
