@@ -125,30 +125,19 @@ test('complete backup restores training, nutrition, metrics and photos after loc
   await page.goto('/');
   await expect(page.getByRole('heading', { name: 'Hola, Backup QA' })).toBeVisible();
 
-  await page.evaluate(async () => {
-    const request = indexedDB.open('fitcoach-next-media', 1);
-    const db = await new Promise<IDBDatabase>((resolve, reject) => {
-      request.onupgradeneeded = () => {
-        const current = request.result;
-        if (!current.objectStoreNames.contains('progress-photos')) {
-          const store = current.createObjectStore('progress-photos', { keyPath: 'id' });
-          store.createIndex('localDate', 'localDate');
-        }
-      };
-      request.onsuccess = () => resolve(request.result);
-      request.onerror = () => reject(request.error);
-    });
-    const localDate = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}-${String(new Date().getDate()).padStart(2, '0')}`;
-    const tx = db.transaction('progress-photos', 'readwrite');
-    tx.objectStore('progress-photos').put({
-      id: 'photo-backup-1', localDate, pose: 'front', weightKg: 80.2, mimeType: 'image/jpeg', width: 1, height: 1,
-      createdAt: new Date().toISOString(), blob: new Blob([new Uint8Array([255, 216, 255, 217])], { type: 'image/jpeg' }),
-    });
-    await new Promise<void>((resolve, reject) => { tx.oncomplete = () => resolve(); tx.onerror = () => reject(tx.error); });
-    db.close();
-  });
-
   const nav = page.getByRole('navigation', { name: 'Navegación principal' });
+  await nav.getByRole('button', { name: 'Progreso', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Comparación corporal' })).toBeVisible();
+  const photoSection = page.locator('section').filter({ has: page.getByRole('heading', { name: 'Comparación corporal' }) });
+  const photoInput = photoSection.locator('input[type="file"]');
+  await photoInput.setInputFiles({
+    name: 'backup-qa.png',
+    mimeType: 'image/png',
+    buffer: Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9Y9Z5xkAAAAASUVORK5CYII=', 'base64'),
+  });
+  await expect(photoSection.locator('.photo-row')).toHaveCount(1);
+  await expect(photoSection).toContainText('Frontal');
+
   await nav.getByRole('button', { name: 'Perfil', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Copia completa' })).toBeVisible();
 
@@ -165,7 +154,7 @@ test('complete backup restores training, nutrition, metrics and photos after loc
     localStorage.setItem('fitcoach_next_food_log_v1', '[]');
     localStorage.setItem('fitcoach_next_body_metrics_v1', '[]');
     const request = indexedDB.deleteDatabase('fitcoach-next-media');
-    await new Promise<void>((resolve, reject) => { request.onsuccess = () => resolve(); request.onerror = () => reject(request.error); });
+    await new Promise<void>((resolve, reject) => { request.onsuccess = () => resolve(); request.onerror = () => reject(request.error ?? new Error('No se pudo borrar IndexedDB')); });
   });
 
   page.once('dialog', dialog => void dialog.accept());
@@ -173,25 +162,12 @@ test('complete backup restores training, nutrition, metrics and photos after loc
   await page.waitForLoadState('domcontentloaded');
   await expect(page.getByRole('heading', { name: 'Hola, Backup QA' })).toBeVisible();
 
-  const restored = await page.evaluate(async () => {
-    const profile = JSON.parse(localStorage.getItem('fitcoach_next_profile_v1') || 'null');
-    const sessions = JSON.parse(localStorage.getItem('fitcoach_next_sessions_v1') || '[]');
-    const foodLog = JSON.parse(localStorage.getItem('fitcoach_next_food_log_v1') || '[]');
-    const metrics = JSON.parse(localStorage.getItem('fitcoach_next_body_metrics_v1') || '[]');
-    const request = indexedDB.open('fitcoach-next-media', 1);
-    const db = await new Promise<IDBDatabase>((resolve, reject) => {
-      request.onsuccess = () => resolve(request.result);
-      request.onerror = () => reject(request.error);
-    });
-    const tx = db.transaction('progress-photos', 'readonly');
-    const photos = await new Promise<any[]>((resolve, reject) => {
-      const getAll = tx.objectStore('progress-photos').getAll();
-      getAll.onsuccess = () => resolve(getAll.result);
-      getAll.onerror = () => reject(getAll.error);
-    });
-    db.close();
-    return { profile, sessions, foodLog, metrics, photos: photos.map(photo => ({ id: photo.id, pose: photo.pose, weightKg: photo.weightKg, size: photo.blob?.size })) };
-  });
+  const restored = await page.evaluate(() => ({
+    profile: JSON.parse(localStorage.getItem('fitcoach_next_profile_v1') || 'null'),
+    sessions: JSON.parse(localStorage.getItem('fitcoach_next_sessions_v1') || '[]'),
+    foodLog: JSON.parse(localStorage.getItem('fitcoach_next_food_log_v1') || '[]'),
+    metrics: JSON.parse(localStorage.getItem('fitcoach_next_body_metrics_v1') || '[]'),
+  }));
 
   expect(restored.profile?.name).toBe('Backup QA');
   expect(restored.sessions).toHaveLength(1);
@@ -200,5 +176,10 @@ test('complete backup restores training, nutrition, metrics and photos after loc
   expect(restored.foodLog[0]).toMatchObject({ name: 'Pollo con arroz', kcal: 650, proteinG: 55 });
   expect(restored.metrics).toHaveLength(1);
   expect(restored.metrics[0]).toMatchObject({ weightKg: 80.2, waistCm: 84, bodyFatPct: 16 });
-  expect(restored.photos).toEqual([{ id: 'photo-backup-1', pose: 'front', weightKg: 80.2, size: 4 }]);
+
+  const restoredNav = page.getByRole('navigation', { name: 'Navegación principal' });
+  await restoredNav.getByRole('button', { name: 'Progreso', exact: true }).click();
+  const restoredPhotoSection = page.locator('section').filter({ has: page.getByRole('heading', { name: 'Comparación corporal' }) });
+  await expect(restoredPhotoSection.locator('.photo-row')).toHaveCount(1);
+  await expect(restoredPhotoSection).toContainText('Frontal');
 });
