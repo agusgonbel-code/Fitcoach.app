@@ -13,6 +13,11 @@ function useObjectUrl(blob?: Blob): string {
   return url;
 }
 
+function newPhotoId(): string {
+  if (typeof globalThis.crypto?.randomUUID === 'function') return globalThis.crypto.randomUUID();
+  return `photo-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 12)}`;
+}
+
 function ComparePhoto({ photo, label }: { photo?: ProgressPhotoRecord; label: string }) {
   const url = useObjectUrl(photo?.blob);
   return <div className="photo-compare-item"><span className="secondary">{label}</span>{photo && url ? <><img src={url} alt={`${photo.pose} ${photo.localDate}`} /><strong>{photo.localDate}</strong></> : <div className="photo-placeholder">Selecciona una foto</div>}</div>;
@@ -47,7 +52,7 @@ export function PhotoProgress() {
     try {
       const prepared = await prepareProgressPhoto(file);
       const entry: ProgressPhotoRecord = {
-        id: crypto.randomUUID(), localDate: localDate(), pose,
+        id: newPhotoId(), localDate: localDate(), pose,
         weightKg: weight.trim() ? Number(weight) : undefined,
         createdAt: new Date().toISOString(), ...prepared,
       };
