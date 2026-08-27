@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { isProgressPhotoBlob, validProgressPhotoMeta, validateProgressPhotoFile } from './progressPhotoRepository';
+import { isProgressPhotoBlob, shouldKeepOriginalProgressPhoto, validProgressPhotoMeta, validateProgressPhotoFile } from './progressPhotoRepository';
 
 describe('progress photo safety', () => {
   it('accepts valid local metadata', () => {
@@ -17,6 +17,14 @@ describe('progress photo safety', () => {
   it('accepts iPhone HEIC metadata and rejects unrelated files', () => {
     expect(() => validateProgressPhotoFile({ size: 4_000_000, type: 'image/heic' })).not.toThrow();
     expect(() => validateProgressPhotoFile({ size: 1000, type: 'application/pdf' })).toThrow('Formato no compatible');
+  });
+
+  it('keeps already-small browser-native images but still recompresses HEIC, large files and oversized dimensions', () => {
+    expect(shouldKeepOriginalProgressPhoto({ size: 1024, type: 'image/png' }, 32, 32)).toBe(true);
+    expect(shouldKeepOriginalProgressPhoto({ size: 1024, type: 'image/jpeg' }, 1200, 1600)).toBe(true);
+    expect(shouldKeepOriginalProgressPhoto({ size: 1024, type: 'image/heic' }, 1200, 1600)).toBe(false);
+    expect(shouldKeepOriginalProgressPhoto({ size: 3 * 1024 * 1024, type: 'image/jpeg' }, 1200, 1600)).toBe(false);
+    expect(shouldKeepOriginalProgressPhoto({ size: 1024, type: 'image/webp' }, 2000, 1200)).toBe(false);
   });
 
   it('accepts a blob-shaped IndexedDB clone without relying on instanceof', () => {
