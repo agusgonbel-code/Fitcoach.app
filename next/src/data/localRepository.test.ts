@@ -1,6 +1,6 @@
-import { describe, expect, it } from 'vitest';
-import { validBodyMetric, validSession } from './localRepository';
-import type { BodyMetric, WorkoutSession } from '../domain/models';
+import { beforeEach, describe, expect, it } from 'vitest';
+import { loadProfile, saveProfile, validBodyMetric, validSession } from './localRepository';
+import type { BodyMetric, UserProfile, WorkoutSession } from '../domain/models';
 
 const base = (): WorkoutSession => ({
   id: 's1', plannedWorkoutId: 'p1', localDate: '2026-08-26', startedAt: '2026-08-26T08:00:00', exercises: []
@@ -14,6 +14,38 @@ const metric = (overrides: Partial<BodyMetric> = {}): BodyMetric => ({
   bodyFatPct: 18,
   createdAt: '2026-08-27T08:00:00.000Z',
   ...overrides,
+});
+
+const profile = (overrides: Partial<UserProfile> = {}): UserProfile => ({
+  id: 'u1',
+  name: 'Calendario QA',
+  goal: 'recomp',
+  experience: 'intermediate',
+  sex: 'male',
+  age: 40,
+  heightCm: 180,
+  weightKg: 80,
+  activityMultiplier: 1.45,
+  trainingDaysPerWeek: 4,
+  sessionMinutes: 50,
+  preferredTrainingDays: [0, 1, 3, 4],
+  equipment: ['gym'],
+  restrictions: [],
+  ...overrides,
+});
+
+beforeEach(() => localStorage.clear());
+
+describe('profile persistence', () => {
+  it('preserves the preferred weekly training calendar after reload', () => {
+    saveProfile(profile());
+    expect(loadProfile()?.preferredTrainingDays).toEqual([0, 1, 3, 4]);
+  });
+
+  it('sanitizes invalid and duplicated preferred training days', () => {
+    localStorage.setItem('fitcoach_next_profile_v1', JSON.stringify(profile({ preferredTrainingDays: [0, 0, 3, 7, -1] })));
+    expect(loadProfile()?.preferredTrainingDays).toEqual([0, 3]);
+  });
 });
 
 describe('validSession', () => {
