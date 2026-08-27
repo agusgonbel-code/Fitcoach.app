@@ -26,6 +26,8 @@ jobs:
     defaults:
       run:
         working-directory: next
+    env:
+      FITCOACH_BUILD_NUMBER: ${{ github.run_number }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -47,9 +49,16 @@ jobs:
         run: |
           npm test
           npm run build
+      - name: Validate release icon source
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f assets/app-icon-1024.png
+          test "$(sips -g pixelWidth assets/app-icon-1024.png | awk '/pixelWidth/ {print $2}')" = '1024'
+          test "$(sips -g pixelHeight assets/app-icon-1024.png | awk '/pixelHeight/ {print $2}')" = '1024'
       - name: Generate isolated iOS project
         run: npx cap add ios
-      - name: Install privacy manifest and sync web bundle
+      - name: Install privacy, release metadata and sync web bundle
         run: npm run ios:prepare
       - name: Validate Capacitor configuration
         run: npx cap doctor ios
@@ -64,7 +73,7 @@ jobs:
             -destination 'generic/platform=iOS Simulator' \
             CODE_SIGNING_ALLOWED=NO \
             build
-      - name: Validate native identity and privacy
+      - name: Validate native identity, version, icon and privacy
         id: app
         shell: bash
         run: |
@@ -75,15 +84,22 @@ jobs:
           PRIVACY="$APP_PATH/PrivacyInfo.xcprivacy"
           BUNDLE_ID="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$PLIST")"
           DISPLAY_NAME="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleDisplayName' "$PLIST" 2>/dev/null || /usr/libexec/PlistBuddy -c 'Print :CFBundleName' "$PLIST")"
+          VERSION="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$PLIST")"
+          BUILD="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' "$PLIST")"
+          EXPECTED_VERSION="$(node -p "require('./package.json').version.replace(/-.*/, '')")"
           test "$BUNDLE_ID" = 'com.fitcoach.next'
           test "$DISPLAY_NAME" = 'FitCoach Next'
+          test "$VERSION" = "$EXPECTED_VERSION"
+          test "$BUILD" = "$FITCOACH_BUILD_NUMBER"
           test -f "$PRIVACY"
           plutil -lint "$PRIVACY"
           test "$(plutil -extract NSPrivacyTracking raw -o - "$PRIVACY")" = 'false'
           test "$(plutil -extract NSPrivacyCollectedDataTypes json -o - "$PRIVACY")" = '[]'
           test -f "$APP_PATH/public/index.html"
+          test -n "$(find "$APP_PATH" -iname '*AppIcon*' -o -iname 'AppIcon*.png' | head -1)"
           echo "Bundle ID: $BUNDLE_ID"
           echo "Display name: $DISPLAY_NAME"
+          echo "Version: $VERSION ($BUILD)"
           echo "path=$APP_PATH" >> "$GITHUB_OUTPUT"
       - name: Stage simulator artifact
         shell: bash

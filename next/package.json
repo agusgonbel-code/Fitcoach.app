@@ -11,7 +11,8 @@
     "cap:add:ios": "npm run build && npx cap add ios",
     "cap:sync:ios": "npm run build && npx cap sync ios",
     "ios:privacy": "node scripts/configure-ios-privacy.mjs",
-    "ios:prepare": "npm run cap:sync:ios && npm run ios:privacy"
+    "ios:release": "node scripts/configure-ios-release.mjs",
+    "ios:prepare": "npm run cap:sync:ios && npm run ios:privacy && npm run ios:release"
   },
   "dependencies": {
     "@capacitor/core": "8.5.0",
