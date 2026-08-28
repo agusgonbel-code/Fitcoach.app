@@ -7,6 +7,10 @@ const SESSIONS_KEY = 'fitcoach_next_sessions_v1';
 const FOOD_LOG_KEY = 'fitcoach_next_food_log_v1';
 const BODY_METRICS_KEY = 'fitcoach_next_body_metrics_v1';
 
+const GOALS: UserProfile['goal'][] = ['hypertrophy', 'recomp', 'strength', 'fatloss', 'maintain'];
+const EXPERIENCES: UserProfile['experience'][] = ['beginner', 'intermediate', 'advanced'];
+const SEXES: UserProfile['sex'][] = ['male', 'female'];
+
 export function localDate(date = new Date()): string {
   const y = date.getFullYear();
   const m = String(date.getMonth() + 1).padStart(2, '0');
@@ -21,6 +25,22 @@ function readJson<T>(key: string, fallback: T): T {
   } catch {
     return fallback;
   }
+}
+
+function finiteInRange(value: unknown, min: number, max: number, fallback: number): number {
+  const parsed = typeof value === 'number' ? value : Number(value);
+  return Number.isFinite(parsed) && parsed >= min && parsed <= max ? parsed : fallback;
+}
+
+function finiteOptionalInRange(value: unknown, min: number, max: number): number | undefined {
+  if (value === undefined || value === null || value === '') return undefined;
+  const parsed = typeof value === 'number' ? value : Number(value);
+  return Number.isFinite(parsed) && parsed >= min && parsed <= max ? parsed : undefined;
+}
+
+function stringsOnly(value: unknown, fallback: string[]): string[] {
+  if (!Array.isArray(value)) return fallback;
+  return [...new Set(value.filter((item): item is string => typeof item === 'string').map(item => item.trim()).filter(Boolean))];
 }
 
 function legacyMigrationSuppressed(): boolean {
@@ -38,26 +58,26 @@ export function loadProfile(): UserProfile | null {
     migrateLegacyProfile(localStorage, () => crypto.randomUUID());
     raw = readJson<Partial<UserProfile> | null>(PROFILE_KEY, null);
   }
-  if (!raw) return null;
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return null;
   const preferredTrainingDays = Array.isArray(raw.preferredTrainingDays)
     ? [...new Set(raw.preferredTrainingDays.map(Number).filter(day => Number.isInteger(day) && day >= 0 && day <= 6))]
     : undefined;
   return {
-    id: raw.id || crypto.randomUUID(),
-    name: raw.name || 'Atleta',
-    goal: raw.goal || 'recomp',
-    experience: raw.experience || 'intermediate',
-    sex: raw.sex || 'male',
-    age: Number(raw.age) || 35,
-    heightCm: Number(raw.heightCm) || 170,
-    weightKg: Number(raw.weightKg) || 70,
-    bodyFatPct: raw.bodyFatPct,
-    activityMultiplier: Number(raw.activityMultiplier) || 1.45,
-    trainingDaysPerWeek: Number(raw.trainingDaysPerWeek) || 4,
-    sessionMinutes: Number(raw.sessionMinutes) || 50,
+    id: typeof raw.id === 'string' && raw.id.trim() ? raw.id : crypto.randomUUID(),
+    name: typeof raw.name === 'string' && raw.name.trim() ? raw.name.trim() : 'Atleta',
+    goal: GOALS.includes(raw.goal as UserProfile['goal']) ? raw.goal as UserProfile['goal'] : 'recomp',
+    experience: EXPERIENCES.includes(raw.experience as UserProfile['experience']) ? raw.experience as UserProfile['experience'] : 'intermediate',
+    sex: SEXES.includes(raw.sex as UserProfile['sex']) ? raw.sex as UserProfile['sex'] : 'male',
+    age: Math.round(finiteInRange(raw.age, 13, 100, 35)),
+    heightCm: finiteInRange(raw.heightCm, 120, 230, 170),
+    weightKg: finiteInRange(raw.weightKg, 30, 350, 70),
+    bodyFatPct: finiteOptionalInRange(raw.bodyFatPct, 2, 70),
+    activityMultiplier: finiteInRange(raw.activityMultiplier, 1.1, 2.5, 1.45),
+    trainingDaysPerWeek: Math.round(finiteInRange(raw.trainingDaysPerWeek, 1, 7, 4)),
+    sessionMinutes: Math.round(finiteInRange(raw.sessionMinutes, 15, 180, 50)),
     preferredTrainingDays,
-    equipment: Array.isArray(raw.equipment) ? raw.equipment : ['gym'],
-    restrictions: Array.isArray(raw.restrictions) ? raw.restrictions : []
+    equipment: stringsOnly(raw.equipment, ['gym']),
+    restrictions: stringsOnly(raw.restrictions, [])
   };
 }
 
