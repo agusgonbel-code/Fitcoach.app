@@ -43,6 +43,17 @@ function stringsOnly(value: unknown, fallback: string[]): string[] {
   return [...new Set(value.filter((item): item is string => typeof item === 'string').map(item => item.trim()).filter(Boolean))];
 }
 
+function isValidCivilDate(value: unknown): value is string {
+  if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+  const [year, month, day] = value.split('-').map(Number);
+  const date = new Date(Date.UTC(year, month - 1, day));
+  return date.getUTCFullYear() === year && date.getUTCMonth() === month - 1 && date.getUTCDate() === day;
+}
+
+function isValidTimestamp(value: unknown): value is string {
+  return typeof value === 'string' && value.trim().length > 0 && Number.isFinite(Date.parse(value));
+}
+
 function legacyMigrationSuppressed(): boolean {
   return localStorage.getItem(LEGACY_MIGRATION_SUPPRESSION_KEY) === 'true';
 }
@@ -85,15 +96,27 @@ export function saveProfile(profile: UserProfile): void {
   localStorage.setItem(PROFILE_KEY, JSON.stringify(profile));
 }
 
+function isStoredSet(value: unknown): boolean {
+  if (!value || typeof value !== 'object') return false;
+  const set = value as { kg?: unknown; reps?: unknown; rir?: unknown; completedAt?: unknown };
+  return typeof set.kg === 'number' && Number.isFinite(set.kg) && set.kg >= 0 &&
+    typeof set.reps === 'number' && Number.isFinite(set.reps) && set.reps > 0 &&
+    (set.rir === null || (typeof set.rir === 'number' && Number.isFinite(set.rir) && set.rir >= 0 && set.rir <= 10)) &&
+    isValidTimestamp(set.completedAt);
+}
+
 function isStoredSession(value: unknown): value is WorkoutSession {
   if (!value || typeof value !== 'object') return false;
   const session = value as Partial<WorkoutSession>;
-  return typeof session.id === 'string' && session.id.length > 0 &&
-    typeof session.plannedWorkoutId === 'string' && session.plannedWorkoutId.length > 0 &&
-    typeof session.localDate === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(session.localDate) &&
-    typeof session.startedAt === 'string' && session.startedAt.length > 0 &&
+  return typeof session.id === 'string' && session.id.trim().length > 0 &&
+    typeof session.plannedWorkoutId === 'string' && session.plannedWorkoutId.trim().length > 0 &&
+    isValidCivilDate(session.localDate) &&
+    isValidTimestamp(session.startedAt) &&
+    (session.completedAt === undefined || isValidTimestamp(session.completedAt)) &&
+    (session.notes === undefined || typeof session.notes === 'string') &&
     Array.isArray(session.exercises) && session.exercises.every(exercise =>
-      Boolean(exercise && typeof exercise === 'object' && typeof exercise.exerciseId === 'string' && Array.isArray(exercise.sets))
+      Boolean(exercise && typeof exercise === 'object' && typeof exercise.exerciseId === 'string' && exercise.exerciseId.trim().length > 0 &&
+        Array.isArray(exercise.sets) && exercise.sets.every(isStoredSet))
     );
 }
 
@@ -104,11 +127,7 @@ export function loadSessions(): WorkoutSession[] {
 }
 
 export function validSession(session: WorkoutSession): boolean {
-  return isStoredSession(session) && session.exercises.some(exercise => exercise.sets.some(set =>
-    Number.isFinite(set.kg) && set.kg >= 0 &&
-    Number.isFinite(set.reps) && set.reps > 0 &&
-    (set.rir === null || (Number.isFinite(set.rir) && set.rir >= 0 && set.rir <= 10))
-  ));
+  return isStoredSession(session) && session.exercises.some(exercise => exercise.sets.length > 0);
 }
 
 export function saveSession(session: WorkoutSession): void {
@@ -120,11 +139,12 @@ export function saveSession(session: WorkoutSession): void {
 function isStoredFoodEntry(value: unknown): value is FoodLogEntry {
   if (!value || typeof value !== 'object') return false;
   const entry = value as Partial<FoodLogEntry>;
-  return typeof entry.id === 'string' && entry.id.length > 0 &&
-    typeof entry.localDate === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(entry.localDate) &&
+  return typeof entry.id === 'string' && entry.id.trim().length > 0 &&
+    isValidCivilDate(entry.localDate) &&
     typeof entry.name === 'string' && entry.name.trim().length > 0 &&
     [entry.kcal, entry.proteinG, entry.carbsG, entry.fatG].every(value => typeof value === 'number' && Number.isFinite(value) && value >= 0) &&
-    Number(entry.kcal) > 0;
+    Number(entry.kcal) > 0 &&
+    isValidTimestamp(entry.createdAt);
 }
 
 export function loadFoodLog(): FoodLogEntry[] {
@@ -157,7 +177,7 @@ export function validBodyMetric(metric: BodyMetric): boolean {
   const validWeight = Number.isFinite(metric.weightKg) && metric.weightKg >= 30 && metric.weightKg <= 350;
   const validWaist = metric.waistCm === undefined || (Number.isFinite(metric.waistCm) && metric.waistCm >= 40 && metric.waistCm <= 250);
   const validBodyFat = metric.bodyFatPct === undefined || (Number.isFinite(metric.bodyFatPct) && metric.bodyFatPct >= 2 && metric.bodyFatPct <= 70);
-  return Boolean(metric.id && /^\d{4}-\d{2}-\d{2}$/.test(metric.localDate) && metric.createdAt && validWeight && validWaist && validBodyFat);
+  return Boolean(typeof metric.id === 'string' && metric.id.trim() && isValidCivilDate(metric.localDate) && isValidTimestamp(metric.createdAt) && validWeight && validWaist && validBodyFat);
 }
 
 export function saveBodyMetric(metric: BodyMetric): void {
