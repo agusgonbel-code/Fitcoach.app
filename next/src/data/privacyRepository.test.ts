@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { deleteAllFitCoachNextData } from './privacyRepository';
+import { deleteAllFitCoachNextData, LEGACY_MIGRATION_SUPPRESSION_KEY } from './privacyRepository';
 
 class MemoryStorage implements Storage {
   private data = new Map<string, string>();
@@ -12,7 +12,7 @@ class MemoryStorage implements Storage {
 }
 
 describe('deleteAllFitCoachNextData', () => {
-  it('removes every Next key and progress photo without touching legacy data', async () => {
+  it('removes every Next key and progress photo without touching legacy data or allowing reimport', async () => {
     const storage = new MemoryStorage();
     storage.setItem('fitcoach_next_profile_v1', '{"name":"QA"}');
     storage.setItem('fitcoach_next_sessions_v1', '[]');
@@ -35,6 +35,7 @@ describe('deleteAllFitCoachNextData', () => {
     expect(storage.getItem('fitcoach_next_sessions_v1')).toBeNull();
     expect(storage.getItem('fitcoach_next_workout_draft_v1')).toBeNull();
     expect(storage.getItem('fitcoach_next_legacy_data_migration_v1')).toBeNull();
+    expect(storage.getItem(LEGACY_MIGRATION_SUPPRESSION_KEY)).toBe('true');
     expect(storage.getItem('fitcoach_client_profile_v35')).toBe('{"name":"Legacy"}');
     expect(storage.getItem('workouts')).toBe('[{"legacy":true}]');
     expect(removedPhotoIds).toEqual(['photo-1', 'photo-2']);
