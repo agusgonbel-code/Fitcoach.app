@@ -64,6 +64,45 @@ describe('nutritionPlanRepository', () => {
     expect(readNutritionPlan(storage, 'profile-1', target)).toBeNull();
   });
 
+  it('rejects duplicated or out-of-order persisted nutrition days', () => {
+    const storage = new MemoryStorage();
+    const broken = state();
+    broken.week[1] = { ...broken.week[1], day: 1 };
+    storage.setItem(nutritionPlanStorageKey(), JSON.stringify(broken));
+    expect(readNutritionPlan(storage, 'profile-1', target)).toBeNull();
+  });
+
+  it('rejects invalid monthly week metadata', () => {
+    const storage = new MemoryStorage();
+    const broken = state();
+    broken.month[7] = { ...broken.month[7], week: 1 };
+    storage.setItem(nutritionPlanStorageKey(), JSON.stringify(broken));
+    expect(readNutritionPlan(storage, 'profile-1', target)).toBeNull();
+  });
+
+  it('rejects non-finite persisted day macros', () => {
+    const storage = new MemoryStorage();
+    const broken = state();
+    broken.month[0] = {
+      ...broken.month[0],
+      macros: { ...broken.month[0].macros, kcal: Number.POSITIVE_INFINITY },
+    };
+    storage.setItem(nutritionPlanStorageKey(), JSON.stringify(broken));
+    expect(readNutritionPlan(storage, 'profile-1', target)).toBeNull();
+  });
+
+  it('refuses to write meal scales outside the supported planner range', () => {
+    const storage = new MemoryStorage();
+    const broken = state();
+    broken.week[0] = {
+      ...broken.week[0],
+      plan: {
+        meals: broken.week[0].plan.meals.map((meal, index) => index === 0 ? { ...meal, scale: 8 } : meal),
+      },
+    };
+    expect(() => writeNutritionPlan(storage, broken)).toThrow('El plan nutricional no es válido');
+  });
+
   it('refuses to write invalid substitution scales', () => {
     const storage = new MemoryStorage();
     const broken = state();
