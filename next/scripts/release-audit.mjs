@@ -39,6 +39,21 @@ for (const [key, value] of Object.entries({ privacyPolicyUrl: metadata.privacyPo
   if (url.hostname !== 'agusgonbel-code.github.io') fail(`${key} must point to the approved public FitCoach site`);
 }
 
+const privacyUrl = new URL(metadata.privacyPolicyUrl);
+const supportUrl = new URL(metadata.supportUrl);
+if (privacyUrl.pathname !== '/Fitcoach.app/privacy.html') fail(`unexpected privacy policy path ${privacyUrl.pathname}`);
+if (supportUrl.pathname !== '/Fitcoach.app/support.html') fail(`unexpected support path ${supportUrl.pathname}`);
+
+const privacyPage = readText('../privacy.html');
+if (!privacyPage.includes('FitCoach Next')) fail('public privacy policy does not mention FitCoach Next');
+if (!privacyPage.includes('Borrar todos mis datos')) fail('public privacy policy does not document complete Next data deletion');
+if (!privacyPage.includes('no realiza seguimiento')) fail('public privacy policy does not state the tracking policy');
+
+const supportPage = readText('../support.html');
+if (!supportPage.includes('FitCoach Next')) fail('public support page does not mention FitCoach Next');
+if (!supportPage.includes('Perfil → Datos y privacidad')) fail('public support page does not document Next backup/privacy controls');
+if (!supportPage.includes('https://github.com/agusgonbel-code/Fitcoach.app/issues/new')) fail('public support page is missing the support issue link');
+
 const index = readText('index.html');
 if (!index.includes('viewport-fit=cover')) fail('viewport does not include viewport-fit=cover');
 if (!/<html\s+lang="es"/.test(index)) fail('document language is not Spanish');
@@ -54,4 +69,4 @@ const width = png.readUInt32BE(16);
 const height = png.readUInt32BE(20);
 if (width !== 1024 || height !== 1024) fail(`app icon must be 1024x1024, got ${width}x${height}`);
 
-console.log(`FitCoach Next release audit OK · ${pkg.version} · ${capacitor.appId} · ${metadata.primaryLocale} · iPhone portrait · icon ${width}x${height}`);
+console.log(`FitCoach Next release audit OK · ${pkg.version} · ${capacitor.appId} · ${metadata.primaryLocale} · iPhone portrait · privacy/support aligned · icon ${width}x${height}`);
