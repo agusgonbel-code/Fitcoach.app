@@ -42,7 +42,9 @@ test('essential iPhone flow remains usable after connectivity is lost', async ({
   await page.getByRole('button', { name: 'Finalizar y guardar' }).click();
   await expect(page.getByRole('heading', { name: 'Tu evolución' })).toBeVisible();
   await expect(page.locator('.metric-card').filter({ hasText: 'series' }).locator('strong')).toHaveText('1');
-  await expect(page.locator('.metric-card').filter({ hasText: 'kg × reps' }).locator('strong')).toHaveText('652.5');
+  // Progress intentionally presents whole-number volume while persisted set data
+  // retains decimal load precision.
+  await expect(page.locator('.metric-card').filter({ hasText: 'kg × reps' }).locator('strong')).toHaveText('653');
 
   const sessions = await page.evaluate(() => JSON.parse(localStorage.getItem('fitcoach_next_sessions_v1') || '[]'));
   expect(sessions).toHaveLength(1);
