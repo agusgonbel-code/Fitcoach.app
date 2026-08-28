@@ -1,5 +1,6 @@
 import type { BodyMetric, FoodLogEntry, UserProfile, WorkoutSession } from '../domain/models';
 import { migrateLegacyData, migrateLegacyProfile } from './legacyMigration';
+import { LEGACY_MIGRATION_SUPPRESSION_KEY } from './privacyRepository';
 
 const PROFILE_KEY = 'fitcoach_next_profile_v1';
 const SESSIONS_KEY = 'fitcoach_next_sessions_v1';
@@ -22,13 +23,18 @@ function readJson<T>(key: string, fallback: T): T {
   }
 }
 
+function legacyMigrationSuppressed(): boolean {
+  return localStorage.getItem(LEGACY_MIGRATION_SUPPRESSION_KEY) === 'true';
+}
+
 function ensureLegacyActivityMigration(): void {
+  if (legacyMigrationSuppressed()) return;
   migrateLegacyData(localStorage, () => crypto.randomUUID());
 }
 
 export function loadProfile(): UserProfile | null {
   let raw = readJson<Partial<UserProfile> | null>(PROFILE_KEY, null);
-  if (!raw) {
+  if (!raw && !legacyMigrationSuppressed()) {
     migrateLegacyProfile(localStorage, () => crypto.randomUUID());
     raw = readJson<Partial<UserProfile> | null>(PROFILE_KEY, null);
   }
@@ -88,40 +94,28 @@ export function loadFoodLog(): FoodLogEntry[] {
 export function validFoodEntry(entry: FoodLogEntry): boolean {
   return entry.name.trim().length > 0 &&
     [entry.kcal, entry.proteinG, entry.carbsG, entry.fatG].every(value => Number.isFinite(value) && value >= 0) &&
-    entry.kcal > 0;
+    entry.kcal <= 5000 && entry.proteinG <= 500 && entry.carbsG <= 1000 && entry.fatG <= 500;
 }
 
 export function saveFoodEntry(entry: FoodLogEntry): void {
-  if (!validFoodEntry(entry)) throw new Error('Completa una comida válida antes de guardarla.');
-  const log = loadFoodLog();
-  localStorage.setItem(FOOD_LOG_KEY, JSON.stringify([...log.filter(item => item.id !== entry.id), entry]));
-}
-
-export function removeFoodEntry(id: string): void {
-  localStorage.setItem(FOOD_LOG_KEY, JSON.stringify(loadFoodLog().filter(item => item.id !== id)));
+  if (!validFoodEntry(entry)) throw new Error('La comida contiene valores no válidos.');
+  const entries = loadFoodLog();
+  localStorage.setItem(FOOD_LOG_KEY, JSON.stringify([...entries.filter(item => item.id !== entry.id), entry]));
 }
 
 export function loadBodyMetrics(): BodyMetric[] {
-  return readJson<BodyMetric[]>(BODY_METRICS_KEY, [])
-    .filter(validBodyMetric)
-    .sort((a, b) => a.localDate.localeCompare(b.localDate) || a.createdAt.localeCompare(b.createdAt));
+  ensureLegacyActivityMigration();
+  return readJson<BodyMetric[]>(BODY_METRICS_KEY, []);
 }
 
 export function validBodyMetric(metric: BodyMetric): boolean {
-  const validWeight = Number.isFinite(metric.weightKg) && metric.weightKg >= 30 && metric.weightKg <= 350;
-  const validWaist = metric.waistCm === undefined || (Number.isFinite(metric.waistCm) && metric.waistCm >= 40 && metric.waistCm <= 250);
-  const validBodyFat = metric.bodyFatPct === undefined || (Number.isFinite(metric.bodyFatPct) && metric.bodyFatPct >= 2 && metric.bodyFatPct <= 70);
-  return Boolean(metric.id && /^\d{4}-\d{2}-\d{2}$/.test(metric.localDate) && metric.createdAt && validWeight && validWaist && validBodyFat);
+  return Number.isFinite(metric.weightKg) && metric.weightKg >= 35 && metric.weightKg <= 350 &&
+    (metric.waistCm === undefined || (Number.isFinite(metric.waistCm) && metric.waistCm >= 30 && metric.waistCm <= 250)) &&
+    (metric.bodyFatPct === undefined || (Number.isFinite(metric.bodyFatPct) && metric.bodyFatPct >= 2 && metric.bodyFatPct <= 70));
 }
 
 export function saveBodyMetric(metric: BodyMetric): void {
-  if (!validBodyMetric(metric)) throw new Error('Revisa el peso y las medidas antes de guardar.');
+  if (!validBodyMetric(metric)) throw new Error('La métrica corporal está fuera de rango.');
   const metrics = loadBodyMetrics();
-  const next = [...metrics.filter(item => item.id !== metric.id), metric]
-    .sort((a, b) => a.localDate.localeCompare(b.localDate) || a.createdAt.localeCompare(b.createdAt));
-  localStorage.setItem(BODY_METRICS_KEY, JSON.stringify(next));
-}
-
-export function removeBodyMetric(id: string): void {
-  localStorage.setItem(BODY_METRICS_KEY, JSON.stringify(loadBodyMetrics().filter(item => item.id !== id)));
+  localStorage.setItem(BODY_METRICS_KEY, JSON.stringify([...metrics.filter(item => item.id !== metric.id), metric]));
 }
