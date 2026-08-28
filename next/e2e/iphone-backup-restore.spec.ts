@@ -72,11 +72,13 @@ test('complete backup restores FitCoach Next state on iPhone without touching le
   };
 
   page.once('dialog', dialog => void dialog.accept());
+  const reloaded = page.waitForEvent('framenavigated', frame => frame === page.mainFrame());
   await page.getByLabel('Seleccionar copia de FitCoach Next').setInputFiles({
     name: 'fitcoach-next-complete-v1-2026-08-28.json',
     mimeType: 'application/json',
     buffer: Buffer.from(JSON.stringify(backup)),
   });
+  await reloaded;
   await page.waitForLoadState('domcontentloaded');
 
   await expect(page.getByRole('heading', { name: 'Hola, Restored QA' })).toBeVisible();
