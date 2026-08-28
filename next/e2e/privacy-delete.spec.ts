@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 
-test('privacy deletion removes FitCoach Next data but preserves legacy 3.4.4 data', async ({ page }) => {
+test('privacy deletion removes FitCoach Next data but preserves legacy 3.4.4 data without reimporting it', async ({ page }) => {
   await page.addInitScript(() => {
     localStorage.setItem('fitcoach_next_profile_v1', JSON.stringify({
       id: 'privacy-qa-user',
@@ -42,6 +42,7 @@ test('privacy deletion removes FitCoach Next data but preserves legacy 3.4.4 dat
     sessions: localStorage.getItem('fitcoach_next_sessions_v1'),
     draft: localStorage.getItem('fitcoach_next_workout_draft_v1'),
     migration: localStorage.getItem('fitcoach_next_legacy_data_migration_v1'),
+    migrationSuppressed: localStorage.getItem('fitcoach_next_legacy_migration_suppressed_v1'),
     legacyProfile: localStorage.getItem('fitcoach_client_profile_v35'),
     legacyWorkouts: localStorage.getItem('workouts'),
   }));
@@ -50,6 +51,7 @@ test('privacy deletion removes FitCoach Next data but preserves legacy 3.4.4 dat
   expect(data.sessions).toBeNull();
   expect(data.draft).toBeNull();
   expect(data.migration).toBeNull();
+  expect(data.migrationSuppressed).toBe('true');
   expect(data.legacyProfile).toBe('{"name":"Legacy preserved"}');
   expect(data.legacyWorkouts).toBe('[{"legacy":true}]');
 });
