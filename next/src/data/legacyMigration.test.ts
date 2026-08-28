@@ -103,4 +103,39 @@ describe('legacy activity migration', () => {
     expect(result).toMatchObject({ migrated: false, workouts: 0 });
     expect(storage.getItem('fitcoach_next_sessions_v1')).toBeNull();
   });
+
+  it('rejects impossible civil dates from legacy workouts and meals', () => {
+    const storage = new MemoryStorage();
+    storage.setItem('workouts', JSON.stringify([{
+      date: '2026-02-31', day: 'Lunes', exercises: [{ name: 'Press banca', sets: [{ kg: 80, reps: 10, rir: 2 }] }]
+    }]));
+    storage.setItem('meals', JSON.stringify([
+      { date: '2026-02-31', name: 'Comida imposible', kcal: 500, protein: 40 }
+    ]));
+    const result = migrateLegacyData(storage, () => '1');
+    expect(result).toMatchObject({ migrated: false, workouts: 0, meals: 0 });
+    expect(storage.getItem('fitcoach_next_sessions_v1')).toBeNull();
+    expect(storage.getItem('fitcoach_next_food_log_v1')).toBeNull();
+  });
+
+  it('drops sets that would round to zero repetitions instead of persisting invalid Next data', () => {
+    const storage = new MemoryStorage();
+    storage.setItem('workouts', JSON.stringify([{
+      date: '2026-08-25T06:30:00', day: 'Lunes', exercises: [{ name: 'Press banca', sets: [{ kg: 80, reps: 0.2, rir: 2 }] }]
+    }]));
+    const result = migrateLegacyData(storage, () => '1');
+    expect(result).toMatchObject({ migrated: false, workouts: 0 });
+    expect(storage.getItem('fitcoach_next_sessions_v1')).toBeNull();
+  });
+
+  it('replaces an invalid legacy meal timestamp with a valid deterministic fallback', () => {
+    const storage = new MemoryStorage();
+    storage.setItem('meals', JSON.stringify([
+      { date: '2026-08-25', createdAt: 'not-a-timestamp', name: 'Comida', kcal: 500, protein: 40 }
+    ]));
+    const result = migrateLegacyData(storage, () => '1');
+    const meals = JSON.parse(storage.getItem('fitcoach_next_food_log_v1') || '[]');
+    expect(result).toMatchObject({ migrated: true, meals: 1 });
+    expect(meals[0].createdAt).toBe('2026-08-25T12:00:00');
+  });
 });
