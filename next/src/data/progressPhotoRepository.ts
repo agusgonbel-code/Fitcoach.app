@@ -30,18 +30,39 @@ const MAX_EDGE = 1800;
 const ACCEPTED = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/heif']);
 const ORIGINAL_SAFE = new Set(['image/jpeg', 'image/png', 'image/webp']);
 
+function isCivilDate(value: string): boolean {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+  if (!match) return false;
+  const year = Number(match[1]);
+  const month = Number(match[2]);
+  const day = Number(match[3]);
+  const date = new Date(Date.UTC(year, month - 1, day));
+  return date.getUTCFullYear() === year && date.getUTCMonth() === month - 1 && date.getUTCDate() === day;
+}
+
+function isIsoTimestamp(value: string): boolean {
+  if (typeof value !== 'string' || !value.trim()) return false;
+  const parsed = Date.parse(value);
+  return Number.isFinite(parsed) && /^\d{4}-\d{2}-\d{2}T/.test(value);
+}
+
 export function validProgressPhotoMeta(meta: ProgressPhotoMeta): boolean {
-  const validDate = /^\d{4}-\d{2}-\d{2}$/.test(meta.localDate);
+  if (!meta || typeof meta !== 'object') return false;
+  const validId = typeof meta.id === 'string' && Boolean(meta.id.trim());
+  const validDate = typeof meta.localDate === 'string' && isCivilDate(meta.localDate);
   const validPose = meta.pose === 'front' || meta.pose === 'side' || meta.pose === 'back';
   const validWeight = meta.weightKg === undefined || (Number.isFinite(meta.weightKg) && meta.weightKg >= 30 && meta.weightKg <= 350);
-  return Boolean(meta.id && validDate && validPose && meta.createdAt && ACCEPTED.has(meta.mimeType) && meta.width > 0 && meta.height > 0 && validWeight);
+  const validMime = typeof meta.mimeType === 'string' && ACCEPTED.has(meta.mimeType.toLowerCase());
+  const validDimensions = Number.isFinite(meta.width) && Number.isFinite(meta.height) && meta.width > 0 && meta.height > 0 && meta.width <= MAX_EDGE && meta.height <= MAX_EDGE;
+  const validCreatedAt = typeof meta.createdAt === 'string' && isIsoTimestamp(meta.createdAt);
+  return validId && validDate && validPose && validCreatedAt && validMime && validDimensions && validWeight;
 }
 
 export function isProgressPhotoBlob(value: unknown): value is Blob {
   if (!value || typeof value !== 'object') return false;
   const candidate = value as { size?: unknown; type?: unknown; slice?: unknown; arrayBuffer?: unknown };
-  return Number.isFinite(candidate.size) && Number(candidate.size) > 0 &&
-    typeof candidate.type === 'string' &&
+  return Number.isFinite(candidate.size) && Number(candidate.size) > 0 && Number(candidate.size) <= MAX_OUTPUT_BYTES &&
+    typeof candidate.type === 'string' && ACCEPTED.has(candidate.type.toLowerCase()) &&
     typeof candidate.slice === 'function' &&
     typeof candidate.arrayBuffer === 'function';
 }
@@ -49,13 +70,13 @@ export function isProgressPhotoBlob(value: unknown): value is Blob {
 function isArrayBufferLike(value: unknown): value is ArrayBuffer {
   if (!value || typeof value !== 'object') return false;
   const candidate = value as { byteLength?: unknown; slice?: unknown };
-  return Number.isFinite(candidate.byteLength) && Number(candidate.byteLength) > 0 && typeof candidate.slice === 'function';
+  return Number.isFinite(candidate.byteLength) && Number(candidate.byteLength) > 0 && Number(candidate.byteLength) <= MAX_OUTPUT_BYTES && typeof candidate.slice === 'function';
 }
 
 export function validateProgressPhotoFile(file: FileLike): void {
   if (!file || !Number.isFinite(file.size) || file.size <= 0) throw new Error('Selecciona una fotografía válida.');
   if (file.size > MAX_INPUT_BYTES) throw new Error('La fotografía supera el límite de 25 MB.');
-  if (!ACCEPTED.has(file.type.toLowerCase())) throw new Error('Formato no compatible. Usa JPG, PNG, WebP, HEIC o HEIF.');
+  if (typeof file.type !== 'string' || !ACCEPTED.has(file.type.toLowerCase())) throw new Error('Formato no compatible. Usa JPG, PNG, WebP, HEIC o HEIF.');
 }
 
 export function shouldKeepOriginalProgressPhoto(file: FileLike, width: number, height: number): boolean {
@@ -151,7 +172,7 @@ export async function prepareProgressPhoto(file: File): Promise<{ blob: Blob; mi
 }
 
 export async function saveProgressPhoto(record: ProgressPhotoRecord): Promise<void> {
-  if (!validProgressPhotoMeta(record) || !isProgressPhotoBlob(record.blob) || record.blob.size > MAX_OUTPUT_BYTES) {
+  if (!validProgressPhotoMeta(record) || !isProgressPhotoBlob(record.blob) || record.blob.size > MAX_OUTPUT_BYTES || record.blob.type.toLowerCase() !== record.mimeType.toLowerCase()) {
     throw new Error('La fotografía preparada no es válida.');
   }
 
@@ -166,7 +187,7 @@ export async function saveProgressPhoto(record: ProgressPhotoRecord): Promise<vo
     localDate: record.localDate,
     pose: record.pose,
     weightKg: record.weightKg,
-    mimeType: record.mimeType,
+    mimeType: record.mimeType.toLowerCase(),
     width: record.width,
     height: record.height,
     createdAt: record.createdAt,
@@ -206,20 +227,20 @@ export async function loadProgressPhotos(): Promise<ProgressPhotoRecord[]> {
     const result = rows.flatMap(item => {
       if (!validProgressPhotoMeta(item)) return [];
       if ('bytes' in item && isArrayBufferLike(item.bytes)) {
-        const blob = new Blob([item.bytes], { type: item.mimeType });
+        const blob = new Blob([item.bytes], { type: item.mimeType.toLowerCase() });
         return [{
           id: item.id,
           localDate: item.localDate,
           pose: item.pose,
           weightKg: item.weightKg,
-          mimeType: item.mimeType,
+          mimeType: item.mimeType.toLowerCase(),
           width: item.width,
           height: item.height,
           createdAt: item.createdAt,
           blob,
         } satisfies ProgressPhotoRecord];
       }
-      if ('blob' in item && isProgressPhotoBlob(item.blob)) return [item];
+      if ('blob' in item && isProgressPhotoBlob(item.blob) && item.blob.type.toLowerCase() === item.mimeType.toLowerCase()) return [item];
       return [];
     });
     return result.sort((a, b) => a.localDate.localeCompare(b.localDate) || a.createdAt.localeCompare(b.createdAt));
