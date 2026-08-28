@@ -31,6 +31,51 @@ describe('profile persistence', () => {
     localStorage.setItem('fitcoach_next_profile_v1', JSON.stringify(profile({ preferredTrainingDays: [0, 0, 3, 7, -1] })));
     expect(loadProfile()?.preferredTrainingDays).toEqual([0, 3]);
   });
+  it('sanitizes persisted profile values before they reach training, nutrition or Coach domains', () => {
+    const raw = {
+      id: '  ',
+      name: '  QA Athlete  ',
+      goal: 'bulk-forever',
+      experience: 'elite',
+      sex: 'unknown',
+      age: 500,
+      heightCm: -2,
+      weightKg: 'NaN',
+      bodyFatPct: 95,
+      activityMultiplier: 99,
+      trainingDaysPerWeek: 12,
+      sessionMinutes: 500,
+      preferredTrainingDays: ['0', 0, 6, 9],
+      equipment: [' gym ', 7, '', 'gym', 'dumbbells'],
+      restrictions: [' knee ', null, 'knee']
+    };
+    localStorage.setItem('fitcoach_next_profile_v1', JSON.stringify(raw));
+
+    expect(loadProfile()).toMatchObject({
+      name: 'QA Athlete',
+      goal: 'recomp',
+      experience: 'intermediate',
+      sex: 'male',
+      age: 35,
+      heightCm: 170,
+      weightKg: 70,
+      bodyFatPct: undefined,
+      activityMultiplier: 1.45,
+      trainingDaysPerWeek: 4,
+      sessionMinutes: 50,
+      preferredTrainingDays: [0, 6],
+      equipment: ['gym', 'dumbbells'],
+      restrictions: ['knee']
+    });
+    expect(loadProfile()?.id).toBeTruthy();
+  });
+  it('keeps the raw persisted profile untouched while exposing a safe in-memory view', () => {
+    const raw = JSON.stringify({ name: 'Persisted QA', goal: 'invalid', age: -1 });
+    localStorage.setItem('fitcoach_next_profile_v1', raw);
+    expect(loadProfile()?.goal).toBe('recomp');
+    expect(loadProfile()?.age).toBe(35);
+    expect(localStorage.getItem('fitcoach_next_profile_v1')).toBe(raw);
+  });
 });
 
 describe('persisted activity recovery', () => {
