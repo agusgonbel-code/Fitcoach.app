@@ -12,6 +12,7 @@
   gap: var(--fc-space-4);
 }
 .topbar { margin-bottom: var(--fc-space-6); }
+.hero-row > *, .section-heading > *, .form-grid > * { min-width: 0; }
 h1, h2, p { margin-top: 0; }
 h1 { margin-bottom: 0; font-size: 30px; letter-spacing: -0.8px; }
 h2 { margin-bottom: var(--fc-space-1); font-size: 21px; letter-spacing: -0.35px; }
@@ -32,7 +33,7 @@ progress { width: 100%; height: 8px; margin-top: var(--fc-space-4); accent-color
 .coach-card p:last-child { margin-bottom: 0; line-height: 1.45; }
 .form-card { margin-top: var(--fc-space-6); display: grid; gap: var(--fc-space-4); }
 .form-card label { display: grid; gap: 8px; font-size: 14px; font-weight: 650; }
-.form-card input, .form-card select, .set-grid input { min-height: 46px; border: 1px solid var(--fc-separator); border-radius: var(--fc-radius-md); background: var(--fc-surface); color: var(--fc-text); padding: 0 12px; font: inherit; }
+.form-card input, .form-card select, .set-grid input { width: 100%; min-width: 0; min-height: 46px; border: 1px solid var(--fc-separator); border-radius: var(--fc-radius-md); background: var(--fc-surface); color: var(--fc-text); padding: 0 12px; font: inherit; }
 .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--fc-space-3); }
 .exercise-card { margin-bottom: var(--fc-space-4); }
 .set-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
