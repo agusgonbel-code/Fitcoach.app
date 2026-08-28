@@ -60,6 +60,39 @@ describe('adaptationRepository', () => {
     expect(JSON.parse(localStorage.getItem('fitcoach_next_training_adaptation_v1') ?? '{}').version).toBe(2);
   });
 
+  it('rejects impossible civil dates instead of normalizing them silently', () => {
+    expect(addLocalDays('2026-02-31', 6)).toBeNull();
+    expect(activeAcceptedAdaptation('2026-02-31')).toBeNull();
+  });
+
+  it('rejects a persisted decision with a manipulated activation window', () => {
+    const raw = JSON.stringify({
+      version: 2,
+      proposal,
+      status: 'accepted',
+      decidedAt: '2026-08-27T08:00:00.000Z',
+      effectiveFrom: '2026-08-31',
+      effectiveUntil: '2026-09-30',
+    });
+    localStorage.setItem('fitcoach_next_training_adaptation_v1', raw);
+    expect(loadAdaptationDecision()).toBeNull();
+    expect(localStorage.getItem('fitcoach_next_training_adaptation_v1')).toBe(raw);
+  });
+
+  it('rejects invalid decision timestamps without overwriting the raw record', () => {
+    const raw = JSON.stringify({
+      version: 2,
+      proposal,
+      status: 'accepted',
+      decidedAt: 'not-a-timestamp',
+      effectiveFrom: '2026-08-31',
+      effectiveUntil: '2026-09-06',
+    });
+    localStorage.setItem('fitcoach_next_training_adaptation_v1', raw);
+    expect(loadAdaptationDecision()).toBeNull();
+    expect(localStorage.getItem('fitcoach_next_training_adaptation_v1')).toBe(raw);
+  });
+
   it('adds days using local civil dates across month boundaries', () => {
     expect(addLocalDays('2026-08-31', 6)).toBe('2026-09-06');
     expect(addLocalDays('invalid', 6)).toBeNull();
