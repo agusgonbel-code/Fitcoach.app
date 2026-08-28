@@ -50,15 +50,27 @@ function finiteNumber(value: unknown): number | null {
   return Number.isFinite(number) ? number : null;
 }
 
+function isValidCivilDate(value: string): boolean {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+  const [year, month, day] = value.split('-').map(Number);
+  const date = new Date(Date.UTC(year, month - 1, day));
+  return date.getUTCFullYear() === year && date.getUTCMonth() === month - 1 && date.getUTCDate() === day;
+}
+
+function isValidTimestamp(value: unknown): value is string {
+  return typeof value === 'string' && value.trim().length > 0 && Number.isFinite(Date.parse(value));
+}
+
 function localDateFrom(value: unknown): string | null {
   if (typeof value !== 'string' || !value.trim()) return null;
-  if (/^\d{4}-\d{2}-\d{2}$/.test(value)) return value;
+  if (/^\d{4}-\d{2}-\d{2}$/.test(value)) return isValidCivilDate(value) ? value : null;
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return null;
   const y = date.getFullYear();
   const m = String(date.getMonth() + 1).padStart(2, '0');
   const d = String(date.getDate()).padStart(2, '0');
-  return `${y}-${m}-${d}`;
+  const localDate = `${y}-${m}-${d}`;
+  return isValidCivilDate(localDate) ? localDate : null;
 }
 
 function mapGoal(value: unknown): Goal {
@@ -146,6 +158,7 @@ function mapLegacyWorkout(value: unknown, createId: () => string): WorkoutSessio
   const raw = value as Record<string, unknown>;
   const localDate = localDateFrom(raw.date);
   if (!localDate || !Array.isArray(raw.exercises)) return null;
+  const timestamp = isValidTimestamp(raw.date) ? raw.date : `${localDate}T12:00:00`;
 
   const exercises = raw.exercises.flatMap(item => {
     if (!item || typeof item !== 'object' || Array.isArray(item)) return [];
@@ -157,15 +170,15 @@ function mapLegacyWorkout(value: unknown, createId: () => string): WorkoutSessio
       const set = setValue as Record<string, unknown>;
       const kg = finiteNumber(set.kg);
       const reps = finiteNumber(set.reps);
+      const roundedReps = reps === null ? null : Math.round(reps);
       const rirRaw = set.rir;
       const rir = rirRaw === '' || rirRaw === null || rirRaw === undefined ? null : finiteNumber(rirRaw);
-      if (kg === null || kg < 0 || reps === null || reps <= 0 || (rir !== null && (rir < 0 || rir > 10))) return [];
-      return [{ kg, reps: Math.round(reps), rir, completedAt: typeof raw.date === 'string' ? raw.date : `${localDate}T12:00:00` }];
+      if (kg === null || kg < 0 || roundedReps === null || roundedReps <= 0 || (rir !== null && (rir < 0 || rir > 10))) return [];
+      return [{ kg, reps: roundedReps, rir, completedAt: timestamp }];
     });
     return sets.length ? [{ exerciseId: `legacy:${name}`, sets }] : [];
   });
   if (!exercises.length) return null;
-  const timestamp = typeof raw.date === 'string' ? raw.date : `${localDate}T12:00:00`;
   return {
     id: `legacy-workout-${createId()}`,
     plannedWorkoutId: `legacy:${typeof raw.day === 'string' && raw.day.trim() ? raw.day.trim() : 'workout'}`,
@@ -195,7 +208,7 @@ function mapLegacyMeal(value: unknown, createId: () => string): FoodLogEntry | n
     proteinG: protein,
     carbsG: carbs !== null && carbs >= 0 ? carbs : 0,
     fatG: fat !== null && fat >= 0 ? fat : 0,
-    createdAt: typeof raw.createdAt === 'string' ? raw.createdAt : `${localDate}T12:00:00`
+    createdAt: isValidTimestamp(raw.createdAt) ? raw.createdAt : `${localDate}T12:00:00`
   };
 }
 
