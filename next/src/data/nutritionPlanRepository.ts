@@ -4,6 +4,8 @@ import type { WeeklyNutritionDay } from '../domain/nutrition/weeklyPlanner';
 
 const NUTRITION_PLAN_KEY = 'fitcoach_next_nutrition_plan_v1';
 const VERSION = 1 as const;
+const MIN_MEAL_SCALE = 0.55;
+const MAX_MEAL_SCALE = 1.65;
 
 export interface PersistedMealOverride {
   recipeId: string;
@@ -26,13 +28,17 @@ function finiteNonNegative(value: unknown): value is number {
   return typeof value === 'number' && Number.isFinite(value) && value >= 0;
 }
 
-function validTarget(value: unknown): value is MacroVector {
+function validMacroVector(value: unknown): value is MacroVector {
   if (!value || typeof value !== 'object') return false;
-  const target = value as Partial<MacroVector>;
-  return finiteNonNegative(target.kcal) && target.kcal >= 1000 &&
-    finiteNonNegative(target.proteinG) &&
-    finiteNonNegative(target.carbsG) &&
-    finiteNonNegative(target.fatG);
+  const macros = value as Partial<MacroVector>;
+  return finiteNonNegative(macros.kcal) &&
+    finiteNonNegative(macros.proteinG) &&
+    finiteNonNegative(macros.carbsG) &&
+    finiteNonNegative(macros.fatG);
+}
+
+function validTarget(value: unknown): value is MacroVector {
+  return validMacroVector(value) && value.kcal >= 1000;
 }
 
 function sameTarget(a: MacroVector, b: MacroVector): boolean {
@@ -42,17 +48,31 @@ function sameTarget(a: MacroVector, b: MacroVector): boolean {
     Math.abs(a.fatG - b.fatG) < 0.01;
 }
 
-function validPlanDay(value: unknown): boolean {
+function validPlan(value: unknown): boolean {
   if (!value || typeof value !== 'object') return false;
-  const day = value as { day?: unknown; plan?: { meals?: unknown } };
-  if (!Number.isInteger(day.day) || Number(day.day) < 1) return false;
-  if (!day.plan || !Array.isArray(day.plan.meals) || day.plan.meals.length === 0) return false;
-  return day.plan.meals.every((meal) => {
+  const plan = value as { meals?: unknown };
+  if (!Array.isArray(plan.meals) || plan.meals.length === 0) return false;
+  return plan.meals.every((meal) => {
     if (!meal || typeof meal !== 'object') return false;
     const item = meal as { recipeId?: unknown; scale?: unknown };
     return typeof item.recipeId === 'string' && item.recipeId.length > 0 &&
-      typeof item.scale === 'number' && Number.isFinite(item.scale) && item.scale > 0;
+      typeof item.scale === 'number' && Number.isFinite(item.scale) &&
+      item.scale >= MIN_MEAL_SCALE && item.scale <= MAX_MEAL_SCALE;
   });
+}
+
+function validWeeklyDay(value: unknown, index: number): value is WeeklyNutritionDay {
+  if (!value || typeof value !== 'object') return false;
+  const day = value as Partial<WeeklyNutritionDay>;
+  return day.day === index + 1 && validPlan(day.plan) && validMacroVector(day.macros);
+}
+
+function validMonthlyDay(value: unknown, index: number): value is MonthlyNutritionDay {
+  if (!value || typeof value !== 'object') return false;
+  const day = value as Partial<MonthlyNutritionDay>;
+  const expectedDay = index + 1;
+  const expectedWeek = Math.floor(index / 7) + 1;
+  return day.day === expectedDay && day.week === expectedWeek && validPlan(day.plan) && validMacroVector(day.macros);
 }
 
 function validOverrides(value: unknown): value is Record<string, PersistedMealOverride> {
@@ -62,7 +82,7 @@ function validOverrides(value: unknown): value is Record<string, PersistedMealOv
     const item = override as Partial<PersistedMealOverride>;
     return typeof item.recipeId === 'string' && item.recipeId.length > 0 &&
       typeof item.scale === 'number' && Number.isFinite(item.scale) &&
-      item.scale >= 0.55 && item.scale <= 1.65;
+      item.scale >= MIN_MEAL_SCALE && item.scale <= MAX_MEAL_SCALE;
   });
 }
 
@@ -70,8 +90,8 @@ export function validPersistedNutritionPlan(value: unknown): value is PersistedN
   if (!value || typeof value !== 'object') return false;
   const state = value as Partial<PersistedNutritionPlan>;
   if (state.version !== VERSION || typeof state.profileId !== 'string' || !state.profileId || !validTarget(state.target)) return false;
-  if (!Array.isArray(state.week) || state.week.length !== 7 || !state.week.every(validPlanDay)) return false;
-  if (!Array.isArray(state.month) || state.month.length !== 30 || !state.month.every(validPlanDay)) return false;
+  if (!Array.isArray(state.week) || state.week.length !== 7 || !state.week.every(validWeeklyDay)) return false;
+  if (!Array.isArray(state.month) || state.month.length !== 30 || !state.month.every(validMonthlyDay)) return false;
   if (!validOverrides(state.overrides)) return false;
   if (state.horizon !== 'week' && state.horizon !== 'month') return false;
   const maxDay = state.horizon === 'week' ? 7 : 30;
