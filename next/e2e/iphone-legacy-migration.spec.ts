@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 
-async function prepareLegacyInstall(page: import('@playwright/test').Page) {
+async function clearInstall(page: import('@playwright/test').Page) {
   await page.evaluate(async () => {
     for (const key of Object.keys(localStorage)) {
       if (key.startsWith('fitcoach_next_') || [
@@ -17,7 +17,12 @@ async function prepareLegacyInstall(page: import('@playwright/test').Page) {
       request.onerror = () => reject(request.error ?? new Error('No se pudo borrar IndexedDB'));
       request.onblocked = () => resolve();
     });
+  });
+}
 
+async function prepareLegacyInstall(page: import('@playwright/test').Page) {
+  await clearInstall(page);
+  await page.evaluate(() => {
     const now = new Date();
     const localDate = [
       now.getFullYear(),
@@ -59,6 +64,42 @@ async function prepareLegacyInstall(page: import('@playwright/test').Page) {
       kcal: 510,
       protein: 36,
       carbs: 58,
+      fat: 15,
+    }]));
+  });
+}
+
+async function prepareCorruptLegacyActivity(page: import('@playwright/test').Page) {
+  await clearInstall(page);
+  await page.evaluate(() => {
+    localStorage.setItem('fitcoach_client_profile_v35', JSON.stringify({
+      name: 'Legacy Safe',
+      goal: 'recomp',
+      experience: 'intermediate',
+      sex: 'male',
+      age: 46,
+      height: 181,
+      weight: 75,
+      activity: 1.45,
+      days: 4,
+      minutes: 50,
+    }));
+    localStorage.setItem('workouts', JSON.stringify([{
+      date: '2026-02-31',
+      day: 'legacy-corrupt',
+      exercises: [{ name: 'Press banca', sets: [{ kg: 80, reps: 8, rir: 2 }] }],
+    }, {
+      date: '2026-08-25T06:30:00',
+      day: 'legacy-zero-rounding',
+      exercises: [{ name: 'Sentadilla', sets: [{ kg: 100, reps: 0.2, rir: 2 }] }],
+    }]));
+    localStorage.setItem('meals', JSON.stringify([{
+      date: '2026-02-31',
+      createdAt: 'not-a-timestamp',
+      name: 'Comida imposible',
+      kcal: 500,
+      protein: 40,
+      carbs: 50,
       fat: 15,
     }]));
   });
@@ -141,6 +182,65 @@ test('iPhone RC migrates valid legacy profile and activity once without mutating
   expect(afterRelaunch.sessions).toHaveLength(1);
   expect(afterRelaunch.meals).toHaveLength(1);
   expect(afterRelaunch.legacyProfile).toBe(legacyBefore.profile);
+  expect(afterRelaunch.legacyWorkouts).toBe(legacyBefore.workouts);
+  expect(afterRelaunch.legacyMeals).toBe(legacyBefore.meals);
+
+  const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+  expect(overflow).toBeLessThanOrEqual(1);
+});
+
+test('iPhone RC quarantines corrupt legacy activity while preserving a valid legacy profile and raw recovery data', async ({ page }) => {
+  await page.goto('/');
+  await prepareCorruptLegacyActivity(page);
+
+  const legacyBefore = await page.evaluate(() => ({
+    profile: localStorage.getItem('fitcoach_client_profile_v35'),
+    workouts: localStorage.getItem('workouts'),
+    meals: localStorage.getItem('meals'),
+  }));
+
+  await page.reload();
+
+  await expect(page.getByRole('heading', { name: 'Hola, Legacy Safe' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Tu plan empieza contigo' })).toHaveCount(0);
+
+  const migrated = await page.evaluate(() => ({
+    profile: JSON.parse(localStorage.getItem('fitcoach_next_profile_v1') || 'null'),
+    sessionsRaw: localStorage.getItem('fitcoach_next_sessions_v1'),
+    mealsRaw: localStorage.getItem('fitcoach_next_food_log_v1'),
+    marker: localStorage.getItem('fitcoach_next_legacy_data_migration_v1'),
+    legacy: {
+      profile: localStorage.getItem('fitcoach_client_profile_v35'),
+      workouts: localStorage.getItem('workouts'),
+      meals: localStorage.getItem('meals'),
+    },
+  }));
+
+  expect(migrated.profile).toMatchObject({ name: 'Legacy Safe', goal: 'recomp', age: 46 });
+  expect(migrated.sessionsRaw).toBeNull();
+  expect(migrated.mealsRaw).toBeNull();
+  expect(migrated.marker).toBe('done');
+  expect(migrated.legacy).toEqual(legacyBefore);
+
+  const nav = page.getByRole('navigation', { name: 'Navegación principal' });
+  await nav.getByRole('button', { name: 'Nutrición', exact: true }).click();
+  await expect(page.getByText('Comida imposible')).toHaveCount(0);
+
+  await nav.getByRole('button', { name: 'Progreso', exact: true }).click();
+  await expect(page.getByText('legacy-corrupt')).toHaveCount(0);
+
+  await page.goto('about:blank');
+  await page.goto('/');
+  await expect(page.getByRole('heading', { name: 'Hola, Legacy Safe' })).toBeVisible();
+
+  const afterRelaunch = await page.evaluate(() => ({
+    sessionsRaw: localStorage.getItem('fitcoach_next_sessions_v1'),
+    mealsRaw: localStorage.getItem('fitcoach_next_food_log_v1'),
+    legacyWorkouts: localStorage.getItem('workouts'),
+    legacyMeals: localStorage.getItem('meals'),
+  }));
+  expect(afterRelaunch.sessionsRaw).toBeNull();
+  expect(afterRelaunch.mealsRaw).toBeNull();
   expect(afterRelaunch.legacyWorkouts).toBe(legacyBefore.workouts);
   expect(afterRelaunch.legacyMeals).toBe(legacyBefore.meals);
 
