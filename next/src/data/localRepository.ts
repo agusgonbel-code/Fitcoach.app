@@ -66,13 +66,26 @@ export function saveProfile(profile: UserProfile): void {
   localStorage.setItem(PROFILE_KEY, JSON.stringify(profile));
 }
 
+function isStoredSession(value: unknown): value is WorkoutSession {
+  if (!value || typeof value !== 'object') return false;
+  const session = value as Partial<WorkoutSession>;
+  return typeof session.id === 'string' && session.id.length > 0 &&
+    typeof session.plannedWorkoutId === 'string' && session.plannedWorkoutId.length > 0 &&
+    typeof session.localDate === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(session.localDate) &&
+    typeof session.startedAt === 'string' && session.startedAt.length > 0 &&
+    Array.isArray(session.exercises) && session.exercises.every(exercise =>
+      Boolean(exercise && typeof exercise === 'object' && typeof exercise.exerciseId === 'string' && Array.isArray(exercise.sets))
+    );
+}
+
 export function loadSessions(): WorkoutSession[] {
   ensureLegacyActivityMigration();
-  return readJson<WorkoutSession[]>(SESSIONS_KEY, []);
+  const stored = readJson<unknown>(SESSIONS_KEY, []);
+  return Array.isArray(stored) ? stored.filter(isStoredSession) : [];
 }
 
 export function validSession(session: WorkoutSession): boolean {
-  return session.exercises.some(exercise => exercise.sets.some(set =>
+  return isStoredSession(session) && session.exercises.some(exercise => exercise.sets.some(set =>
     Number.isFinite(set.kg) && set.kg >= 0 &&
     Number.isFinite(set.reps) && set.reps > 0 &&
     (set.rir === null || (Number.isFinite(set.rir) && set.rir >= 0 && set.rir <= 10))
@@ -86,15 +99,24 @@ export function saveSession(session: WorkoutSession): void {
   localStorage.setItem(SESSIONS_KEY, JSON.stringify(next));
 }
 
+function isStoredFoodEntry(value: unknown): value is FoodLogEntry {
+  if (!value || typeof value !== 'object') return false;
+  const entry = value as Partial<FoodLogEntry>;
+  return typeof entry.id === 'string' && entry.id.length > 0 &&
+    typeof entry.localDate === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(entry.localDate) &&
+    typeof entry.name === 'string' && entry.name.trim().length > 0 &&
+    [entry.kcal, entry.proteinG, entry.carbsG, entry.fatG].every(value => typeof value === 'number' && Number.isFinite(value) && value >= 0) &&
+    Number(entry.kcal) > 0;
+}
+
 export function loadFoodLog(): FoodLogEntry[] {
   ensureLegacyActivityMigration();
-  return readJson<FoodLogEntry[]>(FOOD_LOG_KEY, []);
+  const stored = readJson<unknown>(FOOD_LOG_KEY, []);
+  return Array.isArray(stored) ? stored.filter(isStoredFoodEntry) : [];
 }
 
 export function validFoodEntry(entry: FoodLogEntry): boolean {
-  return entry.name.trim().length > 0 &&
-    [entry.kcal, entry.proteinG, entry.carbsG, entry.fatG].every(value => Number.isFinite(value) && value >= 0) &&
-    entry.kcal > 0;
+  return isStoredFoodEntry(entry);
 }
 
 export function saveFoodEntry(entry: FoodLogEntry): void {
@@ -129,5 +151,5 @@ export function saveBodyMetric(metric: BodyMetric): void {
 }
 
 export function removeBodyMetric(id: string): void {
-  localStorage.setItem(BODY_METRICS_KEY, JSON.stringify(loadBodyMetrics().filter(item => item.id !== id)));
+  localStorage.setItem(BODY_METRICS_KEY, JSON.stringify(loadBodyMetrics().filter(item => item.id !== id));
 }
