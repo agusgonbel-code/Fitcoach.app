@@ -1,7 +1,8 @@
 import { expect, test } from '@playwright/test';
 
 test('privacy deletion removes FitCoach Next data but preserves legacy 3.4.4 data without reimporting it', async ({ page }) => {
-  await page.addInitScript(() => {
+  await page.goto('/');
+  await page.evaluate(() => {
     localStorage.setItem('fitcoach_next_profile_v1', JSON.stringify({
       id: 'privacy-qa-user',
       name: 'Privacy QA',
@@ -24,8 +25,8 @@ test('privacy deletion removes FitCoach Next data but preserves legacy 3.4.4 dat
     localStorage.setItem('fitcoach_client_profile_v35', '{"name":"Legacy preserved"}');
     localStorage.setItem('workouts', '[{"legacy":true}]');
   });
+  await page.reload();
 
-  await page.goto('/');
   await expect(page.getByRole('heading', { name: 'Hola, Privacy QA' })).toBeVisible();
 
   const nav = page.getByRole('navigation', { name: 'Navegación principal' });
