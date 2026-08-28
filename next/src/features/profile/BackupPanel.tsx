@@ -3,6 +3,7 @@ import {
   completeBackupFileName,
   createCompleteBackup,
   restoreCompleteBackup,
+  validateCompleteBackup,
 } from '../../data/completeBackup';
 import { deleteAllFitCoachNextData } from '../../data/privacyRepository';
 
@@ -36,7 +37,7 @@ export function BackupPanel() {
     setBusy(true); setStatus('Validando copia antes de restaurar…');
     try {
       const raw = await file.text();
-      const parsed = JSON.parse(raw) as unknown;
+      const parsed = validateCompleteBackup(JSON.parse(raw) as unknown);
       const confirmed = window.confirm('La restauración sustituirá los datos actuales de FitCoach Next por los de esta copia. ¿Continuar?');
       if (!confirmed) {
         setStatus('Restauración cancelada. No se ha modificado ningún dato.');
