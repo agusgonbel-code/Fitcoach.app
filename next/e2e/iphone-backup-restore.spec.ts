@@ -61,7 +61,8 @@ test('complete backup restores FitCoach Next state on iPhone without touching le
         foodLog: [],
         bodyMetrics: [{
           id: 'metric-restored',
-          date: '2026-08-28',
+          localDate: '2026-08-28',
+          createdAt: '2026-08-28T08:30:00.000Z',
           weightKg: 75,
           waistCm: 82,
         }],
@@ -93,7 +94,13 @@ test('complete backup restores FitCoach Next state on iPhone without touching le
 
   expect(restored.profile.name).toBe('Restored QA');
   expect(restored.profile.goal).toBe('recomp');
-  expect(restored.bodyMetrics).toEqual([{ id: 'metric-restored', date: '2026-08-28', weightKg: 75, waistCm: 82 }]);
+  expect(restored.bodyMetrics).toEqual([{
+    id: 'metric-restored',
+    localDate: '2026-08-28',
+    createdAt: '2026-08-28T08:30:00.000Z',
+    weightKg: 75,
+    waistCm: 82,
+  }]);
   expect(restored.legacyProfile).toBe('{"name":"Legacy must survive"}');
   expect(restored.legacyWorkouts).toBe('[{"legacy":true}]');
 
