@@ -42,7 +42,7 @@ export function loadProfile(): UserProfile | null {
   const preferredTrainingDays = Array.isArray(raw.preferredTrainingDays)
     ? [...new Set(raw.preferredTrainingDays.map(Number).filter(day => Number.isInteger(day) && day >= 0 && day <= 6))]
     : undefined;
-  const migrated: UserProfile = {
+  return {
     id: raw.id || crypto.randomUUID(),
     name: raw.name || 'Atleta',
     goal: raw.goal || 'recomp',
@@ -59,7 +59,6 @@ export function loadProfile(): UserProfile | null {
     equipment: Array.isArray(raw.equipment) ? raw.equipment : ['gym'],
     restrictions: Array.isArray(raw.restrictions) ? raw.restrictions : []
   };
-  return migrated;
 }
 
 export function saveProfile(profile: UserProfile): void {
@@ -95,8 +94,7 @@ export function validSession(session: WorkoutSession): boolean {
 export function saveSession(session: WorkoutSession): void {
   if (!validSession(session)) throw new Error('La sesión necesita al menos una serie válida.');
   const sessions = loadSessions();
-  const next = [...sessions.filter(item => item.id !== session.id), session];
-  localStorage.setItem(SESSIONS_KEY, JSON.stringify(next));
+  localStorage.setItem(SESSIONS_KEY, JSON.stringify([...sessions.filter(item => item.id !== session.id), session]));
 }
 
 function isStoredFoodEntry(value: unknown): value is FoodLogEntry {
@@ -151,5 +149,5 @@ export function saveBodyMetric(metric: BodyMetric): void {
 }
 
 export function removeBodyMetric(id: string): void {
-  localStorage.setItem(BODY_METRICS_KEY, JSON.stringify(loadBodyMetrics().filter(item => item.id !== id));
+  localStorage.setItem(BODY_METRICS_KEY, JSON.stringify(loadBodyMetrics().filter(item => item.id !== id)));
 }
