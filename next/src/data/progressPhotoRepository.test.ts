@@ -6,8 +6,12 @@ describe('progress photo safety', () => {
     expect(validProgressPhotoMeta({ id: 'p1', localDate: '2026-08-27', pose: 'front', weightKg: 80.2, mimeType: 'image/jpeg', width: 1200, height: 1600, createdAt: '2026-08-27T00:30:00.000Z' })).toBe(true);
   });
 
-  it('rejects impossible weight or invalid pose/date', () => {
+  it('rejects impossible weight, pose, civil date, timestamp and dimensions', () => {
     expect(validProgressPhotoMeta({ id: 'p1', localDate: '27/08/2026', pose: 'front', weightKg: 10, mimeType: 'image/jpeg', width: 1200, height: 1600, createdAt: 'x' })).toBe(false);
+    expect(validProgressPhotoMeta({ id: 'p1', localDate: '2026-02-31', pose: 'front', weightKg: 80, mimeType: 'image/jpeg', width: 1200, height: 1600, createdAt: '2026-02-28T10:00:00.000Z' })).toBe(false);
+    expect(validProgressPhotoMeta({ id: 'p1', localDate: '2026-02-28', pose: 'front', weightKg: 80, mimeType: 'image/jpeg', width: 1200, height: 1600, createdAt: 'not-a-timestamp' })).toBe(false);
+    expect(validProgressPhotoMeta({ id: 'p1', localDate: '2026-02-28', pose: 'front', weightKg: 80, mimeType: 'image/jpeg', width: Number.POSITIVE_INFINITY, height: 1600, createdAt: '2026-02-28T10:00:00.000Z' })).toBe(false);
+    expect(validProgressPhotoMeta({ id: 'p1', localDate: '2026-02-28', pose: 'front', weightKg: 80, mimeType: 'image/jpeg', width: 1801, height: 1600, createdAt: '2026-02-28T10:00:00.000Z' })).toBe(false);
   });
 
   it('rejects oversized files', () => {
@@ -27,7 +31,7 @@ describe('progress photo safety', () => {
     expect(shouldKeepOriginalProgressPhoto({ size: 1024, type: 'image/webp' }, 2000, 1200)).toBe(false);
   });
 
-  it('accepts a blob-shaped IndexedDB clone without relying on instanceof', () => {
+  it('accepts a bounded image blob-shaped IndexedDB clone without relying on instanceof', () => {
     const clonedBlob = Object.assign(Object.create(null), {
       size: 1024,
       type: 'image/jpeg',
@@ -36,5 +40,7 @@ describe('progress photo safety', () => {
     });
     expect(isProgressPhotoBlob(clonedBlob)).toBe(true);
     expect(isProgressPhotoBlob({ size: 1024, type: 'image/jpeg' })).toBe(false);
+    expect(isProgressPhotoBlob({ ...clonedBlob, size: 3 * 1024 * 1024 })).toBe(false);
+    expect(isProgressPhotoBlob({ ...clonedBlob, type: 'application/octet-stream' })).toBe(false);
   });
 });
