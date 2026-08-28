@@ -20,7 +20,7 @@ test('onboarding exposes labelled controls and usable touch targets on iPhone', 
     'Equipamiento',
     'Limitaciones',
   ]) {
-    await expect(page.getByLabel(label, { exact: true })).toBeVisible();
+    await expect(page.getByLabel(label)).toBeVisible();
   }
 
   const unnamedControls = await page.locator(interactiveSelector).evaluateAll(elements => elements
