@@ -2,6 +2,12 @@ name: FitCoach Next TestFlight Manual
 
 on:
   workflow_dispatch:
+    inputs:
+      upload_to_testflight:
+        description: Upload the validated signed IPA to TestFlight
+        required: true
+        default: false
+        type: boolean
 
 permissions:
   contents: read
@@ -127,7 +133,7 @@ jobs:
             OTHER_CODE_SIGN_FLAGS="--keychain ${{ steps.signing.outputs.keychain_path }}" \
             archive
 
-      - name: Export signed IPA without uploading
+      - name: Export signed IPA
         shell: bash
         run: |
           set -euo pipefail
@@ -202,8 +208,28 @@ jobs:
           codesign -dv --verbose=4 "$APP_PATH" 2>&1 | grep -q "TeamIdentifier=$APPLE_TEAM_ID"
           echo "Signed IPA validated: $BUNDLE_ID $VERSION ($BUILD), architectures: $ARCHS"
 
+      - name: Upload validated IPA to TestFlight
+        if: ${{ inputs.upload_to_testflight }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          PRIVATE_KEYS_DIR="$RUNNER_TEMP/appstoreconnect-private-keys"
+          mkdir -p "$PRIVATE_KEYS_DIR"
+          chmod 700 "$PRIVATE_KEYS_DIR"
+          KEY_PATH="$PRIVATE_KEYS_DIR/AuthKey_${APP_STORE_CONNECT_KEY_ID}.p8"
+          printf '%s' "$APP_STORE_CONNECT_PRIVATE_KEY" > "$KEY_PATH"
+          chmod 600 "$KEY_PATH"
+          test -s "$KEY_PATH"
+          API_PRIVATE_KEYS_DIR="$PRIVATE_KEYS_DIR" xcrun altool --upload-app \
+            --file "$RUNNER_TEMP/FitCoach-Next.ipa" \
+            --type ios \
+            --apiKey "$APP_STORE_CONNECT_KEY_ID" \
+            --apiIssuer "$APP_STORE_CONNECT_ISSUER_ID"
+
       - name: Stage signed candidate and readiness evidence
         shell: bash
+        env:
+          UPLOAD_TO_TESTFLIGHT: ${{ inputs.upload_to_testflight }}
         run: |
           set -euo pipefail
           mkdir -p testflight-candidate
@@ -223,7 +249,8 @@ jobs:
             echo "signed_preflight=passed"
             echo "signed_archive=passed"
             echo "signed_ipa=passed"
-            echo "upload_performed=false"
+            echo "upload_requested=${UPLOAD_TO_TESTFLIGHT}"
+            echo "upload_performed=${UPLOAD_TO_TESTFLIGHT}"
           } > testflight-candidate/TESTFLIGHT-CANDIDATE-EVIDENCE.txt
           test -s testflight-candidate/TESTFLIGHT-CANDIDATE-EVIDENCE.txt
 
