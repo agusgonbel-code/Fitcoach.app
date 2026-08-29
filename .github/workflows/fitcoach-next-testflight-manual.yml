@@ -36,11 +36,21 @@ jobs:
       FITCOACH_BUILD_NUMBER: ${{ github.run_number }}
 
     steps:
-      - name: Checkout exact development ref
+      - name: Checkout immutable candidate commit
         uses: actions/checkout@v4
         with:
-          ref: fitcoach-next
+          ref: ${{ github.sha }}
           persist-credentials: false
+
+      - name: Verify immutable candidate identity
+        shell: bash
+        working-directory: .
+        run: |
+          set -euo pipefail
+          ACTUAL_SHA="$(git rev-parse HEAD)"
+          test "$GITHUB_REF_NAME" = 'fitcoach-next'
+          test "$ACTUAL_SHA" = "$GITHUB_SHA"
+          echo "Immutable TestFlight candidate: $ACTUAL_SHA from $GITHUB_REF_NAME"
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -246,6 +256,7 @@ jobs:
             echo "platform=iphoneos"
             echo "architecture=arm64"
             echo "distribution_gate=manual"
+            echo "candidate_identity=verified"
             echo "signed_preflight=passed"
             echo "signed_archive=passed"
             echo "signed_ipa=passed"
