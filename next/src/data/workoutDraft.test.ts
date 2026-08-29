@@ -35,8 +35,13 @@ describe('workout draft', () => {
 
   it('expires and removes drafts older than 14 days', () => {
     const storage = new MemoryStorage();
-    saveWorkoutDraft(makeDraft('2026-08-01T05:05:00.000Z'), storage);
-    expect(loadWorkoutDraft('upper-a', '2026-08-26', Date.parse('2026-08-26T06:00:00.000Z'), storage)).toBeNull();
+    const oldDraft: WorkoutDraft = {
+      ...makeDraft('2026-08-01T05:05:00.000Z'),
+      localDate: '2026-08-01',
+      startedAt: '2026-08-01T05:00:00.000Z',
+    };
+    saveWorkoutDraft(oldDraft, storage);
+    expect(loadWorkoutDraft('upper-a', '2026-08-01', Date.parse('2026-08-26T06:00:00.000Z'), storage)).toBeNull();
     expect(storage.getItem(KEY)).toBeNull();
   });
 
