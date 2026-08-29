@@ -65,4 +65,16 @@ expectRejected(
   /supportUrl must point to the approved public FitCoach site/,
 );
 
+expectRejected(
+  'React Vite plugin removed from manifest',
+  ({ pkg }) => { delete pkg.devDependencies['@vitejs/plugin-react']; },
+  /required build dependency @vitejs\/plugin-react must be pinned to 6\.1\.0, got missing/,
+);
+
+expectRejected(
+  'Vite version drift',
+  ({ pkg }) => { pkg.devDependencies.vite = '8.2.1'; },
+  /required build dependency vite must be pinned to 8\.2\.2, got 8\.2\.1/,
+);
+
 console.log('FitCoach Next release audit regression suite OK');
