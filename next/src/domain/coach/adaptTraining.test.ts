@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { adaptTraining } from './adaptTraining';
+import { buildWeeklyTrainingAdaptation } from '../training/weeklyAdaptation';
 import type { ProgressSummary } from '../progress/summarizeProgress';
 
 const base: ProgressSummary = {
@@ -14,29 +15,16 @@ const base: ProgressSummary = {
 };
 
 describe('adaptTraining', () => {
-  it('prioritizes adherence recovery before overload', () => {
-    const result = adaptTraining({ ...base, completedWorkouts7d: 1, trainingAdherence: 0.25 });
-    expect(result.action).toBe('rebuild-adherence');
-    expect(result.volumeMultiplier).toBe(0.85);
-    expect(result.loadChangePct).toBe(0);
+  it.each([
+    ['low adherence', { ...base, completedWorkouts7d: 1, trainingAdherence: 0.25 }],
+    ['near-failure fatigue', { ...base, averageRir7d: 0.5 }],
+    ['stable progression signal', { ...base, averageRir7d: 3 }],
+    ['missing effort data', { ...base, averageRir7d: null }],
+  ] as const)('uses the canonical weekly policy for %s', (_label, summary) => {
+    expect(adaptTraining(summary)).toEqual(buildWeeklyTrainingAdaptation(summary));
   });
 
-  it('reduces volume after repeated near-failure effort', () => {
-    const result = adaptTraining({ ...base, averageRir7d: 0.5 });
-    expect(result.action).toBe('reduce-volume');
-    expect(result.volumeMultiplier).toBe(0.8);
-  });
-
-  it('uses a conservative load increase when adherence and RIR are stable', () => {
-    const result = adaptTraining(base);
-    expect(result.action).toBe('progress-load');
-    expect(result.loadChangePct).toBe(2.5);
-    expect(result.volumeMultiplier).toBe(1);
-  });
-
-  it('holds prescription when effort data are missing', () => {
-    const result = adaptTraining({ ...base, averageRir7d: null });
-    expect(result.action).toBe('hold');
-    expect(result.confidence).toBe('low');
+  it('keeps every coach adaptation explicitly user-confirmed', () => {
+    expect(adaptTraining(base).requiresConfirmation).toBe(true);
   });
 });
