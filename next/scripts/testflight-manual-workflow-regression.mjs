@@ -17,7 +17,10 @@ requireMatch('explicit upload input', /upload_to_testflight:\s*\n\s*description:
 requireMatch('upload defaults disabled', /upload_to_testflight:[\s\S]*?default:\s*false/);
 requireMatch('upload input is boolean', /upload_to_testflight:[\s\S]*?type:\s*boolean/);
 requireMatch('development branch runtime guard', /if:\s*github\.ref_name == 'fitcoach-next'/);
-requireMatch('exact development checkout', /ref:\s*fitcoach-next/);
+requireMatch('immutable candidate checkout', /ref:\s*\$\{\{ github\.sha \}\}/);
+requireMatch('immutable candidate verification step', /- name:\s*Verify immutable candidate identity/);
+requireMatch('candidate HEAD matches event SHA', /test "\$ACTUAL_SHA" = "\$GITHUB_SHA"/);
+requireMatch('candidate branch identity verified', /test "\$GITHUB_REF_NAME" = 'fitcoach-next'/);
 requireMatch('credentials not persisted', /persist-credentials:\s*false/);
 requireMatch('protected TestFlight environment', /environment:\s*fitcoach-next-testflight/);
 requireMatch('read-only repository permission', /permissions:\s*\n\s*contents:\s*read/);
@@ -69,6 +72,7 @@ requireMatch('candidate checksum generation', /shasum -a 256 testflight-candidat
 requireMatch('candidate checksum verification', /shasum -a 256 -c testflight-candidate\/SHA256SUMS\.txt/);
 requireMatch('commit evidence pinning', /commit=\$\{GITHUB_SHA\}/);
 requireMatch('ref evidence pinning', /ref=\$\{GITHUB_REF_NAME\}/);
+requireMatch('candidate identity evidence', /candidate_identity=verified/);
 requireMatch('bundle evidence', /bundle_id=com\.fitcoach\.next/);
 requireMatch('manual distribution marker', /distribution_gate=manual/);
 requireMatch('signed archive marker', /signed_archive=passed/);
@@ -81,9 +85,10 @@ requireMatch('evidence retention window', /retention-days:\s*14/);
 
 requireAbsent('push trigger', /\n\s*push:/);
 requireAbsent('pull request trigger', /\n\s*pull_request:/);
+requireAbsent('moving branch checkout', /ref:\s*fitcoach-next\b/);
 requireAbsent('production branch reference', /ref:\s*(?:main|master)\b/);
 requireAbsent('unconditional TestFlight upload', /- name:\s*Upload validated IPA to TestFlight\s*\n(?!\s*if:)/);
 requireAbsent('write repository permission', /contents:\s*write/);
 requireAbsent('automatic provisioning', /allowProvisioningUpdates|CODE_SIGN_STYLE\s*=\s*Automatic/);
 
-console.log('FitCoach Next explicit TestFlight upload consent regression suite OK');
+console.log('FitCoach Next immutable TestFlight candidate regression suite OK');
