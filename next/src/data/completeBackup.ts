@@ -37,6 +37,14 @@ function parseJson(raw: string | null): unknown {
   try { return JSON.parse(raw); } catch { return null; }
 }
 
+function validIsoTimestamp(value: unknown): value is string {
+  return typeof value === 'string' && value.length > 0 && Number.isFinite(Date.parse(value));
+}
+
+function expectedBase64Length(byteLength: number): number {
+  return Math.ceil(byteLength / 3) * 4;
+}
+
 function bytesToBase64(bytes: Uint8Array): string {
   let binary = '';
   const chunkSize = 0x8000;
@@ -73,7 +81,13 @@ export async function encodeProgressPhoto(record: ProgressPhotoRecord): Promise<
 }
 
 export function decodeProgressPhoto(value: EncodedProgressPhoto): ProgressPhotoRecord {
-  const bytes = base64ToBytes(value.base64);
+  if (!validEncodedPhoto(value)) throw new Error('La copia contiene una fotografía dañada.');
+  let bytes: Uint8Array;
+  try {
+    bytes = base64ToBytes(value.base64);
+  } catch {
+    throw new Error('La copia contiene una fotografía dañada.');
+  }
   if (bytes.byteLength !== value.byteLength || bytes.byteLength <= 0 || bytes.byteLength > MAX_PHOTO_BYTES) {
     throw new Error('La copia contiene una fotografía dañada.');
   }
@@ -87,14 +101,15 @@ function validEncodedPhoto(value: unknown): value is EncodedProgressPhoto {
   if (!value || typeof value !== 'object') return false;
   const photo = value as Partial<EncodedProgressPhoto>;
   if (!validProgressPhotoMeta(photo as ProgressPhotoMeta)) return false;
-  return typeof photo.byteLength === 'number' && Number.isInteger(photo.byteLength) && photo.byteLength > 0 && photo.byteLength <= MAX_PHOTO_BYTES &&
-    typeof photo.base64 === 'string' && photo.base64.length > 0;
+  if (typeof photo.byteLength !== 'number' || !Number.isInteger(photo.byteLength) || photo.byteLength <= 0 || photo.byteLength > MAX_PHOTO_BYTES) return false;
+  if (typeof photo.base64 !== 'string' || photo.base64.length !== expectedBase64Length(photo.byteLength)) return false;
+  return /^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/.test(photo.base64);
 }
 
 export function validateCompleteBackup(value: unknown): FitCoachCompleteBackupV1 {
   if (!value || typeof value !== 'object') throw new Error('La copia completa no tiene un formato válido.');
   const backup = value as Partial<FitCoachCompleteBackupV1>;
-  if (backup.schema !== COMPLETE_SCHEMA || backup.version !== COMPLETE_BACKUP_VERSION || typeof backup.exportedAt !== 'string' || !backup.exportedAt) {
+  if (backup.schema !== COMPLETE_SCHEMA || backup.version !== COMPLETE_BACKUP_VERSION || !validIsoTimestamp(backup.exportedAt)) {
     throw new Error('La copia completa no es compatible con esta versión de FitCoach Next.');
   }
   validateBackup(backup.core);
