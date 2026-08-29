@@ -153,6 +153,57 @@ jobs:
           test -f "$DEVICE_APP/PrivacyInfo.xcprivacy"
           test -f "$DEVICE_APP/public/index.html"
           echo "Physical iPhone bundle validated: $BUNDLE_ID $VERSION ($BUILD), architectures: $ARCHS"
+      - name: Archive FitCoach Next Release for physical iPhone without signing
+        shell: bash
+        run: |
+          set -euo pipefail
+          xcodebuild \
+            -project ios/App/App.xcodeproj \
+            -scheme App \
+            -configuration Release \
+            -sdk iphoneos \
+            -destination 'generic/platform=iOS' \
+            -archivePath "$RUNNER_TEMP/FitCoach-Next.xcarchive" \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            archive
+      - name: Validate unsigned iPhone archive contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          ARCHIVE="$RUNNER_TEMP/FitCoach-Next.xcarchive"
+          ARCHIVE_INFO="$ARCHIVE/Info.plist"
+          ARCHIVE_APP="$ARCHIVE/Products/Applications/App.app"
+          test -d "$ARCHIVE"
+          test -f "$ARCHIVE_INFO"
+          plutil -lint "$ARCHIVE_INFO"
+          test -d "$ARCHIVE_APP"
+          APP_PLIST="$ARCHIVE_APP/Info.plist"
+          APP_EXECUTABLE="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleExecutable' "$APP_PLIST")"
+          APP_BINARY="$ARCHIVE_APP/$APP_EXECUTABLE"
+          test -f "$APP_BINARY"
+          BUNDLE_ID="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$APP_PLIST")"
+          VERSION="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$APP_PLIST")"
+          BUILD="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' "$APP_PLIST")"
+          EXPECTED_VERSION="$(node -p "require('./package.json').version.replace(/-.*/, '')")"
+          ARCHS="$(lipo -archs "$APP_BINARY")"
+          test "$BUNDLE_ID" = 'com.fitcoach.next'
+          test "$VERSION" = "$EXPECTED_VERSION"
+          test "$BUILD" = "$FITCOACH_BUILD_NUMBER"
+          echo "$ARCHS" | tr ' ' '\n' | grep -qx 'arm64'
+          if echo "$ARCHS" | tr ' ' '\n' | grep -Eq '^(x86_64|i386)$'; then
+            echo "Simulator architecture found in archive binary: $ARCHS" >&2
+            exit 1
+          fi
+          test -f "$ARCHIVE_APP/PrivacyInfo.xcprivacy"
+          test -f "$ARCHIVE_APP/public/index.html"
+          ARCHIVE_BUNDLE_ID="$(/usr/libexec/PlistBuddy -c 'Print :ApplicationProperties:CFBundleIdentifier' "$ARCHIVE_INFO")"
+          ARCHIVE_VERSION="$(/usr/libexec/PlistBuddy -c 'Print :ApplicationProperties:CFBundleShortVersionString' "$ARCHIVE_INFO")"
+          ARCHIVE_BUILD="$(/usr/libexec/PlistBuddy -c 'Print :ApplicationProperties:CFBundleVersion' "$ARCHIVE_INFO")"
+          test "$ARCHIVE_BUNDLE_ID" = "$BUNDLE_ID"
+          test "$ARCHIVE_VERSION" = "$VERSION"
+          test "$ARCHIVE_BUILD" = "$BUILD"
+          echo "Unsigned iPhone archive validated: $ARCHIVE_BUNDLE_ID $ARCHIVE_VERSION ($ARCHIVE_BUILD), architectures: $ARCHS"
       - name: Stage simulator artifact
         shell: bash
         run: |
