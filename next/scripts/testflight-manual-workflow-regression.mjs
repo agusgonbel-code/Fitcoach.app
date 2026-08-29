@@ -13,6 +13,9 @@ function requireAbsent(name, pattern) {
 }
 
 requireMatch('manual dispatch only', /on:\s*\n\s*workflow_dispatch:/);
+requireMatch('explicit upload input', /upload_to_testflight:\s*\n\s*description:/);
+requireMatch('upload defaults disabled', /upload_to_testflight:[\s\S]*?default:\s*false/);
+requireMatch('upload input is boolean', /upload_to_testflight:[\s\S]*?type:\s*boolean/);
 requireMatch('development branch runtime guard', /if:\s*github\.ref_name == 'fitcoach-next'/);
 requireMatch('exact development checkout', /ref:\s*fitcoach-next/);
 requireMatch('credentials not persisted', /persist-credentials:\s*false/);
@@ -54,6 +57,14 @@ requireMatch('privacy manifest validation', /PrivacyInfo\.xcprivacy/);
 requireMatch('web bundle validation', /public\/index\.html/);
 requireMatch('code signature verification', /codesign --verify --deep --strict/);
 requireMatch('team signature verification', /TeamIdentifier=\$APPLE_TEAM_ID/);
+requireMatch('upload step exists', /- name:\s*Upload validated IPA to TestFlight/);
+requireMatch('upload requires explicit consent', /Upload validated IPA to TestFlight[\s\S]*?if:\s*\$\{\{ inputs\.upload_to_testflight \}\}/);
+requireMatch('private API key isolated', /PRIVATE_KEYS_DIR="\$RUNNER_TEMP\/appstoreconnect-private-keys"/);
+requireMatch('private API key restrictive permissions', /chmod 600 "\$KEY_PATH"/);
+requireMatch('Apple upload command', /xcrun altool --upload-app/);
+requireMatch('upload exact IPA', /--file "\$RUNNER_TEMP\/FitCoach-Next\.ipa"/);
+requireMatch('upload API key', /--apiKey "\$APP_STORE_CONNECT_KEY_ID"/);
+requireMatch('upload API issuer', /--apiIssuer "\$APP_STORE_CONNECT_ISSUER_ID"/);
 requireMatch('candidate checksum generation', /shasum -a 256 testflight-candidate\/FitCoach-Next\.ipa/);
 requireMatch('candidate checksum verification', /shasum -a 256 -c testflight-candidate\/SHA256SUMS\.txt/);
 requireMatch('commit evidence pinning', /commit=\$\{GITHUB_SHA\}/);
@@ -62,7 +73,8 @@ requireMatch('bundle evidence', /bundle_id=com\.fitcoach\.next/);
 requireMatch('manual distribution marker', /distribution_gate=manual/);
 requireMatch('signed archive marker', /signed_archive=passed/);
 requireMatch('signed IPA marker', /signed_ipa=passed/);
-requireMatch('no upload evidence marker', /upload_performed=false/);
+requireMatch('upload request evidence', /upload_requested=\$\{UPLOAD_TO_TESTFLIGHT\}/);
+requireMatch('upload result evidence', /upload_performed=\$\{UPLOAD_TO_TESTFLIGHT\}/);
 requireMatch('commit-bound candidate artifact', /FitCoach-Next-TestFlight-Candidate-\$\{\{ github\.sha \}\}/);
 requireMatch('artifact must exist', /if-no-files-found:\s*error/);
 requireMatch('evidence retention window', /retention-days:\s*14/);
@@ -70,8 +82,8 @@ requireMatch('evidence retention window', /retention-days:\s*14/);
 requireAbsent('push trigger', /\n\s*push:/);
 requireAbsent('pull request trigger', /\n\s*pull_request:/);
 requireAbsent('production branch reference', /ref:\s*(?:main|master)\b/);
-requireAbsent('automatic App Store upload', /altool|notarytool|xcrun\s+transporter|upload-app|deliver\b|pilot\b/i);
+requireAbsent('unconditional TestFlight upload', /- name:\s*Upload validated IPA to TestFlight\s*\n(?!\s*if:)/);
 requireAbsent('write repository permission', /contents:\s*write/);
 requireAbsent('automatic provisioning', /allowProvisioningUpdates|CODE_SIGN_STYLE\s*=\s*Automatic/);
 
-console.log('FitCoach Next signed TestFlight candidate workflow regression suite OK');
+console.log('FitCoach Next explicit TestFlight upload consent regression suite OK');
