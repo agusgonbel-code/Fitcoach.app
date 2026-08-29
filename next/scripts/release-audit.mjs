@@ -16,6 +16,31 @@ for (const [group, deps] of Object.entries({ dependencies: pkg.dependencies || {
   }
 }
 
+const requiredBuildDependencies = {
+  vite: '8.2.2',
+  '@vitejs/plugin-react': '6.1.0',
+  typescript: '7.0.2',
+};
+for (const [name, expectedVersion] of Object.entries(requiredBuildDependencies)) {
+  const actualVersion = pkg.devDependencies?.[name];
+  if (actualVersion !== expectedVersion) fail(`required build dependency ${name} must be pinned to ${expectedVersion}, got ${actualVersion ?? 'missing'}`);
+}
+
+const lock = JSON.parse(readText('package-lock.json'));
+const lockRoot = lock.packages?.[''];
+if (!lockRoot) fail('package-lock.json is missing the root package entry');
+for (const [name, expectedVersion] of Object.entries(requiredBuildDependencies)) {
+  const lockedRootVersion = lockRoot.devDependencies?.[name];
+  if (lockedRootVersion !== expectedVersion) fail(`package-lock root dependency ${name} must be ${expectedVersion}, got ${lockedRootVersion ?? 'missing'}`);
+  const installed = lock.packages?.[`node_modules/${name}`]?.version;
+  if (installed !== expectedVersion) fail(`package-lock installed dependency ${name} must resolve to ${expectedVersion}, got ${installed ?? 'missing'}`);
+}
+
+const viteConfig = readText('vite.config.ts');
+if (!viteConfig.includes("from '@vitejs/plugin-react'")) fail('Vite config must import @vitejs/plugin-react');
+if (!/plugins\s*:\s*\[\s*react\(\)\s*\]/.test(viteConfig)) fail('Vite config must enable the React plugin');
+if (!/base\s*:\s*['"]\.\/['"]/.test(viteConfig)) fail('Vite config must keep relative base ./ for Capacitor packaging');
+
 const capacitor = JSON.parse(readText('capacitor.config.json'));
 if (capacitor.appId !== 'com.fitcoach.next') fail(`unexpected bundle id ${capacitor.appId}`);
 if (capacitor.appName !== 'FitCoach Next') fail(`unexpected app name ${capacitor.appName}`);
@@ -71,4 +96,4 @@ const width = png.readUInt32BE(16);
 const height = png.readUInt32BE(20);
 if (width !== 1024 || height !== 1024) fail(`app icon must be 1024x1024, got ${width}x${height}`);
 
-console.log(`FitCoach Next release audit OK · ${pkg.version} · ${metadata.releaseChannel} · ${capacitor.appId} · ${metadata.primaryLocale} · iPhone portrait · privacy/support aligned · icon ${width}x${height}`);
+console.log(`FitCoach Next release audit OK · ${pkg.version} · ${metadata.releaseChannel} · ${capacitor.appId} · ${metadata.primaryLocale} · iPhone portrait · build toolchain locked · privacy/support aligned · icon ${width}x${height}`);
