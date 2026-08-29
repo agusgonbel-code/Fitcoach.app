@@ -8,6 +8,7 @@
     "build": "tsc --noEmit && vite build",
     "test": "vitest run src",
     "test:mobile": "playwright test",
+    "test:release": "node scripts/release-audit-regression.mjs",
     "release:audit": "node scripts/release-audit.mjs",
     "release:bundle:audit": "node scripts/release-bundle-audit.mjs",
     "cap:add:ios": "npm run build && npm run release:bundle:audit && npx cap add ios",
