@@ -22,7 +22,7 @@ concurrency:
 jobs:
   build-ios-simulator:
     runs-on: macos-26
-    timeout-minutes: 25
+    timeout-minutes: 30
     defaults:
       run:
         working-directory: next
@@ -73,6 +73,7 @@ jobs:
             -scheme App \
             -configuration Release \
             -destination 'generic/platform=iOS Simulator' \
+            -derivedDataPath "$RUNNER_TEMP/fitcoach-next-simulator" \
             CODE_SIGNING_ALLOWED=NO \
             build
       - name: Validate native identity, version, device family, orientation, icon and privacy
@@ -80,8 +81,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          APP_PATH="$(find "$HOME/Library/Developer/Xcode/DerivedData" -path '*Build/Products/Release-iphonesimulator/App.app' -print -quit)"
-          test -n "$APP_PATH"
+          APP_PATH="$RUNNER_TEMP/fitcoach-next-simulator/Build/Products/Release-iphonesimulator/App.app"
+          test -d "$APP_PATH"
           PLIST="$APP_PATH/Info.plist"
           PRIVACY="$APP_PATH/PrivacyInfo.xcprivacy"
           PROJECT='ios/App/App.xcodeproj/project.pbxproj'
@@ -112,6 +113,46 @@ jobs:
           echo "Configuration: Release"
           echo "Target: iPhone portrait"
           echo "path=$APP_PATH" >> "$GITHUB_OUTPUT"
+      - name: Compile FitCoach Next Release for physical iPhone without signing
+        shell: bash
+        run: |
+          set -euo pipefail
+          xcodebuild \
+            -project ios/App/App.xcodeproj \
+            -scheme App \
+            -configuration Release \
+            -sdk iphoneos \
+            -destination 'generic/platform=iOS' \
+            -derivedDataPath "$RUNNER_TEMP/fitcoach-next-device" \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            build
+      - name: Validate physical iPhone release bundle
+        shell: bash
+        run: |
+          set -euo pipefail
+          DEVICE_APP="$RUNNER_TEMP/fitcoach-next-device/Build/Products/Release-iphoneos/App.app"
+          test -d "$DEVICE_APP"
+          DEVICE_PLIST="$DEVICE_APP/Info.plist"
+          DEVICE_EXECUTABLE="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleExecutable' "$DEVICE_PLIST")"
+          DEVICE_BINARY="$DEVICE_APP/$DEVICE_EXECUTABLE"
+          test -f "$DEVICE_BINARY"
+          BUNDLE_ID="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$DEVICE_PLIST")"
+          VERSION="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$DEVICE_PLIST")"
+          BUILD="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' "$DEVICE_PLIST")"
+          EXPECTED_VERSION="$(node -p "require('./package.json').version.replace(/-.*/, '')")"
+          ARCHS="$(lipo -archs "$DEVICE_BINARY")"
+          test "$BUNDLE_ID" = 'com.fitcoach.next'
+          test "$VERSION" = "$EXPECTED_VERSION"
+          test "$BUILD" = "$FITCOACH_BUILD_NUMBER"
+          echo "$ARCHS" | tr ' ' '\n' | grep -qx 'arm64'
+          if echo "$ARCHS" | tr ' ' '\n' | grep -Eq '^(x86_64|i386)$'; then
+            echo "Simulator architecture found in physical iPhone binary: $ARCHS" >&2
+            exit 1
+          fi
+          test -f "$DEVICE_APP/PrivacyInfo.xcprivacy"
+          test -f "$DEVICE_APP/public/index.html"
+          echo "Physical iPhone bundle validated: $BUNDLE_ID $VERSION ($BUILD), architectures: $ARCHS"
       - name: Stage simulator artifact
         shell: bash
         run: |
