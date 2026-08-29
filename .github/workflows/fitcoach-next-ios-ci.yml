@@ -204,6 +204,34 @@ jobs:
           test "$ARCHIVE_VERSION" = "$VERSION"
           test "$ARCHIVE_BUILD" = "$BUILD"
           echo "Unsigned iPhone archive validated: $ARCHIVE_BUNDLE_ID $ARCHIVE_VERSION ($ARCHIVE_BUILD), architectures: $ARCHS"
+      - name: Stage validated iPhone archive evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p rc-artifact
+          ditto -c -k --sequesterRsrc --keepParent "$RUNNER_TEMP/FitCoach-Next.xcarchive" rc-artifact/FitCoach-Next.xcarchive.zip
+          shasum -a 256 rc-artifact/FitCoach-Next.xcarchive.zip > rc-artifact/SHA256SUMS.txt
+          cat > rc-artifact/RC-EVIDENCE.txt <<EOF
+          commit=${GITHUB_SHA}
+          workflow_run=${GITHUB_RUN_NUMBER}
+          bundle_id=com.fitcoach.next
+          version=$(node -p "require('./package.json').version.replace(/-.*/, '')")
+          build=${FITCOACH_BUILD_NUMBER}
+          platform=iphoneos
+          architecture=arm64
+          signing=unsigned
+          EOF
+          test -s rc-artifact/FitCoach-Next.xcarchive.zip
+          test -s rc-artifact/SHA256SUMS.txt
+          test -s rc-artifact/RC-EVIDENCE.txt
+          shasum -a 256 -c rc-artifact/SHA256SUMS.txt
+      - name: Upload validated iPhone RC archive
+        uses: actions/upload-artifact@v4
+        with:
+          name: FitCoach-Next-iPhone-RC-Archive-${{ github.sha }}
+          path: next/rc-artifact/
+          if-no-files-found: error
+          retention-days: 14
       - name: Stage simulator artifact
         shell: bash
         run: |
