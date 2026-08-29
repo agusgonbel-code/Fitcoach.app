@@ -1,0 +1,94 @@
+name: FitCoach Next TestFlight Manual
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: fitcoach-next-testflight-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  prepare-testflight:
+    if: github.ref_name == 'fitcoach-next'
+    runs-on: macos-latest
+    environment: fitcoach-next-testflight
+    defaults:
+      run:
+        working-directory: next
+    env:
+      APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+      APP_STORE_CONNECT_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+      APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+      APP_STORE_CONNECT_PRIVATE_KEY: ${{ secrets.APP_STORE_CONNECT_PRIVATE_KEY }}
+      IOS_DISTRIBUTION_CERTIFICATE_P12: ${{ secrets.IOS_DISTRIBUTION_CERTIFICATE_P12 }}
+      IOS_DISTRIBUTION_CERTIFICATE_PASSWORD: ${{ secrets.IOS_DISTRIBUTION_CERTIFICATE_PASSWORD }}
+      IOS_PROVISIONING_PROFILE: ${{ secrets.IOS_PROVISIONING_PROFILE }}
+
+    steps:
+      - name: Checkout exact development ref
+        uses: actions/checkout@v4
+        with:
+          ref: fitcoach-next
+          persist-credentials: false
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: next/package-lock.json
+
+      - name: Install locked dependencies
+        run: npm ci
+
+      - name: Regress RC release contracts
+        run: npm run test:release
+
+      - name: Run TestFlight signed preflight
+        run: npm run release:testflight:preflight:signed
+
+      - name: Require distribution signing material
+        shell: bash
+        run: |
+          set -euo pipefail
+          for name in IOS_DISTRIBUTION_CERTIFICATE_P12 IOS_DISTRIBUTION_CERTIFICATE_PASSWORD IOS_PROVISIONING_PROFILE; do
+            value="${!name:-}"
+            if [ -z "${value// }" ]; then
+              echo "Missing required distribution signing input: $name" >&2
+              exit 1
+            fi
+          done
+
+      - name: Prepare native iOS Release project
+        env:
+          FITCOACH_BUILD_NUMBER: ${{ github.run_number }}
+        run: npm run ios:prepare
+
+      - name: Record gated TestFlight readiness evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p testflight-evidence
+          {
+            echo "commit=${GITHUB_SHA}"
+            echo "ref=${GITHUB_REF_NAME}"
+            echo "workflow_run=${GITHUB_RUN_NUMBER}"
+            echo "bundle_id=com.fitcoach.next"
+            echo "version=$(node -p \"require('./package.json').version\")"
+            echo "platform=iphoneos"
+            echo "distribution_gate=manual"
+            echo "signed_preflight=passed"
+            echo "upload_performed=false"
+          } > testflight-evidence/TESTFLIGHT-PREFLIGHT-EVIDENCE.txt
+          test -s testflight-evidence/TESTFLIGHT-PREFLIGHT-EVIDENCE.txt
+
+      - name: Upload TestFlight readiness evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: FitCoach-Next-TestFlight-Preflight-${{ github.sha }}
+          path: next/testflight-evidence/
+          if-no-files-found: error
+          retention-days: 14
