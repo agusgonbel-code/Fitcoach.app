@@ -69,6 +69,32 @@ describe('FitCoach Next complete backup', () => {
     expect(() => validateCompleteBackup(corrupted)).toThrow(/fotografías/);
   });
 
+  it('rejects oversized or malformed Base64 before decoding photo bytes', async () => {
+    const encoded = await encodeProgressPhoto(photo);
+    const oversized = { ...encoded, base64: encoded.base64.repeat(1024) };
+    const malformed = { ...encoded, base64: '!!!!!!!!!' };
+
+    expect(() => decodeProgressPhoto(oversized)).toThrow(/fotografía dañada/);
+    expect(() => decodeProgressPhoto(malformed)).toThrow(/fotografía dañada/);
+
+    for (const badPhoto of [oversized, malformed]) {
+      const backup = {
+        schema: 'fitcoach-next-complete-backup', version: 1, exportedAt: '2026-08-27T10:00:00.000Z',
+        core, nutritionPlan: null, progressPhotos: [badPhoto],
+      };
+      expect(() => validateCompleteBackup(backup)).toThrow(/fotografías/);
+    }
+  });
+
+  it('rejects invalid complete-backup export timestamps', async () => {
+    const encoded = await encodeProgressPhoto(photo);
+    const backup = {
+      schema: 'fitcoach-next-complete-backup', version: 1, exportedAt: 'not-a-timestamp',
+      core, nutritionPlan: null, progressPhotos: [encoded],
+    };
+    expect(() => validateCompleteBackup(backup)).toThrow(/no es compatible/);
+  });
+
   it('uses the local civil date for complete-backup filenames', () => {
     expect(completeBackupFileName(new Date(2026, 7, 27, 23, 59))).toBe('fitcoach-next-complete-v1-2026-08-27.json');
   });
