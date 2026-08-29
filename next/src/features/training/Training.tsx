@@ -34,6 +34,7 @@ export function Training({ workout, sessions, onSaved, loadAdjustmentPercent = 0
   const [values, setValues] = useState<Record<string, DraftSet[]>>(initial.values);
   const [startedAt] = useState(initial.startedAt);
   const [recovered] = useState(initial.recovered);
+  const ownsPersistedDraft = useRef(initial.recovered);
   const [error, setError] = useState('');
   const [restRemaining, setRestRemaining] = useState(0);
   const [restLabel, setRestLabel] = useState('');
@@ -43,8 +44,15 @@ export function Training({ workout, sessions, onSaved, loadAdjustmentPercent = 0
   ])), [sessions, workout]);
 
   useEffect(() => {
-    if (!hasDraftContent(values)) { clearWorkoutDraft(); return; }
+    if (!hasDraftContent(values)) {
+      if (ownsPersistedDraft.current) {
+        clearWorkoutDraft();
+        ownsPersistedDraft.current = false;
+      }
+      return;
+    }
     saveWorkoutDraft({ version: 1, workoutId: workout.id, localDate: localDate(), startedAt, savedAt: new Date().toISOString(), values });
+    ownsPersistedDraft.current = true;
   }, [values, startedAt, workout.id]);
 
   useEffect(() => {
@@ -69,7 +77,7 @@ export function Training({ workout, sessions, onSaved, loadAdjustmentPercent = 0
       id: crypto.randomUUID(), plannedWorkoutId: workout.id, localDate: localDate(), startedAt, completedAt: now,
       exercises: workout.exercises.map(exercise => ({ exerciseId: exercise.id, sets: values[exercise.id].filter(set => set.reps !== '').map(set => ({ kg: Number(set.kg || 0), reps: Number(set.reps), rir: set.rir === '' ? null : Number(set.rir), completedAt: now })) })),
     };
-    try { saveSession(session); clearWorkoutDraft(); setError(''); onSaved(); }
+    try { saveSession(session); clearWorkoutDraft(); ownsPersistedDraft.current = false; setError(''); onSaved(); }
     catch (cause) { setError(cause instanceof Error ? cause.message : 'No se pudo guardar la sesión.'); }
   };
 
