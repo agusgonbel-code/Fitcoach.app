@@ -30,6 +30,8 @@ jobs:
       - run: npm ci
       - name: Audit release candidate invariants
         run: npm run release:audit
+      - name: Preflight TestFlight release contract
+        run: npm run release:testflight:preflight
       - name: Regress release candidate contract failures
         run: npm run test:release
       - run: npm test
