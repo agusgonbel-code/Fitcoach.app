@@ -24,6 +24,8 @@ if (capacitor.webDir !== 'dist') fail(`unexpected webDir ${capacitor.webDir}`);
 const metadata = JSON.parse(readText('release-metadata.json'));
 if (metadata.productName !== capacitor.appName) fail('release metadata product name does not match Capacitor app name');
 if (metadata.bundleId !== capacitor.appId) fail('release metadata bundle id does not match Capacitor app id');
+if (metadata.version !== pkg.version) fail(`release metadata version ${metadata.version} does not match package version ${pkg.version}`);
+if (metadata.releaseChannel !== 'rc') fail(`unexpected release channel ${metadata.releaseChannel}`);
 if (metadata.primaryLocale !== 'es-ES') fail(`unexpected primary locale ${metadata.primaryLocale}`);
 if (metadata.category !== 'Health & Fitness') fail(`unexpected App Store category ${metadata.category}`);
 if (!Array.isArray(metadata.platforms) || metadata.platforms.length !== 1 || metadata.platforms[0] !== 'iPhone') fail('release target must be iPhone-only for this RC');
@@ -69,4 +71,4 @@ const width = png.readUInt32BE(16);
 const height = png.readUInt32BE(20);
 if (width !== 1024 || height !== 1024) fail(`app icon must be 1024x1024, got ${width}x${height}`);
 
-console.log(`FitCoach Next release audit OK · ${pkg.version} · ${capacitor.appId} · ${metadata.primaryLocale} · iPhone portrait · privacy/support aligned · icon ${width}x${height}`);
+console.log(`FitCoach Next release audit OK · ${pkg.version} · ${metadata.releaseChannel} · ${capacitor.appId} · ${metadata.primaryLocale} · iPhone portrait · privacy/support aligned · icon ${width}x${height}`);
