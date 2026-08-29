@@ -30,6 +30,8 @@ jobs:
       - run: npm ci
       - name: Audit release candidate invariants
         run: npm run release:audit
+      - name: Regress release candidate contract failures
+        run: npm run test:release
       - run: npm test
       - run: npm run build
       - name: Audit production web bundle
