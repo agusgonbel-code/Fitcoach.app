@@ -36,6 +36,7 @@ describe('recipePlanner', () => {
     const optimized = optimizeDay(initial, recipes, ingredients, target);
     const after = dayMacros(optimized, recipes, ingredients);
     expect(Math.abs(after.kcal - target.kcal)).toBeLessThanOrEqual(Math.abs(before.kcal - target.kcal));
+    expect(Math.abs(after.carbsG - target.carbsG)).toBeLessThanOrEqual(Math.abs(before.carbsG - target.carbsG));
     expect(optimized.meals.every((meal) => meal.scale >= 0.55 && meal.scale <= 1.65)).toBe(true);
   });
 
@@ -44,5 +45,6 @@ describe('recipePlanner', () => {
     const actual = dayMacros(day, recipes, ingredients);
     expect(validateDay(day, recipes, ingredients, actual).valid).toBe(true);
     expect(validateDay(day, recipes, ingredients, { ...actual, proteinG: actual.proteinG + 20 }).valid).toBe(false);
+    expect(validateDay(day, recipes, ingredients, { ...actual, carbsG: actual.carbsG + 25 }).valid).toBe(false);
   });
 });
