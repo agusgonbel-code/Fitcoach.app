@@ -87,6 +87,12 @@ export function Nutrition({ profile, log, onChange }: NutritionProps) {
   const safeSelectedDay = Math.min(Math.max(planState.selectedDay, 1), activePlan.length);
   const planDay = activePlan[safeSelectedDay - 1] ?? activePlan[0];
 
+  const proteinPerKg = target.proteinG / profile.weightKg;
+  const carbsPerKg = target.carbsG / profile.weightKg;
+  const fatEnergyPct = (target.fatG * 9 / target.kcal) * 100;
+  const proteinPerMealGuide = Math.max(20, profile.weightKg * 0.25);
+  const fibreGuide = target.kcal >= 2400 ? 30 : 25;
+
   const changeHorizon = (next: 'week' | 'month') => {
     setPlanState((previous) => ({ ...previous, horizon: next, selectedDay: 1 }));
     setError('');
@@ -121,14 +127,22 @@ export function Nutrition({ profile, log, onChange }: NutritionProps) {
   };
 
   const addManual = () => {
-    persist({
-      id: crypto.randomUUID(),
-      localDate: localDate(),
-      name: name.trim(),
+    const parsed = {
       kcal: Number(kcal),
       proteinG: Number(protein || 0),
       carbsG: Number(carbs || 0),
       fatG: Number(fat || 0),
+    };
+    if (!name.trim()) return setError('Escribe el nombre de la comida.');
+    if (!Number.isFinite(parsed.kcal) || parsed.kcal <= 0) return setError('Introduce unas kcal válidas.');
+    if ([parsed.proteinG, parsed.carbsG, parsed.fatG].some((value) => !Number.isFinite(value) || value < 0)) {
+      return setError('Los macronutrientes deben ser números iguales o mayores que cero.');
+    }
+    persist({
+      id: crypto.randomUUID(),
+      localDate: localDate(),
+      name: name.trim(),
+      ...parsed,
       createdAt: new Date().toISOString(),
     });
     setName(''); setKcal(''); setProtein(''); setCarbs(''); setFat('');
@@ -173,14 +187,27 @@ export function Nutrition({ profile, log, onChange }: NutritionProps) {
 
   return <section>
     <p className="eyebrow">NUTRICIÓN</p>
-    <h1>Tu estrategia</h1>
+    <h1>Tu estrategia nutricional</h1>
     <div className="metric-grid">
       <article className="metric-card"><strong>{Math.round(totals.kcal)} / {target.kcal}</strong><span>kcal</span></article>
       <article className="metric-card"><strong>{Math.round(totals.proteinG)} / {target.proteinG} g</strong><span>proteína</span></article>
       <article className="metric-card"><strong>{Math.round(totals.carbsG)} / {target.carbsG} g</strong><span>carbohidratos</span></article>
       <article className="metric-card"><strong>{Math.round(totals.fatG)} / {target.fatG} g</strong><span>grasas</span></article>
     </div>
-    <p className="secondary">Objetivo calculado con Mifflin-St Jeor · TDEE estimado {calculation.tdee} kcal · ajuste {Math.round(calculation.adjustmentPct * 100)}%.</p>
+    <p className="secondary">Mifflin-St Jeor · TDEE estimado {calculation.tdee} kcal · ajuste inicial {Math.round(calculation.adjustmentPct * 100)}%. Son objetivos de partida y deben reajustarse con la evolución real de peso, rendimiento, recuperación y adherencia.</p>
+
+    <article className="form-card">
+      <p className="eyebrow">POR QUÉ ESTOS MACROS</p>
+      <h2>Base basada en evidencia</h2>
+      <div className="metric-grid">
+        <article className="metric-card"><strong>{proteinPerKg.toFixed(1)} g/kg</strong><span>proteína diaria</span></article>
+        <article className="metric-card"><strong>{carbsPerKg.toFixed(1)} g/kg</strong><span>carbohidratos</span></article>
+        <article className="metric-card"><strong>{Math.round(fatEnergyPct)}%</strong><span>energía de grasas</span></article>
+        <article className="metric-card"><strong>≥ {fibreGuide} g</strong><span>fibra/día</span></article>
+      </div>
+      <p className="secondary">Proteína orientada a preservar o ganar masa muscular; carbohidratos para sostener el entrenamiento; grasas dentro de un rango suficiente; y al menos {fibreGuide} g de fibra como referencia práctica. Intenta repartir la proteína en 4–5 tomas de aproximadamente {Math.round(proteinPerMealGuide)}–{Math.round(proteinPerMealGuide + 10)} g y prioriza fruta, verdura, legumbres, cereales integrales, frutos secos/semillas y aceite de oliva.</p>
+      <p className="secondary">Los valores de alimentos son referencias genéricas por 100 g y especifican si el peso es cocido o seco. En productos envasados, usa siempre la etiqueta del fabricante si difiere.</p>
+    </article>
 
     <article className="form-card">
       <div className="hero-row"><div><p className="eyebrow">PLAN DE COMIDAS</p><h2>Día {safeSelectedDay}</h2></div><strong>{Math.round(selectedDayMacros.kcal)} kcal</strong></div>
@@ -191,7 +218,7 @@ export function Nutrition({ profile, log, onChange }: NutritionProps) {
       <div className="day-selector" aria-label="Seleccionar día del plan">
         {activePlan.map((day) => <button key={day.day} className={day.day === safeSelectedDay ? 'active' : ''} onClick={() => setPlanState((previous) => ({ ...previous, selectedDay: day.day }))}>{day.day}</button>)}
       </div>
-      <p className="secondary">{Math.round(selectedDayMacros.proteinG)}P · {Math.round(selectedDayMacros.carbsG)}C · {Math.round(selectedDayMacros.fatG)}G. El plan y tus sustituciones quedan guardados en este dispositivo y se recalculan solo si cambia tu objetivo.</p>
+      <p className="secondary">{Math.round(selectedDayMacros.proteinG)}P · {Math.round(selectedDayMacros.carbsG)}C · {Math.round(selectedDayMacros.fatG)}G. El plan y tus sustituciones quedan guardados en este dispositivo y se recalculan sólo si cambia tu objetivo.</p>
       {planDay.plan.meals.map((_meal, index) => {
         const meal = resolveMeal(index);
         const recipe = recipeById.get(meal.recipeId);
