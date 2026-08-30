@@ -36,6 +36,7 @@ export interface PlannedNutritionDay {
 export interface NutritionTolerance {
   kcalPct: number;
   proteinG: number;
+  carbsG?: number;
   fatG: number;
 }
 
@@ -100,8 +101,9 @@ export function dayMacros(day: PlannedNutritionDay, recipes: RecipeDefinition[],
 function score(actual: MacroVector, target: MacroVector): number {
   const kcal = Math.abs(actual.kcal - target.kcal) / Math.max(1, target.kcal);
   const protein = Math.abs(actual.proteinG - target.proteinG) / Math.max(20, target.proteinG);
+  const carbs = Math.abs(actual.carbsG - target.carbsG) / Math.max(30, target.carbsG);
   const fat = Math.abs(actual.fatG - target.fatG) / Math.max(15, target.fatG);
-  return kcal * 2 + protein * 1.35 + fat * 0.2;
+  return kcal * 2 + protein * 1.35 + carbs * 0.85 + fat * 0.2;
 }
 
 export function optimizeDay(
@@ -146,7 +148,7 @@ export function validateDay(
   recipes: RecipeDefinition[],
   ingredients: IngredientDefinition[],
   target: MacroVector,
-  tolerance: NutritionTolerance = { kcalPct: 0.03, proteinG: 5, fatG: 5 },
+  tolerance: NutritionTolerance = { kcalPct: 0.03, proteinG: 5, carbsG: 10, fatG: 5 },
 ) {
   const actual = dayMacros(day, recipes, ingredients);
   const errors = {
@@ -155,8 +157,10 @@ export function validateDay(
     carbsG: round(actual.carbsG - target.carbsG),
     fatG: round(actual.fatG - target.fatG),
   };
+  const carbTolerance = tolerance.carbsG ?? 10;
   const valid = Math.abs(errors.kcal) <= Math.max(35, target.kcal * tolerance.kcalPct)
     && Math.abs(errors.proteinG) <= tolerance.proteinG
+    && Math.abs(errors.carbsG) <= carbTolerance
     && Math.abs(errors.fatG) <= tolerance.fatG;
   return { valid, actual, errors };
 }
