@@ -4,8 +4,8 @@ import type { WeeklyNutritionDay } from '../domain/nutrition/weeklyPlanner';
 
 const NUTRITION_PLAN_KEY = 'fitcoach_next_nutrition_plan_v2';
 const VERSION = 1 as const;
-const MIN_MEAL_SCALE = 0.55;
-const MAX_MEAL_SCALE = 1.7;
+const MIN_MEAL_SCALE = 0.5;
+const MAX_MEAL_SCALE = 1.8;
 
 export interface PersistedMealOverride {
   recipeId: string;
@@ -31,10 +31,7 @@ function finiteNonNegative(value: unknown): value is number {
 function validMacroVector(value: unknown): value is MacroVector {
   if (!value || typeof value !== 'object') return false;
   const macros = value as Partial<MacroVector>;
-  return finiteNonNegative(macros.kcal) &&
-    finiteNonNegative(macros.proteinG) &&
-    finiteNonNegative(macros.carbsG) &&
-    finiteNonNegative(macros.fatG);
+  return finiteNonNegative(macros.kcal) && finiteNonNegative(macros.proteinG) && finiteNonNegative(macros.carbsG) && finiteNonNegative(macros.fatG);
 }
 
 function validTarget(value: unknown): value is MacroVector {
@@ -42,10 +39,7 @@ function validTarget(value: unknown): value is MacroVector {
 }
 
 function sameTarget(a: MacroVector, b: MacroVector): boolean {
-  return Math.abs(a.kcal - b.kcal) < 0.01 &&
-    Math.abs(a.proteinG - b.proteinG) < 0.01 &&
-    Math.abs(a.carbsG - b.carbsG) < 0.01 &&
-    Math.abs(a.fatG - b.fatG) < 0.01;
+  return Math.abs(a.kcal - b.kcal) < 0.01 && Math.abs(a.proteinG - b.proteinG) < 0.01 && Math.abs(a.carbsG - b.carbsG) < 0.01 && Math.abs(a.fatG - b.fatG) < 0.01;
 }
 
 function validPlan(value: unknown): boolean {
@@ -55,9 +49,7 @@ function validPlan(value: unknown): boolean {
   return plan.meals.every((meal) => {
     if (!meal || typeof meal !== 'object') return false;
     const item = meal as { recipeId?: unknown; scale?: unknown };
-    return typeof item.recipeId === 'string' && item.recipeId.length > 0 &&
-      typeof item.scale === 'number' && Number.isFinite(item.scale) &&
-      item.scale >= MIN_MEAL_SCALE && item.scale <= MAX_MEAL_SCALE;
+    return typeof item.recipeId === 'string' && item.recipeId.length > 0 && typeof item.scale === 'number' && Number.isFinite(item.scale) && item.scale >= MIN_MEAL_SCALE && item.scale <= MAX_MEAL_SCALE;
   });
 }
 
@@ -80,9 +72,7 @@ function validOverrides(value: unknown): value is Record<string, PersistedMealOv
   return Object.values(value as Record<string, unknown>).every((override) => {
     if (!override || typeof override !== 'object') return false;
     const item = override as Partial<PersistedMealOverride>;
-    return typeof item.recipeId === 'string' && item.recipeId.length > 0 &&
-      typeof item.scale === 'number' && Number.isFinite(item.scale) &&
-      item.scale >= MIN_MEAL_SCALE && item.scale <= MAX_MEAL_SCALE;
+    return typeof item.recipeId === 'string' && item.recipeId.length > 0 && typeof item.scale === 'number' && Number.isFinite(item.scale) && item.scale >= MIN_MEAL_SCALE && item.scale <= MAX_MEAL_SCALE;
   });
 }
 
@@ -99,11 +89,7 @@ export function validPersistedNutritionPlan(value: unknown): value is PersistedN
   return typeof state.updatedAt === 'string' && state.updatedAt.length > 0;
 }
 
-export function readNutritionPlan(
-  storage: Pick<Storage, 'getItem'>,
-  profileId: string,
-  target: MacroVector,
-): PersistedNutritionPlan | null {
+export function readNutritionPlan(storage: Pick<Storage, 'getItem'>, profileId: string, target: MacroVector): PersistedNutritionPlan | null {
   try {
     const raw = storage.getItem(NUTRITION_PLAN_KEY);
     if (!raw) return null;
@@ -115,13 +101,8 @@ export function readNutritionPlan(
   }
 }
 
-export function writeNutritionPlan(
-  storage: Pick<Storage, 'setItem'>,
-  state: PersistedNutritionPlan,
-): void {
-  if (!validPersistedNutritionPlan(state)) {
-    throw new Error('El plan nutricional no es válido y no se puede guardar.');
-  }
+export function writeNutritionPlan(storage: Pick<Storage, 'setItem'>, state: PersistedNutritionPlan): void {
+  if (!validPersistedNutritionPlan(state)) throw new Error('El plan nutricional no es válido y no se puede guardar.');
   storage.setItem(NUTRITION_PLAN_KEY, JSON.stringify(state));
 }
 
