@@ -9,22 +9,32 @@ const base: UserProfile = {
 };
 
 describe('calculateNutrition', () => {
-  it('returns deterministic Mifflin-St Jeor targets', () => {
+  it('returns deterministic Mifflin-St Jeor targets with balanced macros', () => {
     const result = calculateNutrition(base);
     expect(result.equation).toBe('mifflin-st-jeor');
     expect(result.bmr).toBe(1730);
     expect(result.tdee).toBe(2509);
     expect(result.target.kcal).toBe(2509);
     expect(result.target.proteinG).toBe(144);
-    expect(result.target.fatG).toBe(64);
-    expect(result.target.carbsG).toBe(339);
+    expect(result.target.fatG).toBe(70);
+    expect(result.target.carbsG).toBe(326);
+    expect(result.target.proteinG / base.weightKg).toBeCloseTo(1.8, 2);
   });
 
-  it('applies a conservative deficit for fat loss', () => {
+  it('applies a conservative deficit and high protein for fat loss', () => {
     const result = calculateNutrition({ ...base, goal: 'fatloss' });
     expect(result.adjustmentPct).toBe(-0.15);
     expect(result.target.kcal).toBeLessThan(calculateNutrition(base).target.kcal);
     expect(result.target.proteinG).toBe(160);
+    expect(result.target.fatG).toBeGreaterThanOrEqual(Math.round(base.weightKg * 0.8));
+    expect(result.target.carbsG).toBeGreaterThan(0);
+  });
+
+  it('uses a small surplus for hypertrophy rather than aggressive bulking', () => {
+    const result = calculateNutrition({ ...base, goal: 'hypertrophy' });
+    expect(result.adjustmentPct).toBe(0.06);
+    expect(result.target.proteinG).toBe(144);
+    expect(result.target.kcal).toBeGreaterThan(result.tdee);
   });
 
   it('rejects invalid anthropometrics', () => {
