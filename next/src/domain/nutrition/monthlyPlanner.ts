@@ -9,13 +9,13 @@ export interface MonthlyNutritionDay {
 }
 
 const BASE_TEMPLATES = [
-  ['oat-cake', 'chicken-rice', 'skyr-bowl', 'chicken-potato'],
-  ['skyr-bowl', 'chicken-potato', 'tuna-toast', 'chicken-rice'],
-  ['oat-cake', 'chicken-rice', 'whey-banana', 'chicken-potato'],
-  ['skyr-bowl', 'chicken-potato', 'whey-banana', 'chicken-rice'],
-  ['oat-cake', 'chicken-rice', 'tuna-toast', 'chicken-potato'],
-  ['skyr-bowl', 'chicken-potato', 'tuna-toast', 'chicken-rice'],
-  ['oat-cake', 'chicken-rice', 'skyr-bowl', 'tuna-toast'],
+  ['oat-cake', 'chicken-rice', 'skyr-bowl', 'turkey-wrap', 'greek-fruit'],
+  ['skyr-bowl', 'salmon-potato', 'cottage-toast', 'lentil-chicken', 'whey-banana'],
+  ['oat-cake', 'turkey-pasta', 'greek-fruit', 'chickpea-tuna', 'skyr-banana'],
+  ['skyr-bowl', 'chicken-potato', 'whey-banana', 'turkey-wrap', 'cottage-toast'],
+  ['oat-cake', 'lentil-chicken', 'skyr-banana', 'salmon-potato', 'greek-fruit'],
+  ['cottage-toast', 'chickpea-tuna', 'skyr-bowl', 'turkey-pasta', 'whey-banana'],
+  ['oat-cake', 'chicken-rice', 'greek-fruit', 'tuna-toast', 'skyr-banana'],
 ];
 
 function rotatedTemplate(dayIndex: number): string[] {
@@ -33,7 +33,7 @@ export function generateMonth(target: MacroVector, days = 30): MonthlyNutritionD
   return Array.from({ length: days }, (_, index) => {
     const recipeIds = rotatedTemplate(index);
     const initial: PlannedNutritionDay = { meals: recipeIds.map((recipeId) => ({ recipeId, scale: 1 })) };
-    const plan = optimizeDay(initial, CORE_RECIPES, CORE_INGREDIENTS, target, { minScale: 0.6, maxScale: 1.6, iterations: 220 });
+    const plan = optimizeDay(initial, CORE_RECIPES, CORE_INGREDIENTS, target, { minScale: 0.55, maxScale: 1.7, iterations: 280 });
     return {
       day: index + 1,
       week: Math.floor(index / 7) + 1,
