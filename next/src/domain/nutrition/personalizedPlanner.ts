@@ -11,15 +11,15 @@ const animal = {
 };
 
 const ALLERGY_ALIASES: Record<string, string[]> = {
-  'lactosa': ['skyr', 'greek0', 'cottage', 'whey'],
-  'leche': ['skyr', 'greek0', 'cottage', 'whey'],
+  lactosa: ['skyr', 'greek0', 'cottage', 'whey'],
+  leche: ['skyr', 'greek0', 'cottage', 'whey'],
   'lácteos': ['skyr', 'greek0', 'cottage', 'whey'],
-  'huevo': ['egg', 'eggwhite'],
-  'pescado': ['salmon', 'tuna'],
+  huevo: ['egg', 'eggwhite'],
+  pescado: ['salmon', 'tuna'],
   'frutos secos': ['almonds', 'peanutbutter'],
-  'cacahuete': ['peanutbutter'],
-  'soja': ['soy-yogurt', 'tofu', 'tempeh'],
-  'gluten': ['bread', 'wrap', 'pasta'],
+  cacahuete: ['peanutbutter'],
+  soja: ['soy-yogurt', 'tofu', 'tempeh'],
+  gluten: ['bread', 'wrap', 'pasta'],
 };
 
 const BREAKFAST_IDS = ['oat-cake', 'skyr-bowl', 'greek-fruit', 'cottage-toast', 'vegan-oat-bowl'];
@@ -32,22 +32,16 @@ function normalize(value: string): string {
 
 function dietForbidden(preferences: NutritionPreferences): Set<string> {
   const forbidden = new Set<string>();
-  if (preferences.dietStyle === 'pescatarian' || preferences.dietStyle === 'vegetarian' || preferences.dietStyle === 'vegan') {
-    animal.meat.forEach((id) => forbidden.add(id));
-  }
-  if (preferences.dietStyle === 'vegetarian' || preferences.dietStyle === 'vegan') {
-    animal.fish.forEach((id) => forbidden.add(id));
-  }
-  if (preferences.dietStyle === 'vegan') {
-    animal.dairyEgg.forEach((id) => forbidden.add(id));
-  }
+  if (preferences.dietStyle === 'pescatarian' || preferences.dietStyle === 'vegetarian' || preferences.dietStyle === 'vegan') animal.meat.forEach((id) => forbidden.add(id));
+  if (preferences.dietStyle === 'vegetarian' || preferences.dietStyle === 'vegan') animal.fish.forEach((id) => forbidden.add(id));
+  if (preferences.dietStyle === 'vegan') animal.dairyEgg.forEach((id) => forbidden.add(id));
   return forbidden;
 }
 
 function userForbidden(preferences: NutritionPreferences): Set<string> {
   const forbidden = dietForbidden(preferences);
   const ingredientById = new Map(CORE_INGREDIENTS.map((item) => [item.id, item]));
-  const tokens = [...preferences.allergies, ...preferences.excludedFoods].map(normalize).filter(Boolean);
+  const tokens = [...(preferences.allergies ?? []), ...(preferences.excludedFoods ?? [])].map(normalize).filter(Boolean);
   for (const token of tokens) {
     const alias = Object.entries(ALLERGY_ALIASES).find(([key]) => normalize(key) === token)?.[1] ?? [];
     alias.forEach((id) => forbidden.add(id));
@@ -56,22 +50,19 @@ function userForbidden(preferences: NutritionPreferences): Set<string> {
       if (haystack.includes(token) || token.includes(normalize(ingredient.name))) forbidden.add(ingredient.id);
     }
   }
-  // Ensure ids from aliases that are unknown do not matter.
   return new Set([...forbidden].filter((id) => ingredientById.has(id)));
 }
 
 export function eligibleRecipes(preferences: NutritionPreferences): RecipeDefinition[] {
   const forbidden = userForbidden(preferences);
-  const prepLimit = Math.max(5, preferences.maxPrepMinutes);
-  const allowed = CORE_RECIPES.filter((recipe) =>
-    (recipe.prepMinutes ?? 0) <= prepLimit && recipe.ingredients.every((item) => !forbidden.has(item.ingredientId))
-  );
+  const prepLimit = Math.max(5, Number(preferences.maxPrepMinutes) || 30);
+  const allowed = CORE_RECIPES.filter((recipe) => (recipe.prepMinutes ?? 0) <= prepLimit && recipe.ingredients.every((item) => !forbidden.has(item.ingredientId)));
   if (!allowed.length) throw new Error('Tus restricciones dejan el recetario sin opciones. Amplía el tiempo de preparación o revisa exclusiones/alergias.');
   return allowed;
 }
 
 function recipePreferenceScore(recipe: RecipeDefinition, preferences: NutritionPreferences): number {
-  const preferred = preferences.preferredFoods.map(normalize).filter(Boolean);
+  const preferred = (preferences.preferredFoods ?? []).map(normalize).filter(Boolean);
   const names = recipe.ingredients.map((item) => CORE_INGREDIENTS.find((ingredient) => ingredient.id === item.ingredientId)?.name ?? item.ingredientId).join(' ');
   const haystack = normalize(`${recipe.name} ${names}`);
   let score = preferred.reduce((sum, token) => sum + (haystack.includes(token) ? 3 : 0), 0);
@@ -87,8 +78,7 @@ function chooseFromPool(poolIds: string[], eligible: RecipeDefinition[], prefere
   const source = candidates.length ? candidates : eligible;
   const ranked = [...source].sort((a, b) => {
     const score = recipePreferenceScore(b, preferences) - recipePreferenceScore(a, preferences);
-    if (score !== 0) return score;
-    return a.id.localeCompare(b.id);
+    return score !== 0 ? score : a.id.localeCompare(b.id);
   });
   const unused = ranked.filter((recipe) => !used.has(recipe.id));
   const selectable = unused.length ? unused : ranked;
@@ -96,13 +86,8 @@ function chooseFromPool(poolIds: string[], eligible: RecipeDefinition[], prefere
 }
 
 function minutes(time: string): number {
-  const [h, m] = time.split(':').map(Number);
+  const [h, m] = (time || '12:00').split(':').map(Number);
   return h * 60 + m;
-}
-
-function circularDistance(a: number, b: number): number {
-  const d = Math.abs(a - b);
-  return Math.min(d, 1440 - d);
 }
 
 export function mealRelation(time: string, trainingTime: string): 'pre' | 'post' | 'normal' {
@@ -125,11 +110,12 @@ function slotPool(index: number, meals: number, relation: 'pre' | 'post' | 'norm
 function buildInitialDay(preferences: NutritionPreferences, dayIndex: number): PlannedNutritionDay {
   const eligible = eligibleRecipes(preferences);
   const used = new Set<string>();
+  const mealsPerDay = Math.max(3, Math.min(6, Number(preferences.mealsPerDay) || 4));
   return {
-    meals: Array.from({ length: preferences.mealsPerDay }, (_, index) => {
-      const time = preferences.mealTimes[index];
-      const relation = mealRelation(time, preferences.trainingTime);
-      const recipe = chooseFromPool(slotPool(index, preferences.mealsPerDay, relation), eligible, dayIndex * 11 + index * 3, used);
+    meals: Array.from({ length: mealsPerDay }, (_, index) => {
+      const time = preferences.mealTimes?.[index] ?? '12:00';
+      const relation = mealRelation(time, preferences.trainingTime || '18:00');
+      const recipe = chooseFromPool(slotPool(index, mealsPerDay, relation), eligible, dayIndex * 11 + index * 3, used);
       used.add(recipe.id);
       return { recipeId: recipe.id, scale: 1 };
     }),
@@ -138,7 +124,6 @@ function buildInitialDay(preferences: NutritionPreferences, dayIndex: number): P
 
 function optimizePersonalizedDay(target: MacroVector, preferences: NutritionPreferences, dayIndex: number): PlannedNutritionDay {
   const initial = buildInitialDay(preferences, dayIndex);
-  // The optimizer needs the full ingredient/recipe library for macro resolution; only eligible ids are selected above.
   return optimizeDay(initial, CORE_RECIPES, CORE_INGREDIENTS, target, { minScale: 0.5, maxScale: 1.8, iterations: 320 });
 }
 
