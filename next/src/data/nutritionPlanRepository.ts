@@ -3,7 +3,7 @@ import type { MacroVector } from '../domain/nutrition/recipePlanner';
 import type { WeeklyNutritionDay } from '../domain/nutrition/weeklyPlanner';
 
 const NUTRITION_PLAN_KEY = 'fitcoach_next_nutrition_plan_v2';
-const VERSION = 2 as const;
+const VERSION = 1 as const;
 const MIN_MEAL_SCALE = 0.55;
 const MAX_MEAL_SCALE = 1.7;
 
