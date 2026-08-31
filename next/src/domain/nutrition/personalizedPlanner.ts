@@ -115,7 +115,7 @@ function buildInitialDay(preferences: NutritionPreferences, dayIndex: number): P
     meals: Array.from({ length: mealsPerDay }, (_, index) => {
       const time = preferences.mealTimes?.[index] ?? '12:00';
       const relation = mealRelation(time, preferences.trainingTime || '18:00');
-      const recipe = chooseFromPool(slotPool(index, mealsPerDay, relation), eligible, dayIndex * 11 + index * 3, used);
+      const recipe = chooseFromPool(slotPool(index, mealsPerDay, relation), eligible, preferences, dayIndex * 11 + index * 3, used);
       used.add(recipe.id);
       return { recipeId: recipe.id, scale: 1 };
     }),
