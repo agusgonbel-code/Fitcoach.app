@@ -1,0 +1,19 @@
+{
+  "productName": "FitCoach Next",
+  "subtitle": "Entrena, come y progresa",
+  "primaryLocale": "es-ES",
+  "primaryCategory": "Health & Fitness",
+  "description": "FitCoach Next integra entrenamiento, nutrición y seguimiento del progreso en una experiencia centrada en decisiones claras y datos del usuario. Permite generar y registrar entrenamientos, consultar el historial y la progresión, organizar objetivos nutricionales y menús, registrar métricas corporales y recibir propuestas de adaptación que requieren confirmación antes de modificar el siguiente microciclo. Los datos principales se almacenan de forma local y la aplicación incluye herramientas de copia de seguridad, restauración y borrado de datos.",
+  "keywords": [
+    "fitness",
+    "entrenamiento",
+    "nutrición",
+    "progreso",
+    "fuerza",
+    "hipertrofia"
+  ],
+  "privacyPolicyUrl": "https://agusgonbel-code.github.io/Fitcoach.app/privacy.html",
+  "supportUrl": "https://agusgonbel-code.github.io/Fitcoach.app/support.html",
+  "platforms": ["iPhone"],
+  "reviewNotes": "Release Candidate de FitCoach Next. No requiere inicio de sesión. El almacenamiento principal es local, el seguimiento publicitario está desactivado y las propuestas de adaptación del entrenamiento requieren confirmación explícita del usuario."
+}

@@ -1,0 +1,16 @@
+{
+  "productName": "FitCoach Next",
+  "bundleId": "com.fitcoach.next",
+  "version": "0.2.0-rc.0",
+  "releaseChannel": "rc",
+  "primaryLocale": "es-ES",
+  "category": "Health & Fitness",
+  "privacyPolicyUrl": "https://agusgonbel-code.github.io/Fitcoach.app/privacy.html",
+  "supportUrl": "https://agusgonbel-code.github.io/Fitcoach.app/support.html",
+  "platforms": ["iPhone"],
+  "orientation": "portrait",
+  "dataStorage": "local-first",
+  "tracking": false,
+  "remoteAnalytics": false,
+  "progressPhotosRemoteByDefault": false
+}

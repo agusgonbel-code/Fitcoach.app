@@ -1,8 +1,11 @@
-name: Deploy FitCoach to GitHub Pages
+name: Deploy FitCoach Next to GitHub Pages
 
 on:
   push:
-    branches: ["main"]
+    branches: ["fitcoach-next"]
+    paths:
+      - 'next/**'
+      - '.github/workflows/pages.yml'
   workflow_dispatch:
 
 permissions:
@@ -11,24 +14,36 @@ permissions:
   id-token: write
 
 concurrency:
-  group: "pages"
-  cancel-in-progress: false
+  group: "fitcoach-next-pages"
+  cancel-in-progress: true
 
 jobs:
   deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: next
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: next/package-lock.json
+      - name: Install dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Test nutrition and app
+        run: npm test
+      - name: Build production app
+        run: npm run build
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
-      - name: Upload site
+      - name: Upload production site
         uses: actions/upload-pages-artifact@v3
         with:
-          path: '.'
+          path: 'next/dist'
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4

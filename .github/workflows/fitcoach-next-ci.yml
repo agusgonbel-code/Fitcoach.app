@@ -1,0 +1,50 @@
+name: FitCoach Next CI
+
+on:
+  push:
+    branches: [fitcoach-next]
+    paths:
+      - 'next/**'
+      - '.github/workflows/fitcoach-next-ci.yml'
+  pull_request:
+    paths:
+      - 'next/**'
+      - '.github/workflows/fitcoach-next-ci.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  test-next:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: next
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: next/package-lock.json
+      - run: npm ci
+      - name: Audit release candidate invariants
+        run: npm run release:audit
+      - name: Preflight TestFlight release contract
+        run: npm run release:testflight:preflight
+      - name: Regress release candidate contract failures
+        run: npm run test:release
+      - run: npm test
+      - run: npm run build
+      - name: Audit production web bundle
+        run: npm run release:bundle:audit
+      - run: npx playwright install --with-deps webkit
+      - run: npm run test:mobile
+      - name: Upload Playwright failure diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fitcoach-next-playwright-${{ github.run_id }}
+          path: next/test-results
+          if-no-files-found: warn
+          retention-days: 7

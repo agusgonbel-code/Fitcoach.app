@@ -1,0 +1,40 @@
+{
+  "name": "fitcoach-next",
+  "version": "0.2.0-rc.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "test": "vitest run src",
+    "test:mobile": "playwright test",
+    "test:release": "node scripts/release-audit-regression.mjs && node scripts/ios-rc-workflow-regression.mjs && node scripts/testflight-preflight-regression.mjs && node scripts/testflight-manual-workflow-regression.mjs && node scripts/app-store-metadata-audit.mjs",
+    "release:audit": "node scripts/release-audit.mjs",
+    "release:bundle:audit": "node scripts/release-bundle-audit.mjs",
+    "release:store:audit": "node scripts/app-store-metadata-audit.mjs",
+    "release:testflight:preflight": "node scripts/testflight-preflight.mjs",
+    "release:testflight:preflight:signed": "node scripts/testflight-preflight.mjs --signed",
+    "cap:add:ios": "npm run build && npm run release:bundle:audit && npx cap add ios",
+    "cap:sync:ios": "npm run build && npm run release:bundle:audit && npx cap sync ios",
+    "ios:privacy": "node scripts/configure-ios-privacy.mjs",
+    "ios:release": "node scripts/configure-ios-release.mjs",
+    "ios:audit": "node scripts/audit-ios-native.mjs",
+    "ios:prepare": "npm run cap:sync:ios && npm run ios:privacy && npm run ios:release && npm run ios:audit"
+  },
+  "dependencies": {
+    "@capacitor/core": "8.5.0",
+    "@capacitor/ios": "8.5.0",
+    "react": "19.2.8",
+    "react-dom": "19.2.8"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "8.5.0",
+    "@playwright/test": "1.62.1",
+    "@types/react": "19.2.18",
+    "@types/react-dom": "19.2.5",
+    "@vitejs/plugin-react": "6.1.0",
+    "typescript": "7.0.2",
+    "vite": "8.2.2",
+    "vitest": "4.1.11"
+  }
+}

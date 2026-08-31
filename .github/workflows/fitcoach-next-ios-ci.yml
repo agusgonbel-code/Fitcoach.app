@@ -1,0 +1,246 @@
+name: FitCoach Next iOS CI
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [fitcoach-next]
+    paths:
+      - 'next/**'
+      - '.github/workflows/fitcoach-next-ios-ci.yml'
+  pull_request:
+    paths:
+      - 'next/**'
+      - '.github/workflows/fitcoach-next-ios-ci.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: fitcoach-next-ios-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-ios-simulator:
+    runs-on: macos-26
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: next
+    env:
+      FITCOACH_BUILD_NUMBER: ${{ github.run_number }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: next/package-lock.json
+      - name: Verify Xcode and iOS SDK
+        shell: bash
+        run: |
+          set -euo pipefail
+          xcodebuild -version
+          SDK_VERSION="$(xcrun --sdk iphoneos --show-sdk-version)"
+          echo "iPhoneOS SDK: $SDK_VERSION"
+          test "${SDK_VERSION%%.*}" -ge 26
+      - name: Install pinned dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Audit release candidate invariants
+        run: npm run release:audit
+      - name: Run unit tests and production build
+        run: |
+          npm test
+          npm run build
+      - name: Validate release icon source
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f assets/app-icon-1024.png
+          test "$(sips -g pixelWidth assets/app-icon-1024.png | awk '/pixelWidth/ {print $2}')" = '1024'
+          test "$(sips -g pixelHeight assets/app-icon-1024.png | awk '/pixelHeight/ {print $2}')" = '1024'
+      - name: Generate isolated iOS project
+        run: npx cap add ios
+      - name: Install privacy, release metadata and sync web bundle
+        run: npm run ios:prepare
+      - name: Validate Capacitor configuration
+        run: npx cap doctor ios
+      - name: Compile FitCoach Next Release for iOS Simulator
+        shell: bash
+        run: |
+          set -euo pipefail
+          xcodebuild \
+            -project ios/App/App.xcodeproj \
+            -scheme App \
+            -configuration Release \
+            -destination 'generic/platform=iOS Simulator' \
+            -derivedDataPath "$RUNNER_TEMP/fitcoach-next-simulator" \
+            CODE_SIGNING_ALLOWED=NO \
+            build
+      - name: Validate native identity, version, device family, orientation, icon and privacy
+        id: app
+        shell: bash
+        run: |
+          set -euo pipefail
+          APP_PATH="$RUNNER_TEMP/fitcoach-next-simulator/Build/Products/Release-iphonesimulator/App.app"
+          test -d "$APP_PATH"
+          PLIST="$APP_PATH/Info.plist"
+          PRIVACY="$APP_PATH/PrivacyInfo.xcprivacy"
+          PROJECT='ios/App/App.xcodeproj/project.pbxproj'
+          BUNDLE_ID="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$PLIST")"
+          DISPLAY_NAME="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleDisplayName' "$PLIST" 2>/dev/null || /usr/libexec/PlistBuddy -c 'Print :CFBundleName' "$PLIST")"
+          VERSION="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$PLIST")"
+          BUILD="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' "$PLIST")"
+          EXPECTED_VERSION="$(node -p "require('./package.json').version.replace(/-.*/, '')")"
+          test "$BUNDLE_ID" = 'com.fitcoach.next'
+          test "$DISPLAY_NAME" = 'FitCoach Next'
+          test "$VERSION" = "$EXPECTED_VERSION"
+          test "$BUILD" = "$FITCOACH_BUILD_NUMBER"
+          grep -Eq 'TARGETED_DEVICE_FAMILY = 1;' "$PROJECT"
+          test "$(/usr/libexec/PlistBuddy -c 'Print :UISupportedInterfaceOrientations:0' "$PLIST")" = 'UIInterfaceOrientationPortrait'
+          if /usr/libexec/PlistBuddy -c 'Print :UISupportedInterfaceOrientations:1' "$PLIST" >/dev/null 2>&1; then
+            echo 'Unexpected second iPhone orientation in release bundle' >&2
+            exit 1
+          fi
+          test -f "$PRIVACY"
+          plutil -lint "$PRIVACY"
+          test "$(plutil -extract NSPrivacyTracking raw -o - "$PRIVACY")" = 'false'
+          test "$(plutil -extract NSPrivacyCollectedDataTypes json -o - "$PRIVACY")" = '[]'
+          test -f "$APP_PATH/public/index.html"
+          test -n "$(find "$APP_PATH" -iname '*AppIcon*' -o -iname 'AppIcon*.png' | head -1)"
+          echo "Bundle ID: $BUNDLE_ID"
+          echo "Display name: $DISPLAY_NAME"
+          echo "Version: $VERSION ($BUILD)"
+          echo "Configuration: Release"
+          echo "Target: iPhone portrait"
+          echo "path=$APP_PATH" >> "$GITHUB_OUTPUT"
+      - name: Compile FitCoach Next Release for physical iPhone without signing
+        shell: bash
+        run: |
+          set -euo pipefail
+          xcodebuild \
+            -project ios/App/App.xcodeproj \
+            -scheme App \
+            -configuration Release \
+            -sdk iphoneos \
+            -destination 'generic/platform=iOS' \
+            -derivedDataPath "$RUNNER_TEMP/fitcoach-next-device" \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            build
+      - name: Validate physical iPhone release bundle
+        shell: bash
+        run: |
+          set -euo pipefail
+          DEVICE_APP="$RUNNER_TEMP/fitcoach-next-device/Build/Products/Release-iphoneos/App.app"
+          test -d "$DEVICE_APP"
+          DEVICE_PLIST="$DEVICE_APP/Info.plist"
+          DEVICE_EXECUTABLE="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleExecutable' "$DEVICE_PLIST")"
+          DEVICE_BINARY="$DEVICE_APP/$DEVICE_EXECUTABLE"
+          test -f "$DEVICE_BINARY"
+          BUNDLE_ID="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$DEVICE_PLIST")"
+          VERSION="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$DEVICE_PLIST")"
+          BUILD="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' "$DEVICE_PLIST")"
+          EXPECTED_VERSION="$(node -p "require('./package.json').version.replace(/-.*/, '')")"
+          ARCHS="$(lipo -archs "$DEVICE_BINARY")"
+          test "$BUNDLE_ID" = 'com.fitcoach.next'
+          test "$VERSION" = "$EXPECTED_VERSION"
+          test "$BUILD" = "$FITCOACH_BUILD_NUMBER"
+          echo "$ARCHS" | tr ' ' '\n' | grep -qx 'arm64'
+          if echo "$ARCHS" | tr ' ' '\n' | grep -Eq '^(x86_64|i386)$'; then
+            echo "Simulator architecture found in physical iPhone binary: $ARCHS" >&2
+            exit 1
+          fi
+          test -f "$DEVICE_APP/PrivacyInfo.xcprivacy"
+          test -f "$DEVICE_APP/public/index.html"
+          echo "Physical iPhone bundle validated: $BUNDLE_ID $VERSION ($BUILD), architectures: $ARCHS"
+      - name: Archive FitCoach Next Release for physical iPhone without signing
+        shell: bash
+        run: |
+          set -euo pipefail
+          xcodebuild \
+            -project ios/App/App.xcodeproj \
+            -scheme App \
+            -configuration Release \
+            -sdk iphoneos \
+            -destination 'generic/platform=iOS' \
+            -archivePath "$RUNNER_TEMP/FitCoach-Next.xcarchive" \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            archive
+      - name: Validate unsigned iPhone archive contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          ARCHIVE="$RUNNER_TEMP/FitCoach-Next.xcarchive"
+          ARCHIVE_INFO="$ARCHIVE/Info.plist"
+          ARCHIVE_APP="$ARCHIVE/Products/Applications/App.app"
+          test -d "$ARCHIVE"
+          test -f "$ARCHIVE_INFO"
+          plutil -lint "$ARCHIVE_INFO"
+          test -d "$ARCHIVE_APP"
+          APP_PLIST="$ARCHIVE_APP/Info.plist"
+          APP_EXECUTABLE="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleExecutable' "$APP_PLIST")"
+          APP_BINARY="$ARCHIVE_APP/$APP_EXECUTABLE"
+          test -f "$APP_BINARY"
+          BUNDLE_ID="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$APP_PLIST")"
+          VERSION="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$APP_PLIST")"
+          BUILD="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' "$APP_PLIST")"
+          EXPECTED_VERSION="$(node -p "require('./package.json').version.replace(/-.*/, '')")"
+          ARCHS="$(lipo -archs "$APP_BINARY")"
+          test "$BUNDLE_ID" = 'com.fitcoach.next'
+          test "$VERSION" = "$EXPECTED_VERSION"
+          test "$BUILD" = "$FITCOACH_BUILD_NUMBER"
+          echo "$ARCHS" | tr ' ' '\n' | grep -qx 'arm64'
+          if echo "$ARCHS" | tr ' ' '\n' | grep -Eq '^(x86_64|i386)$'; then
+            echo "Simulator architecture found in archive binary: $ARCHS" >&2
+            exit 1
+          fi
+          test -f "$ARCHIVE_APP/PrivacyInfo.xcprivacy"
+          test -f "$ARCHIVE_APP/public/index.html"
+          ARCHIVE_BUNDLE_ID="$(/usr/libexec/PlistBuddy -c 'Print :ApplicationProperties:CFBundleIdentifier' "$ARCHIVE_INFO")"
+          ARCHIVE_VERSION="$(/usr/libexec/PlistBuddy -c 'Print :ApplicationProperties:CFBundleShortVersionString' "$ARCHIVE_INFO")"
+          ARCHIVE_BUILD="$(/usr/libexec/PlistBuddy -c 'Print :ApplicationProperties:CFBundleVersion' "$ARCHIVE_INFO")"
+          test "$ARCHIVE_BUNDLE_ID" = "$BUNDLE_ID"
+          test "$ARCHIVE_VERSION" = "$VERSION"
+          test "$ARCHIVE_BUILD" = "$BUILD"
+          echo "Unsigned iPhone archive validated: $ARCHIVE_BUNDLE_ID $ARCHIVE_VERSION ($ARCHIVE_BUILD), architectures: $ARCHS"
+      - name: Stage validated iPhone archive evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p rc-artifact
+          ditto -c -k --sequesterRsrc --keepParent "$RUNNER_TEMP/FitCoach-Next.xcarchive" rc-artifact/FitCoach-Next.xcarchive.zip
+          shasum -a 256 rc-artifact/FitCoach-Next.xcarchive.zip > rc-artifact/SHA256SUMS.txt
+          cat > rc-artifact/RC-EVIDENCE.txt <<EOF
+          commit=${GITHUB_SHA}
+          workflow_run=${GITHUB_RUN_NUMBER}
+          bundle_id=com.fitcoach.next
+          version=$(node -p "require('./package.json').version.replace(/-.*/, '')")
+          build=${FITCOACH_BUILD_NUMBER}
+          platform=iphoneos
+          architecture=arm64
+          signing=unsigned
+          EOF
+          test -s rc-artifact/FitCoach-Next.xcarchive.zip
+          test -s rc-artifact/SHA256SUMS.txt
+          test -s rc-artifact/RC-EVIDENCE.txt
+          shasum -a 256 -c rc-artifact/SHA256SUMS.txt
+      - name: Upload validated iPhone RC archive
+        uses: actions/upload-artifact@v4
+        with:
+          name: FitCoach-Next-iPhone-RC-Archive-${{ github.sha }}
+          path: next/rc-artifact/
+          if-no-files-found: error
+          retention-days: 14
+      - name: Stage simulator artifact
+        shell: bash
+        run: |
+          mkdir -p artifact
+          cp -R "${{ steps.app.outputs.path }}" artifact/FitCoach-Next.app
+      - name: Upload simulator application
+        uses: actions/upload-artifact@v4
+        with:
+          name: FitCoach-Next-iOS-Simulator-Release-${{ github.sha }}
+          path: next/artifact/FitCoach-Next.app
+          if-no-files-found: error
+          retention-days: 14

@@ -1,0 +1,78 @@
+.app-shell {
+  width: min(100%, 520px);
+  min-height: 100dvh;
+  margin: 0 auto;
+  padding: max(20px, env(safe-area-inset-top)) 18px calc(92px + env(safe-area-inset-bottom));
+}
+
+.topbar, .hero-row, .section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--fc-space-4);
+}
+.topbar { margin-bottom: var(--fc-space-6); }
+.hero-row > *, .section-heading > *, .form-grid > * { min-width: 0; }
+h1, h2, p { margin-top: 0; }
+h1 { margin-bottom: 0; font-size: 30px; letter-spacing: -0.8px; }
+h2 { margin-bottom: var(--fc-space-1); font-size: 21px; letter-spacing: -0.35px; }
+.eyebrow { margin-bottom: var(--fc-space-2); font-size: 12px; font-weight: 750; letter-spacing: 0.08em; color: var(--fc-text-secondary); }
+.secondary, .hero-card p, .section-heading span { color: var(--fc-text-secondary); }
+.icon-button { width: 44px; height: 44px; border: 1px solid var(--fc-separator); border-radius: 50%; background: var(--fc-surface); color: var(--fc-text); font-weight: 700; }
+.hero-card, .coach-card, .form-card, .exercise-card, .metric-card { border: 1px solid var(--fc-separator); border-radius: var(--fc-radius-lg); background: var(--fc-surface-raised); box-shadow: var(--fc-shadow-raised); }
+.hero-card, .coach-card, .form-card, .exercise-card { padding: var(--fc-space-5); }
+.hero-card h2 { font-size: 27px; }
+.status-pill { padding: 6px 10px; border-radius: 999px; background: color-mix(in srgb, var(--fc-success) 14%, transparent); color: var(--fc-success); font-size: 13px; font-weight: 700; }
+.primary-action { width: 100%; min-height: 48px; margin-top: var(--fc-space-4); border: 0; border-radius: var(--fc-radius-md); background: var(--fc-accent); color: white; font-weight: 750; }
+.secondary-action { min-height: 44px; border: 1px solid var(--fc-separator); border-radius: var(--fc-radius-md); background: var(--fc-surface); color: var(--fc-text); padding: 0 14px; font: inherit; font-weight: 700; }
+.section-block { padding: var(--fc-space-8) 2px var(--fc-space-4); }
+.section-heading h2 { margin-bottom: 0; }
+progress { width: 100%; height: 8px; margin-top: var(--fc-space-4); accent-color: var(--fc-accent); }
+.section-block .secondary { margin: var(--fc-space-3) 0 0; }
+.coach-card { margin-top: var(--fc-space-4); }
+.coach-card p:last-child { margin-bottom: 0; line-height: 1.45; }
+.form-card { margin-top: var(--fc-space-6); display: grid; gap: var(--fc-space-4); }
+.form-card label { display: grid; gap: 8px; font-size: 14px; font-weight: 650; }
+.form-card input, .form-card select, .set-grid input { width: 100%; min-width: 0; min-height: 46px; border: 1px solid var(--fc-separator); border-radius: var(--fc-radius-md); background: var(--fc-surface); color: var(--fc-text); padding: 0 12px; font: inherit; }
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--fc-space-3); }
+.exercise-card { margin-bottom: var(--fc-space-4); }
+.set-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.error { color: var(--fc-danger); font-weight: 650; }
+.metric-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--fc-space-3); margin: var(--fc-space-5) 0; }
+.metric-card { padding: var(--fc-space-5); display: grid; gap: 4px; }
+.metric-card strong { font-size: 30px; }
+.metric-card span { color: var(--fc-text-secondary); font-size: 13px; }
+.segmented-control { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 4px; border-radius: var(--fc-radius-md); background: var(--fc-surface); }
+.segmented-control button { min-height: 44px; border: 0; border-radius: calc(var(--fc-radius-md) - 4px); background: transparent; color: var(--fc-text-secondary); font: inherit; font-weight: 750; }
+.segmented-control button.active { background: var(--fc-surface-raised); color: var(--fc-text); box-shadow: var(--fc-shadow-raised); }
+.day-selector { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+.day-selector button { min-width: 0; min-height: 44px; border: 1px solid var(--fc-separator); border-radius: 12px; background: var(--fc-surface); color: var(--fc-text-secondary); font: inherit; font-weight: 750; }
+.day-selector button.active { border-color: var(--fc-accent); background: color-mix(in srgb, var(--fc-accent) 14%, var(--fc-surface)); color: var(--fc-accent); }
+.day-picker { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+.day-chip { min-width: 0; min-height: 44px; padding: 0; border: 1px solid var(--fc-separator); border-radius: 12px; background: var(--fc-surface); color: var(--fc-text-secondary); font: inherit; font-size: 12px; font-weight: 750; }
+.day-chip.active { border-color: var(--fc-accent); background: color-mix(in srgb, var(--fc-accent) 14%, var(--fc-surface)); color: var(--fc-accent); }
+fieldset.form-card { margin: 0; }
+fieldset.form-card legend { padding: 0 6px; color: var(--fc-text); font-size: 14px; font-weight: 700; }
+.planned-meal { display: grid; gap: var(--fc-space-3); padding: var(--fc-space-4) 0; border-top: 1px solid var(--fc-separator); }
+.planned-meal:first-of-type { border-top: 0; }
+.planned-meal-heading .secondary { margin: 6px 0 0; line-height: 1.4; }
+.recipe-detail { border-radius: var(--fc-radius-md); background: var(--fc-surface); overflow: hidden; }
+.recipe-detail summary { min-height: 44px; display: flex; align-items: center; padding: 0 12px; cursor: pointer; color: var(--fc-text-secondary); font-size: 14px; font-weight: 700; }
+.recipe-detail > .secondary { margin: 0; padding: 10px 12px; border-top: 1px solid var(--fc-separator); font-size: 13px; }
+.ingredient-list { display: grid; gap: 0; border-top: 1px solid var(--fc-separator); }
+.ingredient-row { min-height: 42px; display: flex; align-items: center; justify-content: space-between; gap: var(--fc-space-3); padding: 0 12px; border-bottom: 1px solid var(--fc-separator); font-size: 14px; }
+.ingredient-row:last-child { border-bottom: 0; }
+.ingredient-row strong { white-space: nowrap; }
+.recipe-steps { margin: 0; padding: 14px 16px 16px 32px; border-top: 1px solid var(--fc-separator); color: var(--fc-text-secondary); font-size: 14px; line-height: 1.5; }
+.recipe-steps li + li { margin-top: 8px; }
+.meal-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.backup-panel { margin-top: var(--fc-space-4); }
+.backup-panel h2 { margin-bottom: var(--fc-space-2); }
+.backup-panel .secondary { margin-bottom: 0; line-height: 1.45; }
+.backup-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.backup-actions .secondary-action:disabled { opacity: 0.55; }
+.visually-hidden { position: absolute !important; width: 1px !important; height: 1px !important; padding: 0 !important; margin: -1px !important; overflow: hidden !important; clip: rect(0, 0, 0, 0) !important; white-space: nowrap !important; border: 0 !important; }
+.tabbar { position: fixed; left: 50%; bottom: 0; width: min(100%, 520px); transform: translateX(-50%); display: grid; grid-template-columns: repeat(5, 1fr); padding: 8px 8px max(8px, env(safe-area-inset-bottom)); border-top: 1px solid var(--fc-separator); background: color-mix(in srgb, var(--fc-bg) 88%, transparent); backdrop-filter: blur(18px); }
+.tabbar button { min-height: 44px; border: 0; background: transparent; color: var(--fc-text-secondary); font-size: 11px; font-weight: 650; }
+.tabbar button.active { color: var(--fc-accent); }
+@media (max-width: 360px) { .app-shell { padding-inline: 14px; } .tabbar button { font-size: 10px; } .form-grid, .meal-actions, .backup-actions { grid-template-columns: 1fr; } .day-selector, .day-picker { gap: 4px; } .day-chip { font-size: 11px; } }
